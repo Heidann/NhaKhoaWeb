@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
+import employees from "./Data/data.js";
 
 dotenv.config();
 
@@ -11,11 +12,13 @@ app.use(express.json()); // to parse incoming requests with JSON payloads
 const PORT = process.env.PORT || 5000;
 
 //connect to database
-connectDB();
+// connectDB();
 
 // Main route
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+app.get("/api/data", (req, res) => {
+  // data
+  res.json(employees);
+  console.log(employees);
 });
 
 // to handle errors in async routes

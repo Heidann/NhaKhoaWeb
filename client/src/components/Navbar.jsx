@@ -5,8 +5,11 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import LogoLaboratory from "../assets/logoNhaKhoa.jpg";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 export default function ButtonAppBar() {
+  const handleOpenAdmin = () => {
+    window.open("http://localhost:5174/", "_blank");
+  };
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar
@@ -46,28 +49,29 @@ export default function ButtonAppBar() {
             component="div"
             sx={{ flexGrow: 1 }}
           ></Typography>
-          <Link to="/signin">
-            <Button
-              sx={{
+          {/* <Link to="/admin"> */}
+          <Button
+            onClick={handleOpenAdmin}
+            sx={{
+              backgroundColor: "#202A44",
+              color: "white",
+              textTransform: "none",
+              // hover
+              "&:hover": {
+                backgroundColor: "#2973ED",
+              },
+              // focus
+              "&:focus": {
                 backgroundColor: "#202A44",
-                color: "white",
-                textTransform: "none",
-                // hover
-                "&:hover": {
-                  backgroundColor: "#2973ED",
-                },
-                // focus
-                "&:focus": {
-                  backgroundColor: "#202A44",
-                  outline: "none",
-                },
+                outline: "none",
+              },
 
-                cursor: "pointer",
-              }}
-            >
-              Sign In
-            </Button>
-          </Link>
+              cursor: "pointer",
+            }}
+          >
+            Sign In
+          </Button>
+          {/* </Link> */}
         </Toolbar>
       </AppBar>
     </Box>
