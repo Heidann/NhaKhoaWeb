@@ -1,10 +1,33 @@
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
-import Orders from "../components/Orders.jsx";
 import Title from "../components/Title.jsx";
 import { Gauge, gaugeClasses } from "@mui/x-charts/Gauge";
+import { useState, useEffect } from "react";
+import { useMemo, Fragment } from "react";
+
+import DataTable from "../components/DataTable.jsx";
 
 export default function TheBaoHanhPage() {
+  const [data, setData] = useState(null);
+
+  const columns = [
+    { key: "AUTO_ID", label: "ID" },
+    { key: "MA_THE_BAO_HANH", label: "MÃ THẺ HÀNH" },
+  ];
+
+  const fetchInfo = async () => {
+    const response = await fetch("http://localhost:4000/api/the-bao-hanh-data");
+    const data = await response.json();
+    setData(data);
+    console.log("Data fetched successfully:", data);
+  };
+
+  useEffect(() => {
+    fetchInfo();
+  }, []);
+
+  const memoizedData = useMemo(() => data, [data]);
+
   return (
     <>
       <Grid container spacing={3}>
@@ -49,7 +72,14 @@ export default function TheBaoHanhPage() {
         {/* Recent Orders */}
         <Grid item xs={12}>
           <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
-            <Orders />
+            {memoizedData ? (
+              <Fragment>
+                <Title>Thông Tin Mã Bảo Hành </Title>
+                <DataTable columns={columns} rows={memoizedData} />
+              </Fragment>
+            ) : (
+              <p>Loading data...</p>
+            )}
           </Paper>
         </Grid>
       </Grid>

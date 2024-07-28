@@ -7,17 +7,16 @@ import { useMemo, Fragment } from "react";
 
 import DataTable from "../components/DataTable.jsx";
 
-// import DoanhThuChart from "../components/DoanhThuChart.jsx";
 export default function TheBaoHanhPage() {
   const [data, setData] = useState(null);
 
   const columns = [
-    { key: "AUTO_ID", label: "ID" },
-    { key: "MA_THE_BAO_HANH", label: "MÃ THẺ HÀNH" },
+    { key: "MA_CHUC_VU", label: "ID" },
+    { key: "TEN_CHUC_VU", label: "Tên Chức Vụ" },
   ];
 
   const fetchInfo = async () => {
-    const response = await fetch("http://localhost:4000/api/the-bao-hanh-data");
+    const response = await fetch("http://localhost:4000/api/chuc-vu-data");
     const data = await response.json();
     setData(data);
     console.log("Data fetched successfully:", data);
@@ -31,7 +30,7 @@ export default function TheBaoHanhPage() {
 
   return (
     <>
-      <Grid container spacing={3} sx={{}}>
+      <Grid container spacing={3}>
         {/* Chart */}
         <Grid item xs={12} md={8} lg={8}>
           <Paper
@@ -42,7 +41,7 @@ export default function TheBaoHanhPage() {
               height: 240,
             }}
           >
-            {/* <DoanhThuChart /> */}
+            {/* <Chart /> */}
           </Paper>
         </Grid>
         {/* Recent Deposits */}
@@ -71,11 +70,11 @@ export default function TheBaoHanhPage() {
           </Paper>
         </Grid>
         {/* Recent Orders */}
-        <Grid item xs={12} md={12} lg={12}>
+        <Grid item xs={12}>
           <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
             {memoizedData ? (
               <Fragment>
-                <Title>12321</Title>
+                <Title>Thông Tin Chức Vụ</Title>
                 <DataTable columns={columns} rows={memoizedData} />
               </Fragment>
             ) : (
