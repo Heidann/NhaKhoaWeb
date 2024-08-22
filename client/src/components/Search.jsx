@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState, useMemo } from "react";
 import { styled } from "@mui/material/styles";
 import {
   Box,
@@ -10,8 +10,11 @@ import {
   Button,
   Typography,
   FormControlLabel,
+  Alert,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import { useNavigate } from "react-router-dom";
+import DOMPurify from "dompurify"; // Thư viện để làm sạch dữ liệu đầu vào
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -25,21 +28,37 @@ const Item = styled(Paper)(({ theme }) => ({
   filter: "brightness(1.2) opacity(0.9)",
 }));
 
-export default function BasicGrid() {
-  const [checked, setChecked] = React.useState(false);
-  const [searchValue, setSearchValue] = React.useState("");
+export default function Search() {
+  const [maTheBaoHanh, setMaTheBaoHanh] = useState("");
+  const [checked, setChecked] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
+  // Sử dụng useMemo để tối ưu hóa error và checked
+  const memoizedError = useMemo(() => error, [error]);
+  const memoizedChecked = useMemo(() => checked, [checked]);
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    if (checked && searchValue) {
-      const data = new FormData(event.currentTarget);
-      console.log({
-        search: data.get("search"),
-      });
-    } else {
-      // Hiển thị thông báo lỗi nếu chưa nhập mã hoặc chưa check checkbox
-      alert("Vui lòng nhập mã và đồng ý với điều khoản!");
+
+    // Kiểm tra xem maTheBaoHanh có rỗng hay không
+    if (!maTheBaoHanh.trim()) {
+      setError("Vui lòng nhập mã thẻ bảo hành.");
+      return;
     }
+
+    // Kiểm tra xem checked có được chọn hay không
+    if (!memoizedChecked) {
+      setError("Vui lòng đồng ý với điều khoản.");
+      return;
+    }
+
+    // Làm sạch dữ liệu đầu vào
+    const sanitizedMaTheBaoHanh = DOMPurify.sanitize(maTheBaoHanh);
+
+    // Chuyển hướng đến Sheet.jsx
+    navigate(`/tra-cuu?maTheBaoHanh=${sanitizedMaTheBaoHanh}`);
+    setError(null);
   };
 
   return (
@@ -60,12 +79,7 @@ export default function BasicGrid() {
               },
             }}
           >
-            <Box
-              component="form"
-              onSubmit={handleSubmit}
-              noValidate
-              sx={{ mt: 1 }}
-            >
+            <Box component="form" noValidate sx={{ mt: 1 }}>
               <Typography
                 variant="h3"
                 sx={{
@@ -98,6 +112,11 @@ export default function BasicGrid() {
               >
                 tra cứu <br /> thông tin bảo hành
               </Typography>
+              {memoizedError && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {memoizedError}
+                </Alert>
+              )}
               <Stack
                 direction="row"
                 spacing={2}
@@ -113,8 +132,9 @@ export default function BasicGrid() {
                   margin="normal"
                   required
                   fullWidth
-                  id="search"
-                  name="search"
+                  name="maTheBaoHanh"
+                  value={maTheBaoHanh}
+                  onChange={(e) => setMaTheBaoHanh(e.target.value)}
                   autoComplete="search"
                   InputProps={{
                     startAdornment: <SearchIcon />,
@@ -124,30 +144,28 @@ export default function BasicGrid() {
                       fontSize: 18,
                     },
                   }}
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
                 />
               </Stack>
               <FormControlLabel
                 control={<Checkbox value="checked" color="primary" />}
                 label="Tôi đồng ý việc sử dụng các thông tin cá nhân cung cấp trên website này cho mục đích tra cứu."
                 sx={{
-                  display: "flex", // Sử dụng flexbox để căn chỉnh
-                  alignItems: "center", // Căn chỉnh các phần tử theo chiều dọc
-                  margin: "1rem 0", // Khoảng cách trên dưới
-                  padding: "0.5rem", // Khoảng cách bên trong
-                  borderRadius: "5px", // Bo góc
+                  color: "white",
+                  display: "flex",
+                  alignItems: "center",
+                  margin: "1rem 0",
+                  padding: "0.5rem",
+                  borderRadius: "5px",
                   "& .MuiFormControlLabel-label": {
-                    // Chọn phần tử label
                     fontSize: {
-                      xs: "0.8rem", // Kích thước font cho màn hình nhỏ
-                      sm: "0.8rem", // Kích thước font cho màn hình trung bình
-                      md: "1.1rem", // Kích thước font cho màn hình lớn
-                      lg: "1.2rem", // Kích thước font cho màn hình rất lớn
+                      xs: "0.8rem",
+                      sm: "0.8rem",
+                      md: "1.1rem",
+                      lg: "1.2rem",
                     },
                   },
                 }}
-                checked={checked}
+                checked={memoizedChecked}
                 onChange={(e) => setChecked(e.target.checked)}
               />
 
@@ -173,7 +191,8 @@ export default function BasicGrid() {
                   },
                   backgroundColor: "#638FD7",
                 }}
-                disabled={!checked || !searchValue}
+                onClick={handleSubmit}
+                disabled={!maTheBaoHanh.trim() || !memoizedChecked}
               >
                 Tra cứu
               </Button>

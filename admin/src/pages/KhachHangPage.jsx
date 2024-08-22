@@ -1,33 +1,33 @@
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
-import Title from "../components/Title.jsx";
-import { Gauge, gaugeClasses } from "@mui/x-charts/Gauge";
+import TextField from "@mui/material/TextField";
+import Fab from "@mui/material/Fab";
+import AddIcon from "@mui/icons-material/Add";
+import Box from "@mui/material/Box";
+import Skeleton from "@mui/material/Skeleton";
+
+import { useNavigate } from "react-router-dom";
+
 import { useState, useEffect } from "react";
 import { useMemo, Fragment } from "react";
 
+import Title from "../components/Title.jsx";
 import DataTable from "../components/DataTable.jsx";
 
 export default function KhachHangPage() {
+  const navigate = useNavigate(); // điều hướng trang
+
   const [data, setData] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const columns = [
-    { key: "MA_KHACH", label: "ID" },
-    { key: "TEN_KHACH", label: "Tên" },
-    { key: "NHA_KHOA", label: "Nha khoa" },
-    { key: "TEN_BAC_SI", label: "Tên bác sĩ" },
-    { key: "NGAY_KICH_HOAT", label: "Ngày kích hoạt" },
-    { key: "NGAY_HET_HAN", label: "Ngày hết hạn" },
-    { key: "VAT_LIEU", label: "Vật liệu" },
-    { key: "LABO", label: "Labo" },
-    { key: "LOAI_DIA", label: "Loại đĩa" },
-    { key: "SO_LUONG_RANG", label: "Số lượng răng" },
-    { key: "VI_TRI_RANG", label: "Vị trí răng" },
-    { key: "THE_BAO_HANH_ID", label: "ID thẻ" },
-    { key: "TAI_KHOAN_ID", label: "ID tài khoản" },
+    { key: "MA_THE_BAO_HANH", label: "Mã thẻ bảo hành" },
+    { key: "TEN_KHACH", label: "Tên khách hàng" },
+    { key: "SDT", label: "Số điện thoại" },
   ];
 
   const fetchInfo = async () => {
-    const response = await fetch("http://localhost:4000/api/khach-hang-data");
+    const response = await fetch("http://localhost:3000/api/admin/Khach_Hang");
     const data = await response.json();
     setData(data);
     console.log("Data fetched successfully:", data);
@@ -39,57 +39,65 @@ export default function KhachHangPage() {
 
   const memoizedData = useMemo(() => data, [data]);
 
+  const filteredData = useMemo(() => {
+    if (!searchTerm) {
+      return memoizedData;
+    }
+    return memoizedData.filter((item) => {
+      return (
+        item.MA_THE_BAO_HANH.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.TEN_KHACH.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.SDT.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    });
+  }, [memoizedData, searchTerm]); // Phụ thuộc vào memoizedData và searchTerm
+
   return (
     <>
       <Grid container spacing={3}>
-        {/* Chart */}
-        <Grid item xs={12} md={8} lg={8}>
-          <Paper
-            sx={{
-              p: 2,
-              display: "flex",
-              flexDirection: "column",
-              height: 240,
-            }}
-          >
-            {/* <Chart /> */}
-          </Paper>
-        </Grid>
-        {/* Recent Deposits */}
-        <Grid item xs={12} md={4} lg={4}>
-          <Paper
-            sx={{
-              p: 2,
-              display: "flex",
-              flexDirection: "column",
-              height: 240,
-            }}
-          >
-            <Title>Đã kích hoạt</Title>
-            <Gauge
-              value={75}
-              startAngle={-110}
-              endAngle={110}
-              sx={{
-                [`& .${gaugeClasses.valueText}`]: {
-                  fontSize: 40,
-                  transform: "translate(0px, 0px)",
-                },
-              }}
-              text={({ value, valueMax }) => `${value} / ${valueMax}`}
-            />
-          </Paper>
-        </Grid>
-        {/* Recent Orders */}
+        {/* Table */}
         <Grid item xs={12}>
           <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
+            <Title>Thông Tin Khách Hàng</Title>
+            <Grid container spacing={3}>
+              <Grid item xs={1} md={1} lg={1}>
+                <Box sx={{ "& > :not(style)": { m: 1 } }}>
+                  <Fab
+                    size="small"
+                    color="secondary"
+                    aria-label="add"
+                    onClick={() => navigate("/khach-hang/them")}
+                  >
+                    <AddIcon />
+                  </Fab>
+                </Box>
+              </Grid>
+              <Grid item xs={1} md={5} lg={7}></Grid>
+              <Grid item xs={10} md={6} lg={4}>
+                <TextField
+                  id="standard-basic"
+                  label="Tìm kiếm"
+                  placeholder="Nhập mã thẻ bảo hành hoặc tên khách hàng"
+                  variant="standard"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  sx={{ margin: 1, width: "80%", backgroundColor: "white" }}
+                />
+              </Grid>
+            </Grid>
+            {/* Thêm input cho thanh tìm kiếm */}
             {memoizedData ? (
               <Fragment>
-                <Title>Thông Tin Khách Hàng</Title>
-                <DataTable columns={columns} rows={memoizedData} />
+                <DataTable
+                  columns={columns}
+                  rows={filteredData}
+                  tableType="khach-hang"
+                />
               </Fragment>
             ) : (
-              <p>Loading data...</p>
+              <Box sx={{ display: "flex" }}>
+                <Skeleton />
+              </Box>
             )}
           </Paper>
         </Grid>

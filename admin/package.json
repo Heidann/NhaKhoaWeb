@@ -12,14 +12,21 @@
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
+    "@material/fab": "^14.0.0",
     "@mui/icons-material": "^5.16.4",
     "@mui/material": "^5.16.4",
     "@mui/styled-engine-sc": "^6.0.0-alpha.18",
     "@mui/x-charts": "^7.11.0",
+    "@mui/x-data-grid": "^7.13.0",
+    "axios": "^1.7.4",
+    "dotenv": "^16.4.5",
+    "formik": "^2.4.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.25.1",
-    "styled-components": "^6.1.12"
+    "react-toastify": "^10.0.5",
+    "styled-components": "^6.1.12",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

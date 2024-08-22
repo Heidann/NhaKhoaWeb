@@ -8,7 +8,7 @@ import LogoLaboratory from "../assets/logoNhaKhoa.jpg";
 // import { Link } from "react-router-dom";
 export default function ButtonAppBar() {
   const handleOpenAdmin = () => {
-    window.open("http://localhost:5174/", "_blank");
+    window.open("http://localhost:5174/dang-nhap", "_blank");
   };
   return (
     <Box sx={{ flexGrow: 1 }}>

@@ -17,7 +17,9 @@ export default function TheBaoHanhPage() {
   ];
 
   const fetchInfo = async () => {
-    const response = await fetch("http://localhost:4000/api/the-bao-hanh-data");
+    const response = await fetch(
+      "http://localhost:4000/api/admin/the-bao-hanh-data"
+    );
     const data = await response.json();
     setData(data);
     console.log("Data fetched successfully:", data);
@@ -76,7 +78,7 @@ export default function TheBaoHanhPage() {
             {memoizedData ? (
               <Fragment>
                 <Title>12321</Title>
-                <DataTable columns={columns} rows={memoizedData} />
+                {/* <DataTable columns={columns} rows={memoizedData} /> */}
               </Fragment>
             ) : (
               <p>Loading data...</p>

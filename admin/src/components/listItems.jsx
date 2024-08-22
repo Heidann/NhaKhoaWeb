@@ -9,7 +9,8 @@ import PeopleIcon from "@mui/icons-material/People";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import LayersIcon from "@mui/icons-material/Layers";
 import AssignmentIcon from "@mui/icons-material/Assignment";
-
+import RecentActorsIcon from "@mui/icons-material/RecentActors";
+import CreditCardIcon from "@mui/icons-material/CreditCard";
 export const mainListItems = (
   <React.Fragment>
     <ListItemButton component="a" href="/bang-dieu-khien">
@@ -20,7 +21,7 @@ export const mainListItems = (
     </ListItemButton>
     <ListItemButton component="a" href="/khach-hang">
       <ListItemIcon>
-        <ShoppingCartIcon />
+        <RecentActorsIcon />
       </ListItemIcon>
       <ListItemText primary="Khách hàng" />
     </ListItemButton>
@@ -32,7 +33,7 @@ export const mainListItems = (
     </ListItemButton>
     <ListItemButton component="a" href="/the-bao-hanh">
       <ListItemIcon>
-        <BarChartIcon />
+        <CreditCardIcon />
       </ListItemIcon>
       <ListItemText primary="Thẻ bảo hành" />
     </ListItemButton>
@@ -41,6 +42,30 @@ export const mainListItems = (
         <LayersIcon />
       </ListItemIcon>
       <ListItemText primary="Chức vụ" />
+    </ListItemButton>
+    <ListItemButton component="a" href="/labo">
+      <ListItemIcon>
+        <LayersIcon />
+      </ListItemIcon>
+      <ListItemText primary="Labo" />
+    </ListItemButton>
+    <ListItemButton component="a" href="/vat-lieu">
+      <ListItemIcon>
+        <LayersIcon />
+      </ListItemIcon>
+      <ListItemText primary="Vật Liệu" />
+    </ListItemButton>
+    <ListItemButton component="a" href="/loai-dia">
+      <ListItemIcon>
+        <LayersIcon />
+      </ListItemIcon>
+      <ListItemText primary="Loại Đĩa" />
+    </ListItemButton>
+    <ListItemButton component="a" href="/nhat-ky">
+      <ListItemIcon>
+        <LayersIcon />
+      </ListItemIcon>
+      <ListItemText primary="Nhật ký" />
     </ListItemButton>
   </React.Fragment>
 );

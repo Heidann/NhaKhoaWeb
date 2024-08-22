@@ -16,6 +16,9 @@ import FirstPageIcon from "@mui/icons-material/FirstPage";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
+import Fab from "@mui/material/Fab";
+import ManageSearchIcon from "@mui/icons-material/ManageSearch";
+import { useNavigate } from "react-router-dom";
 
 function TablePaginationActions(props) {
   const theme = useTheme();
@@ -86,7 +89,8 @@ TablePaginationActions.propTypes = {
   rowsPerPage: PropTypes.number.isRequired,
 };
 
-const DataTable = ({ columns, rows }) => {
+const DataTable = ({ columns, rows, tableType }) => {
+  const navigate = useNavigate();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
@@ -103,6 +107,11 @@ const DataTable = ({ columns, rows }) => {
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
+  // handle detail cell
+  const handleDetail = (row) => {
+    navigate(`/${tableType}/${row.AUTO_ID}/chi-tiet`);
+  };
+
   return (
     <TableContainer component={Paper}>
       <Table aria-label="custom pagination table">
@@ -111,6 +120,7 @@ const DataTable = ({ columns, rows }) => {
             {columns.map((column) => (
               <TableCell key={column.key}>{column.label}</TableCell>
             ))}
+            <TableCell align="center">Chức năng</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -122,6 +132,30 @@ const DataTable = ({ columns, rows }) => {
               {columns.map((column) => (
                 <TableCell key={column.key}>{row[column.key]}</TableCell>
               ))}
+              <TableCell>
+                {/* Bao bọc các Fab trong Fragment */}
+                <>
+                  <Box
+                    sx={{
+                      p: 1,
+                      justifyContent: "space-evenly",
+                      display: "flex",
+                      flexDirection: "row",
+                    }}
+                  >
+                    {/* fab detail */}
+                    <Fab
+                      size="small"
+                      color="secondary"
+                      aria-label="Chi Tiết"
+                      onClick={() => handleDetail(row)}
+                      sx={{ padding: 1 }}
+                    >
+                      <ManageSearchIcon />
+                    </Fab>
+                  </Box>
+                </>
+              </TableCell>
             </TableRow>
           ))}
           {emptyRows > 0 && (
@@ -165,6 +199,7 @@ DataTable.propTypes = {
     })
   ).isRequired,
   rows: PropTypes.arrayOf(PropTypes.object).isRequired,
+  tableType: PropTypes.string.isRequired, // Thêm prop tableType
 };
 
 export default DataTable;
