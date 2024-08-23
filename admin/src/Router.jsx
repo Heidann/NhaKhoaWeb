@@ -43,12 +43,11 @@ import VatLieuPage from "./pages/VatLieuPage.jsx";
 // import LaboUpdate from "./components/TheBaoHanhCRUD/TbhUpdate.jsx";
 // import LaboDelete from "./components/TheBaoHanhCRUD/TbhDelete.jsx";
 
-// import Labo CRUD
+// import NhatKy CRUD
 import NhatKyPage from "./pages/NhatKyPage.jsx";
-// import LaboAdd from "./components/TheBaoHanhCRUD/TbhAdd.jsx";
-// import LaboDetail from "./components/TheBaoHanhCRUD/TbhDetail.jsx";
-// import LaboUpdate from "./components/TheBaoHanhCRUD/TbhUpdate.jsx";
-// import LaboDelete from "./components/TheBaoHanhCRUD/TbhDelete.jsx";
+import NhatKyAdd from "./components/NhatKyCRD//NkAdd.jsx";
+import NhatKyDetail from "./components/NhatKyCRD/NkDetail.jsx";
+import NhatKyDelete from "./components/NhatKyCRD/NkDelete.jsx";
 
 // import ChucVu CRUD
 import ChucVuPage from "./pages/ChucVuPage.jsx";
@@ -56,6 +55,7 @@ import CvAdd from "./components/ChucVuCRUD/CvAdd.jsx";
 import CvDetail from "./components/ChucVuCRUD/CvDetail.jsx";
 import CvUpdate from "./components/ChucVuCRUD/CvUpdate.jsx";
 import CvDelete from "./components/ChucVuCRUD/CvDelete.jsx";
+import NkDetail from "./components/NhatKyCRD/NkDetail.jsx";
 
 const Router = () => {
   return (
@@ -106,10 +106,9 @@ const Router = () => {
             <Route path="/chuc-vu/:id/chinh-sua" element={<CvUpdate />} />
             <Route path="/chuc-vu/:id/xoa" element={<CvDelete />} /> */}
             {/* nhat ky */}
-            {/* <Route path="/chuc-vu/:id/chi-tiet" element={<CvDetail />} />
-            <Route path="/chuc-vu/:id/chinh-sua" element={<CvUpdate />} />
-            <Route path="/chuc-vu/:id/xoa" element={<CvDelete />} />
-            <Route path="/chuc-vu/them" element={<CvAdd />} /> */}
+            <Route path="/nhat-ky/:id/chi-tiet" element={<NhatKyDetail />} />
+            <Route path="/nhat-ky/:id/xoa" element={<NhatKyDelete />} />
+            <Route path="/nhat-ky/them" element={<NhatKyAdd />} />
             <Route path="/nhat-ky" element={<NhatKyPage />} />
           </Route>
         </Routes>

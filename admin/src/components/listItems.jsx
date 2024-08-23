@@ -13,7 +13,7 @@ import RecentActorsIcon from "@mui/icons-material/RecentActors";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 export const mainListItems = (
   <React.Fragment>
-    <ListItemButton component="a" href="/bang-dieu-khien">
+    <ListItemButton component="a" href="/">
       <ListItemIcon>
         <DashboardIcon />
       </ListItemIcon>

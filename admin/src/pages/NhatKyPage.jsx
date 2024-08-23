@@ -70,7 +70,7 @@ export default function KhachHangPage() {
                     size="small"
                     color="secondary"
                     aria-label="add"
-                    onClick={() => navigate("/khach-hang/them")}
+                    onClick={() => navigate("/nhat-ky/them")}
                   >
                     <AddIcon />
                   </Fab>
@@ -95,7 +95,7 @@ export default function KhachHangPage() {
                 <DataTable
                   columns={columns}
                   rows={filteredData}
-                  tableType="khach-hang"
+                  tableType="nhat-ky"
                 />
               </Fragment>
             ) : (

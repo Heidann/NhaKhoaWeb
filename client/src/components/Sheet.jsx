@@ -293,13 +293,7 @@ export default function SheetPage() {
       lg: 2,
       xl: 2,
     },
-    margin: {
-      xs: 1,
-      sm: 1,
-      md: 1,
-      lg: 2,
-      xl: 3,
-    },
+    margin: 1,
     color: "white",
   };
 
