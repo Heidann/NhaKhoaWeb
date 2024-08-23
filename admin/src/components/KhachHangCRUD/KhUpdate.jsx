@@ -1,265 +1,322 @@
-import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import { useFormik } from "formik";
-import * as Yup from "yup";
-import axios from "axios";
-import { toast } from "react-toastify";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  Grid,
+  Paper,
+  Divider,
+  Button,
+  TextField,
+  Snackbar,
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Typography,
+} from "@mui/material";
+import Title from "../Title";
+import EditIcon from "@mui/icons-material/Edit";
+import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 const KhUpdate = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-
-  const [bacSiOptions, setBacSiOptions] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(1);
-
-  // Fetch Bac Si options from your APIs
-  const fetchBacSiOptions = async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:3000/api/admin/Tai_Khoan/nha_si"
-      );
-      const data = await response.json();
-      setBacSiOptions(data);
-      console.log("Data fetched successfully:", data);
-    } catch (error) {
-      console.error("Error fetching Bac Si options:", error);
-    }
-  };
+  const [khachHangDetail, setKhachHangDetail] = useState(null);
+  const [error, setError] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [tenKhach, setTenKhach] = useState("");
+  const [theBaoHanhId, setTheBaoHanhId] = useState("");
+  const [phone, setPhone] = useState("");
+  const [createBy, setCreateBy] = useState("");
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
 
   useEffect(() => {
-    fetchBacSiOptions();
-  }, []);
-
-  const [khachHang, setKhachHang] = useState({
-    AUTO_ID: "",
-    TEN_KHACH: "",
-    TEN_NHA_KHOA: "",
-    TEN_NHAN_VIEN: "",
-    NGAY_KICH_HOAT: "",
-    NGAY_HET_HAN: "",
-    MA_THE_BAO_HANH: "",
-    VAT_LIEU: "",
-    LABO: "",
-    LOAI_DIA: "",
-    SO_LUONG_RANG: "",
-    VI_TRI_RANG: "",
-  });
-
-  useEffect(() => {
-    const fetchKhachHang = async () => {
+    const fetchDataDetail = async () => {
       try {
-        const response = await axios.get(`/api/khachhang/${id}`);
-        setKhachHang(response.data);
-        setSelectedMonth(
-          Math.ceil(
-            (new Date(response.data.NGAY_HET_HAN) -
-              new Date(response.data.NGAY_KICH_HOAT)) /
-              (1000 * 60 * 60 * 24 * 30)
-          )
+        const response = await fetch(
+          `http://localhost:3000/api/admin/Khach_Hang/${id}`
         );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setKhachHangDetail(data);
+        setTenKhach(data[0].TEN_KHACH);
+        setTheBaoHanhId(data[0].THE_BAO_HANH_ID);
+        setPhone(data[0].SDT);
+        setCreateBy(data[0].CREATE_BY);
       } catch (error) {
-        console.error("Error fetching khách hàng:", error);
-        toast.error("Lỗi khi lấy thông tin khách hàng");
+        setError(error);
+        console.error("Error fetching data detail:", error);
       }
     };
 
-    fetchKhachHang();
+    fetchDataDetail();
   }, [id]);
 
-  const validationSchema = Yup.object().shape({
-    tenKhach: Yup.string().required("Tên khách hàng là bắt buộc"),
-    nhaKhoa: Yup.string().required("Nha khoa là bắt buộc"),
-    tenBacSi: Yup.string().required("Tên bác sĩ là bắt buộc"),
-    ngayKichHoat: Yup.date().required("Ngày kích hoạt là bắt buộc"),
-    ngayHetHan: Yup.date().required("Ngày hết hạn là bắt buộc"),
-    maTheBaoHanh: Yup.string(),
-    vatLieu: Yup.string(),
-    labo: Yup.string(),
-    loaiDia: Yup.string(),
-    soLuongRang: Yup.number(),
-    viTriRang: Yup.string(),
-  });
-
-  const formik = useFormik({
-    initialValues: {
-      AUTO_ID: khachHang.AUTO_ID,
-      tenKhach: khachHang.TEN_KHACH,
-      nhaKhoa: khachHang.TEN_NHA_KHOA,
-      tenBacSi: khachHang.TEN_NHAN_VIEN,
-      ngayKichHoat: khachHang.NGAY_KICH_HOAT,
-      ngayHetHan: khachHang.NGAY_HET_HAN,
-      maTheBaoHanh: khachHang.MA_THE_BAO_HANH,
-      vatLieu: khachHang.VAT_LIEU,
-      labo: khachHang.LABO,
-      loaiDia: khachHang.LOAI_DIA,
-      soLuongRang: khachHang.SO_LUONG_RANG,
-      viTriRang: khachHang.VI_TRI_RANG,
-    },
-    validationSchema,
-    onSubmit: async (values) => {
-      try {
-        await axios.put(`/api/khachhang/${id}`, values);
-        toast.success("Cập nhật khách hàng thành công");
-        navigate("/khachhang");
-      } catch (error) {
-        console.error("Error updating khách hàng:", error);
-        toast.error("Lỗi khi cập nhật khách hàng");
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/admin/Khach_Hang/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    },
-  });
-
-  const calculateExpirationDate = () => {
-    const currentDate = new Date(formik.values.ngayKichHoat);
-    currentDate.setMonth(currentDate.getMonth() + selectedMonth);
-    return currentDate.toISOString().slice(0, 10);
+      navigate(`/khach-hang`);
+    } catch (error) {
+      setError(error);
+      console.error("Error deleting data:", error);
+    }
   };
 
-  useEffect(() => {
-    formik.setFieldValue("ngayHetHan", calculateExpirationDate());
-  }, [selectedMonth]);
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
+  const handleConfirmDelete = () => {
+    handleDelete();
+    handleCloseDialog();
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/admin/The_Bao_Hanh/code/${theBaoHanhId}`
+      );
+
+      if (!response.ok) {
+        // Thẻ bảo hành không tồn tại
+        handleSnackbarOpen("error", "Mã thẻ bảo hành không tồn tại!");
+        return;
+      }
+
+      const theBaoHanhData = await response.json();
+      if (theBaoHanhData.length > 0) {
+        const theBaoHanhId = theBaoHanhData[0].AUTO_ID;
+
+        // Send PUT request with THE_BAO_HANH_ID
+        const khResponse = await fetch(
+          `http://localhost:3000/api/admin/Khach_Hang/${id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              TEN_KHACH: tenKhach,
+              THE_BAO_HANH_ID: theBaoHanhId,
+              SDT: phone,
+              CREATE_BY: createBy,
+            }),
+          }
+        );
+
+        if (khResponse.ok) {
+          handleSnackbarOpen("success", "Cập nhật khách hàng thành công!");
+          navigate("/khach-hang");
+        } else {
+          handleSnackbarOpen("error", "Lỗi khi cập nhật khách hàng!");
+        }
+      } else {
+        // Thẻ bảo hành không tồn tại
+        handleSnackbarOpen("error", "Mã thẻ bảo hành không tồn tại!");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      handleSnackbarOpen("error", "Lỗi khi cập nhật khách hàng!");
+    }
+  };
+
+  const handleSnackbarOpen = (severity, message) => {
+    setSnackbarSeverity(severity);
+    setSnackbarMessage(message);
+    setOpenSnackbar(true);
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
+  // handle error
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
+  // handle loading
+  if (!khachHangDetail) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <form onSubmit={formik.handleSubmit}>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Typography variant="h6" gutterBottom>
-            Cập nhật Khách Hàng
-          </Typography>
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Tên Khách Hàng"
-            name="tenKhach"
-            value={formik.values.tenKhach}
-            onChange={formik.handleChange}
-            error={formik.touched.tenKhach && Boolean(formik.errors.tenKhach)}
-            helperText={formik.touched.tenKhach && formik.errors.tenKhach}
+    <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
+      <Grid container spacing={2} alignItems="center">
+        <Grid item xs={12} md={3}>
+          <EditIcon
+            sx={{
+              color: "primary.main",
+              fontSize: 24,
+              marginLeft: "auto",
+              width: 120,
+              height: 120,
+            }}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Tên Nha Khoa"
-            name="nhaKhoa"
-            value={formik.values.nhaKhoa}
-            onChange={formik.handleChange}
-            // error={formik.touched.nhaKhoa && Boolean(formik.errors.nhaKhoa)}
-            // helperText={formik.touched.nhaKhoa && formik.errors.nhaKhoa}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <FormControl fullWidth>
-            <InputLabel id="bac-si-select-label">Bác Sĩ</InputLabel>
-            <Select
-              labelId="bac-si-select-label"
-              id="bac-si-select"
-              name="tenBacSi"
-              value={formik.values.tenBacSi}
-              onChange={formik.handleChange}
-            >
-              {bacSiOptions.map((option) => (
-                <MenuItem key={option.AUTO_ID} value={option.TEN_NHAN_VIEN}>
-                  {option.TEN_NHAN_VIEN}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <FormControl fullWidth>
-            <InputLabel id="month-select-label">Số Tháng</InputLabel>
-            <Select
-              labelId="month-select-label"
-              id="month-select"
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-            >
-              {[...Array(12).keys()].map((i) => (
-                <MenuItem key={i + 1} value={i + 1}>
-                  {i + 1}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Mã Thẻ Bảo Hành"
-            name="maTheBaoHanh"
-            value={formik.values.maTheBaoHanh}
-            onChange={formik.handleChange}
-            error={
-              formik.touched.maTheBaoHành && Boolean(formik.errors.maTheBaoHành)
-            }
-            helperText={
-              formik.touched.maTheBaoHành && formik.errors.maTheBaoHành
-            }
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Vật Liệu"
-            name="vatLieu"
-            value={formik.values.vatLieu}
-            onChange={formik.handleChange}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Labo"
-            name="labo"
-            value={formik.values.labo}
-            onChange={formik.handleChange}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Loại Dĩa"
-            name="loaiDia"
-            value={formik.values.loaiDia}
-            onChange={formik.handleChange}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Số Lượng Răng"
-            name="soLuongRang"
-            type="number"
-            value={formik.values.soLuongRang}
-            onChange={formik.handleChange}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Vị Trí Răng"
-            name="viTriRang"
-            value={formik.values.viTriRang}
-            onChange={formik.handleChange}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <Button type="submit" variant="contained" color="primary">
-            Cập nhật Khách Hàng
-          </Button>
+        <Grid item xs={12} md={9}>
+          <Title>Cập nhật khách hàng</Title>
+          <Divider />
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={2} mt={2}>
+              <Grid item xs={12} md={6}>
+                <Typography variant="body1" gutterBottom>
+                  <b>ID:</b> {khachHangDetail[0].AUTO_ID}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Tên khách hàng"
+                  name="TEN_KHACH"
+                  defaultValue={khachHangDetail[0].TEN_KHACH}
+                  onChange={(e) => setTenKhach(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Mã thẻ bảo hành"
+                  name="THE_BAO_HANH_ID"
+                  defaultValue={khachHangDetail[0].MA_THE_BAO_HANH}
+                  onChange={(e) => setTheBaoHanhId(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Số điện thoại"
+                  name="SDT"
+                  defaultValue={khachHangDetail[0].SDT}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Người tạo"
+                  name="CREATE_BY"
+                  defaultValue={khachHangDetail[0].CREATE_BY}
+                  onChange={(e) => setCreateBy(e.target.value)}
+                />
+              </Grid>
+              {/* Add more fields as needed */}
+            </Grid>
+            <Grid container spacing={2} mt={2} justifyContent="flex-end">
+              <Grid item xs={12} md={3}>
+                <Button
+                  sx={{
+                    width: "100%",
+                    padding: "10px 20px",
+                    backgroundColor: "gray",
+                    color: "white",
+                    textTransform: "capitalize",
+                    "&:hover": {
+                      backgroundColor: "#e53935",
+                    },
+                  }}
+                  variant="contained"
+                  href={`/khach-hang`}
+                >
+                  {/* icon */}
+                  <KeyboardArrowLeft />
+                  Quay Lại
+                </Button>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <Button
+                  sx={{
+                    padding: "10px 20px",
+                    width: "100%",
+                    backgroundColor: "#f44336",
+                    color: "white",
+                    textTransform: "capitalize",
+                    "&:hover": {
+                      backgroundColor: "#e53935",
+                    },
+                  }}
+                  variant="contained"
+                  onClick={() => setOpenDialog(true)}
+                >
+                  <DeleteForeverIcon />
+                  Xóa
+                </Button>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <Button
+                  type="submit"
+                  sx={{
+                    padding: "10px 20px",
+                    width: "100%",
+                    backgroundColor: "#4CAF50",
+                    color: "white",
+                    textTransform: "capitalize",
+                    "&:hover": {
+                      backgroundColor: "#45a049",
+                    },
+                  }}
+                  variant="contained"
+                >
+                  <EditIcon />
+                  Cập nhật
+                </Button>
+              </Grid>
+            </Grid>
+          </form>
         </Grid>
       </Grid>
-    </form>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Xác nhận xóa khách hàng?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Bạn có chắc chắn muốn xóa khách hàng này? Hành động này không thể
+            hoàn tác.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Hủy</Button>
+          <Button onClick={handleConfirmDelete} autoFocus>
+            Xóa
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </Paper>
   );
 };
 

@@ -9,6 +9,10 @@ const getKhach_Hang = async (AUTO_ID) => {
   const [rows] = await pool.execute("CALL sp_GetKhachHang(?)", [AUTO_ID]);
   return rows[0];
 };
+const getSDTKhachHang = async (SDT) => {
+  const [rows] = await pool.execute("CALL sp_GetSDTKhachHang(?)", [SDT]);
+  return rows[0];
+};
 
 const getKhach_Hang_By_TheBaoHanh = async (MA_THE_BAO_HANH) => {
   const [rows] = await pool.execute("CALL sp_GetKhachHang_By_TheBaoHanh(?)", [
@@ -31,13 +35,12 @@ const updateKhach_Hang = async (
   AUTO_ID,
   TEN_KHACH,
   THE_BAO_HANH_ID,
-  CREATE_BY,
-  CREATE_AT,
-  SDT
+  SDT,
+  CREATE_BY
 ) => {
   const [result] = await pool.execute(
-    "CALL sp_UpdateKhachHang(?, ?, ?, ?, ?, ?, ?)",
-    [AUTO_ID, TEN_KHACH, THE_BAO_HANH_ID, CREATE_BY, CREATE_AT, SDT]
+    "CALL sp_UpdateKhachHang(?, ?, ?, ?, ?)",
+    [AUTO_ID, TEN_KHACH, THE_BAO_HANH_ID, SDT, CREATE_BY]
   );
   return result[0];
 };
@@ -54,4 +57,5 @@ export {
   updateKhach_Hang,
   deleteKhach_Hang,
   getKhach_Hang_By_TheBaoHanh,
+  getSDTKhachHang,
 };

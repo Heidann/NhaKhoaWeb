@@ -5,6 +5,7 @@ import {
   updateKhach_Hang,
   deleteKhach_Hang,
   getKhach_Hang_By_TheBaoHanh,
+  getSDTKhachHang,
 } from "../Models/Khach_Hang_Model.js";
 
 const getAllKhach_HangController = async (req, res) => {
@@ -20,6 +21,19 @@ const getKhach_HangController = async (req, res) => {
   try {
     const { id } = req.params;
     const Khach_Hang = await getKhach_Hang(id);
+    if (Khach_Hang) {
+      res.json(Khach_Hang);
+    } else {
+      res.status(404).json({ message: "Không tìm thấy" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+const getSDTKhachHangController = async (req, res) => {
+  try {
+    const { phone } = req.params;
+    const Khach_Hang = await getSDTKhachHang(phone);
     if (Khach_Hang) {
       res.json(Khach_Hang);
     } else {
@@ -69,20 +83,15 @@ const createKhach_HangController = async (req, res) => {
 const updateKhach_HangController = async (req, res) => {
   try {
     const { id } = req.params;
-    const { TEN_KHACH, THE_BAO_HANH_ID, CREATE_BY, CREATE_AT, SDT } = req.body;
+    const { TEN_KHACH, THE_BAO_HANH_ID, SDT, CREATE_BY } = req.body;
     const updatedKhach_Hang = await updateKhach_Hang(
       id,
       TEN_KHACH,
       THE_BAO_HANH_ID,
-      CREATE_BY,
-      CREATE_AT,
-      SDT
+      SDT,
+      CREATE_BY
     );
-    if (updatedKhach_Hang) {
-      res.json(updatedKhach_Hang);
-    } else {
-      res.status(404).json({ message: "Cập nhật không thành công" });
-    }
+    res.status(201).json({ message: "Cập nhật thành công!" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -111,4 +120,5 @@ export {
   updateKhach_HangController,
   deleteKhach_HangController,
   getKhach_Hang_By_TheBaoHanhController,
+  getSDTKhachHangController,
 };

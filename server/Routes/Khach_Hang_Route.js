@@ -6,11 +6,13 @@ import {
   updateKhach_HangController,
   deleteKhach_HangController,
   getKhach_Hang_By_TheBaoHanhController,
+  getSDTKhachHangController,
 } from "../Controllers/Khach_Hang_Controller.js";
 
 const router = Router();
 
 router.get("/", getAllKhach_HangController);
+router.get("/phone/:phone", getSDTKhachHangController);
 router.get("/:id", getKhach_HangController);
 router.get("/result/:maTheBaoHanh", getKhach_Hang_By_TheBaoHanhController);
 router.post("/", createKhach_HangController);

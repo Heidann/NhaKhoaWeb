@@ -39,15 +39,17 @@ export default function KhachHangPage() {
 
   const memoizedData = useMemo(() => data, [data]);
 
+  // Cải thiện filteredData
   const filteredData = useMemo(() => {
     if (!searchTerm) {
       return memoizedData;
     }
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
     return memoizedData.filter((item) => {
       return (
-        item.MA_THE_BAO_HANH.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.TEN_KHACH.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.SDT.toLowerCase().includes(searchTerm.toLowerCase())
+        item.MA_THE_BAO_HANH.toLowerCase().includes(lowerCaseSearchTerm) ||
+        item.TEN_KHACH.toLowerCase().includes(lowerCaseSearchTerm) ||
+        item.SDT.toLowerCase().includes(lowerCaseSearchTerm)
       );
     });
   }, [memoizedData, searchTerm]); // Phụ thuộc vào memoizedData và searchTerm
