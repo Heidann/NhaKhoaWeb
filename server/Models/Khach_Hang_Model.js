@@ -17,17 +17,13 @@ const getKhach_Hang_By_TheBaoHanh = async (MA_THE_BAO_HANH) => {
   return rows[0];
 };
 
-const createKhach_Hang = async (
-  TEN_KHACH,
-  THE_BAO_HANH_ID,
-  CREATE_BY,
-  CREATE_AT,
-  SDT
-) => {
-  const [result] = await pool.execute(
-    "CALL sp_InsertKhachHang(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    [TEN_KHACH, THE_BAO_HANH_ID, CREATE_BY, CREATE_AT, SDT]
-  );
+const createKhach_Hang = async (TEN_KHACH, THE_BAO_HANH_ID, CREATE_BY, SDT) => {
+  const [result] = await pool.execute("CALL sp_InsertKhachHang( ?, ?, ?, ?)", [
+    TEN_KHACH,
+    THE_BAO_HANH_ID,
+    CREATE_BY,
+    SDT,
+  ]);
   return result[0];
 };
 

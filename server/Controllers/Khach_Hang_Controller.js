@@ -53,15 +53,14 @@ const getKhach_Hang_By_TheBaoHanhController = async (req, res) => {
 
 const createKhach_HangController = async (req, res) => {
   try {
-    const { TEN_KHACH, THE_BAO_HANH_ID, CREATE_BY, CREATE_AT, SDT } = req.body;
+    const { TEN_KHACH, THE_BAO_HANH_ID, CREATE_BY, SDT } = req.body;
     const newKhach_Hang = await createKhach_Hang(
       TEN_KHACH,
       THE_BAO_HANH_ID,
       CREATE_BY,
-      CREATE_AT,
       SDT
     );
-    res.status(201).json(newKhach_Hang);
+    res.status(201).json({ message: "Thêm thành công!" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

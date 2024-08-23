@@ -9,12 +9,6 @@ import {
   Snackbar,
   Alert,
   Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Box,
 } from "@mui/material";
 import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
@@ -27,46 +21,75 @@ const KhAdd = () => {
   const [severity, setSeverity] = useState("success");
   const [message, setMessage] = useState("");
   const [tenKhach, setTenKhach] = useState("");
-  const [theBaoHanhId, setTheBaoHanhId] = useState("");
-  const [createBy, setCreateBy] = useState("");
-  const [createAt, setCreateAt] = useState("");
+  const [maTheBaoHanh, setMaTheBaoHanh] = useState(""); // State for MA_THE_BAO_HANH
   const [sdt, setSdt] = useState("");
+  const [createBy, setCreateBy] = useState(""); // State for CREATE_BY
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!tenKhach || !theBaoHanhId || !createBy || !createAt || !sdt) {
+    if (!tenKhach || !maTheBaoHanh || !sdt || !createBy) {
       setOpen(true);
       setSeverity("error");
       setMessage("Vui lòng nhập đầy đủ thông tin!");
       return;
     }
 
-    const response = await fetch(`http://localhost:3000/api/admin/Khach_Hang`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        TEN_KHACH: tenKhach,
-        THE_BAO_HANH_ID: theBaoHanhId,
-        CREATE_BY: createBy,
-        CREATE_AT: createAt,
-        SDT: sdt,
-      }),
-    });
-    if (response.ok) {
-      // Xử lý khi thêm khách hàng thành công
-      setOpen(true);
-      setSeverity("success");
-      setMessage("Thêm khách hàng thành công!");
-      // Chuyển hướng về trang danh sách khách hàng
-      navigate("/khach-hang");
-    } else {
-      const errorData = await response.json(); // Lấy dữ liệu lỗi từ server
+    try {
+      console.log("Fetching thẻ bảo hành data..."); // Log for debugging
+      // Kiểm tra xem thẻ bảo hành đã tồn tại hay chưa
+      const response = await fetch(
+        `http://localhost:3000/api/admin/The_Bao_Hanh/code/${maTheBaoHanh}`
+      );
+      console.log("Thẻ bảo hành response"); // Log for debugging
+
+      if (!response.ok) {
+        // Thẻ bảo hành không tồn tại
+        setOpen(true);
+        setSeverity("error");
+        setMessage("Mã thẻ bảo hành không tồn tại!");
+        return;
+      }
+
+      const theBaoHanhData = await response.json();
+      const theBaoHanhId = theBaoHanhData[0].AUTO_ID; // Get THE_BAO_HANH_ID from response
+      console.log("Creating khách hàng...", theBaoHanhId); // Log for debugging
+      // Send POST request with THE_BAO_HANH_ID
+      const khResponse = await fetch(
+        `http://localhost:3000/api/admin/Khach_Hang`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            TEN_KHACH: tenKhach,
+            THE_BAO_HANH_ID: theBaoHanhId,
+            SDT: sdt,
+            CREATE_BY: createBy,
+          }),
+        }
+      );
+      console.log("Khách hàng response:", khResponse);
+      if (khResponse.ok) {
+        // Xử lý khi thêm khách hàng thành công
+        setOpen(true);
+        setSeverity("success");
+        setMessage("Thêm khách hàng thành công!");
+        // Chuyển hướng về trang danh sách khách hàng
+        navigate("/khach-hang");
+      } else {
+        const errorData = await khResponse.json(); // Lấy dữ liệu lỗi từ server
+        setOpen(true);
+        setSeverity("error");
+        setMessage(errorData.message); // Use errorData.message
+      }
+    } catch (error) {
+      // Xử lý lỗi chung
       setOpen(true);
       setSeverity("error");
-      setMessage(errorData.message); // Use errorData.message
+      setMessage("Lỗi khi thêm khách hàng!");
+      console.error("Error adding customer:", error);
     }
   };
 
@@ -114,27 +137,9 @@ const KhAdd = () => {
                 <TextField
                   fullWidth
                   label="Mã Thẻ Bảo Hành"
-                  name="THE_BAO_HANH_ID"
-                  value={theBaoHanhId}
-                  onChange={(e) => setTheBaoHanhId(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Người Tạo"
-                  name="CREATE_BY"
-                  value={createBy}
-                  onChange={(e) => setCreateBy(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Ngày Tạo"
-                  name="CREATE_AT"
-                  value={createAt}
-                  onChange={(e) => setCreateAt(e.target.value)}
+                  name="MA_THE_BAO_HANH"
+                  value={maTheBaoHanh}
+                  onChange={(e) => setMaTheBaoHanh(e.target.value)}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -144,6 +149,15 @@ const KhAdd = () => {
                   name="SDT"
                   value={sdt}
                   onChange={(e) => setSdt(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Người tạo"
+                  name="CREATE_BY"
+                  value={createBy}
+                  onChange={(e) => setCreateBy(e.target.value)}
                 />
               </Grid>
             </Grid>
