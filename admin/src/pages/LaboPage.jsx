@@ -6,6 +6,8 @@ import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button"; // Import Button component
+import * as XLSX from "xlsx"; // Import XLSX library
 
 import { useNavigate } from "react-router-dom";
 import { Gauge, gaugeClasses } from "@mui/x-charts/Gauge";
@@ -14,7 +16,7 @@ import { useMemo, Fragment } from "react";
 
 import DataTable from "../components/DataTable.jsx";
 
-export default function TheBaoHanhPage() {
+export default function LaboPage() {
   const navigate = useNavigate(); // điều hướng trang
 
   const [data, setData] = useState(null);
@@ -42,11 +44,16 @@ export default function TheBaoHanhPage() {
     }
     return memoizedData.filter((item) => {
       // Lọc dựa trên các trường bạn muốn tìm kiếm
-      return item.MA_THE_BAO_HANH.toLowerCase().includes(
-        searchTerm.toLowerCase()
-      );
+      return item.TEN_LABO.toLowerCase().includes(searchTerm.toLowerCase());
     });
   }, [memoizedData, searchTerm]); // Phụ thuộc vào memoizedData và searchTerm
+
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Labo");
+    XLSX.writeFile(workbook, "Labo.xlsx");
+  };
 
   return (
     <>
@@ -92,7 +99,7 @@ export default function TheBaoHanhPage() {
         {/* Recent Orders */}
         <Grid item xs={12}>
           <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
-            <Title>Thông Tin Thẻ Bảo Hành</Title>
+            <Title>Thông Tin Labo</Title>
             <Grid container spacing={3}>
               <Grid item xs={1} md={1} lg={1}>
                 {" "}
@@ -112,7 +119,7 @@ export default function TheBaoHanhPage() {
                 <TextField
                   id="standard-basic"
                   label="Tìm kiếm"
-                  placeholder="Nhập mã thẻ bao hành"
+                  placeholder="Nhập tên labo"
                   variant="standard"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -128,6 +135,9 @@ export default function TheBaoHanhPage() {
                   rows={filteredData}
                   tableType="labo"
                 />
+                <Button variant="contained" onClick={exportToExcel}>
+                  Xuất Excel
+                </Button>
               </Fragment>
             ) : (
               <Box sx={{ display: "flex" }}>

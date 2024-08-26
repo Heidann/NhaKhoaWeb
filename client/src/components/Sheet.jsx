@@ -352,10 +352,13 @@ export default function SheetPage() {
                     },
                   }}
                 >
+                  {/* Add scrollbar to Tabs when there are more than 3 items */}
                   <Tabs
                     orientation={orientation} // Use the state variable
-                    variant="scrollable"
                     value={value}
+                    variant="scrollable"
+                    // Add scroll buttons for mobile
+                    allowScrollButtonsMobile
                     onChange={handleChange} // aria-label="Vertical tabs example"
                     sx={{
                       borderRight: 1,
@@ -373,7 +376,7 @@ export default function SheetPage() {
                       <Tab
                         label={`${item.NGAY_KICH_HOAT}`}
                         {...a11yProps(index)}
-                        key={index}
+                        key={item.AUTO_ID}
                         sx={tableCellStyles}
                       />
                     ))}
@@ -441,7 +444,7 @@ export default function SheetPage() {
                                   Nha sĩ
                                 </TableCell>
                                 <TableCell sx={tableCellStyles}>
-                                  {item.TEN_NHAN_VIEN}
+                                  {item.NHA_SI}
                                 </TableCell>
                               </TableRow>
                               <TableRow>

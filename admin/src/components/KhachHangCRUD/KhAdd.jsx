@@ -28,8 +28,8 @@ const KhAdd = () => {
   const [maTheBaoHanh, setMaTheBaoHanh] = useState("");
   const [phone, setPhone] = useState("");
   const [createBy, setCreateBy] = useState("");
-  const [step, setStep] = useState(1); // Track the current step
-  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false); // State for confirmation dialog
+  const [step, setStep] = useState(1);
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
 
   const handleNextStep = () => {
     setStep(step + 1);
@@ -43,41 +43,58 @@ const KhAdd = () => {
     event.preventDefault();
 
     if (step === 1) {
-      // Step 1: Check if SDT exists
+      // Step 1: Check if maTheBaoHanh has been used
       try {
         const response = await fetch(
-          `http://localhost:3000/api/admin/Khach_Hang/phone/${phone}`
+          `http://localhost:3000/api/admin/The_Bao_Hanh/code/${maTheBaoHanh}`
         );
 
         if (!response.ok) {
-          // SDT doesn't exist, proceed to step 2
+          // Handle error if the request fails
+          setOpen(true);
+          setSeverity("error");
+          setMessage("Lỗi khi kiểm tra Mã thẻ bảo hành!");
+          return;
+        }
+
+        const data = await response.json();
+
+        // Handle the response from the server
+        if (data[0].message === "NOT FOUND") {
+          setOpen(true);
+          setSeverity("error");
+          setMessage("Mã thẻ bảo hành không tồn tại!");
+        } else if (data[0].message === "USED") {
+          setOpen(true);
+          setSeverity("error");
+          setMessage("Mã thẻ bảo hành đã được sử dụng!");
+        } else if (data[0].message === "NOT USED") {
+          setOpen(true);
+          setSeverity("success");
+          setMessage("Mã thẻ bảo hành có thể sử dụng!");
+          // Proceed to step 2
           handleNextStep();
         } else {
-          const data = await response.json();
-          if (data.length > 0) {
-            // SDT exists, show error message
-            setOpen(true);
-            setSeverity("error");
-            setMessage("Số điện thoại đã tồn tại!");
-          } else {
-            // SDT doesn't exist, proceed to step 2
-            handleNextStep();
-          }
+          // Handle unexpected response
+          setOpen(true);
+          setSeverity("error");
+          setMessage("Lỗi không xác định!");
         }
       } catch (error) {
         setOpen(true);
         setSeverity("error");
-        setMessage("Lỗi khi kiểm tra số điện thoại!");
-        console.error("Error checking phone number:", error);
+        setMessage("Lỗi khi kiểm tra Mã thẻ bảo hành!");
+        console.error("Error checking maTheBaoHanh:", error);
       }
     }
-    // kiem tra maTheBaoHanh co ton trong database chua
+
+    // INSERT DATA TO DATABASE
     else if (step === 2) {
       // Step 2: Add new customer
-      if (!tenKhach || !maTheBaoHanh || !createBy) {
+      if (!tenKhach || !createBy) {
         setOpen(true);
         setSeverity("error");
-        setMessage("Vui lòng nhập đầy đủ thông tin!");
+        setMessage("Vui lòng nhập Tên Khách Hàng!");
         return;
       }
 
@@ -184,10 +201,10 @@ const KhAdd = () => {
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    label="Số Điện Thoại"
-                    name="SDT"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    label="Mã thẻ bảo hành"
+                    name="maTheBaoHanh"
+                    value={maTheBaoHanh}
+                    onChange={(e) => setMaTheBaoHanh(e.target.value)}
                   />
                 </Grid>
                 <Grid container spacing={2} mt={2} justifyContent="flex-end">

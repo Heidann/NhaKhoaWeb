@@ -5,11 +5,13 @@ import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button"; // Import Button component
 
 import { useNavigate } from "react-router-dom";
 
 import { useState, useEffect } from "react";
 import { useMemo, Fragment } from "react";
+import * as XLSX from "xlsx"; // Import XLSX library
 
 import Title from "../components/Title.jsx";
 import DataTable from "../components/DataTable.jsx";
@@ -46,6 +48,13 @@ export default function TheBaoHanhPage() {
       return item.TEN_CHUC_VU.toLowerCase().includes(searchTerm.toLowerCase());
     });
   }, [memoizedData, searchTerm]); // Phụ thuộc vào memoizedData và searchTerm
+
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Chức Vụ");
+    XLSX.writeFile(workbook, "ChucVu.xlsx");
+  };
 
   return (
     <>
@@ -88,6 +97,9 @@ export default function TheBaoHanhPage() {
                   rows={filteredData}
                   tableType="chuc-vu"
                 />
+                <Button variant="contained" onClick={exportToExcel}>
+                  Xuất Excel
+                </Button>
               </Fragment>
             ) : (
               <Box sx={{ display: "flex" }}>

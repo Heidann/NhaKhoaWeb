@@ -5,6 +5,8 @@ import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
+import Button from "@mui/material/Button"; // Import Button component
+import * as XLSX from "xlsx"; // Import XLSX library
 
 import { useNavigate } from "react-router-dom";
 
@@ -54,6 +56,13 @@ export default function KhachHangPage() {
     });
   }, [memoizedData, searchTerm]); // Phụ thuộc vào memoizedData và searchTerm
 
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Khách Hàng");
+    XLSX.writeFile(workbook, "KhachHang.xlsx");
+  };
+
   return (
     <>
       <Grid container spacing={3}>
@@ -95,6 +104,9 @@ export default function KhachHangPage() {
                   rows={filteredData}
                   tableType="khach-hang"
                 />
+                <Button variant="contained" onClick={exportToExcel}>
+                  Xuất Excel
+                </Button>
               </Fragment>
             ) : (
               <Box sx={{ display: "flex" }}>

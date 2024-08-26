@@ -6,6 +6,7 @@ import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 
 import { useNavigate } from "react-router-dom";
 import { Gauge, gaugeClasses } from "@mui/x-charts/Gauge";
@@ -13,6 +14,7 @@ import { useState, useEffect } from "react";
 import { useMemo, Fragment } from "react";
 
 import DataTable from "../components/DataTable.jsx";
+import * as XLSX from "xlsx"; // Import the XLSX library
 
 export default function TheBaoHanhPage() {
   const navigate = useNavigate(); // điều hướng trang
@@ -49,6 +51,13 @@ export default function TheBaoHanhPage() {
       );
     });
   }, [memoizedData, searchTerm]); // Phụ thuộc vào memoizedData và searchTerm
+
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Thẻ Bảo Hành");
+    XLSX.writeFile(workbook, "TheBaoHanh.xlsx");
+  };
 
   return (
     <>
@@ -130,6 +139,9 @@ export default function TheBaoHanhPage() {
                   rows={filteredData}
                   tableType="the-bao-hanh"
                 />
+                <Button variant="contained" onClick={exportToExcel}>
+                  Xuất Excel
+                </Button>
               </Fragment>
             ) : (
               <Box sx={{ display: "flex" }}>
