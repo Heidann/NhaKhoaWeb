@@ -8,6 +8,7 @@ import {
   getAllNha_Si,
 } from "../Models/Tai_Khoan_Model.js";
 import bcrypt from "bcrypt"; // Thêm bcrypt để mã hóa mật khẩu
+import { generateToken } from "../middlewares/Auth.js";
 
 const getAllTai_KhoanController = async (req, res) => {
   try {
@@ -44,6 +45,7 @@ const getTai_KhoanController = async (req, res) => {
 const postTai_Khoan_User_PassController = async (req, res) => {
   try {
     const { TEN_TAI_KHOAN, MAT_KHAU } = req.body;
+    console.log(TEN_TAI_KHOAN, MAT_KHAU);
 
     // Kiểm tra xem cả hai trường đều có giá trị hay không
     if (!TEN_TAI_KHOAN || !MAT_KHAU) {
@@ -52,15 +54,16 @@ const postTai_Khoan_User_PassController = async (req, res) => {
         .json({ message: "Vui lòng nhập đầy đủ thông tin" });
     }
 
-    const Tai_Khoan = await postTai_Khoan_User_Pass(TEN_TAI_KHOAN, MAT_KHAU);
+    const user = await postTai_Khoan_User_Pass(TEN_TAI_KHOAN, MAT_KHAU);
 
     // Kiểm tra xem tài khoản có tồn tại và mật khẩu có chính xác hay không
-    if (Tai_Khoan && Tai_Khoan.length > 0) {
-      res.status(200).json({ message: "Đăng nhập thành công" });
+    if (user) {
+      // Tạo JWT
+      const token = generateToken(user.ID);
+
+      res.status(200).json({ token, user });
     } else {
-      res
-        .status(401)
-        .json({ message: "Tài khoản hoặc mật khẩu không chính xác" });
+      res.status(401).json({ message: "Sai thông tin đăng nhập" });
     }
   } catch (error) {
     res.status(500).json({ error: error.message });
