@@ -1,5 +1,6 @@
 import express, { json } from "express";
 import dotenv from "dotenv";
+import session from "express-session";
 import Chuc_Vu_Route from "./Routes/Chuc_Vu_Route.js";
 import Khach_Hang_Route from "./Routes/Khach_Hang_Route.js";
 import Tai_Khoan_Route from "./Routes/Tai_Khoan_Route.js";
@@ -21,6 +22,16 @@ app.use(
     origin: ["http://localhost:5173", "http://localhost:5174"],
   })
 );
+
+//
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
 const PORT = process.env.PORT || 3000;
 
 // Sử dụng routes

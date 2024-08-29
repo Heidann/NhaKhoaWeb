@@ -6,9 +6,11 @@ import {
   deleteTai_Khoan,
   postTai_Khoan_User_Pass,
   getAllNha_Si,
+  getTai_KhoanById,
 } from "../Models/Tai_Khoan_Model.js";
 import bcrypt from "bcrypt"; // Thêm bcrypt để mã hóa mật khẩu
 import { generateToken } from "../middlewares/Auth.js";
+import asyncHandler from "express-async-handler";
 
 const getAllTai_KhoanController = async (req, res) => {
   try {
@@ -28,24 +30,29 @@ const GetAllNha_SiController = async (req, res) => {
   }
 };
 
-const getTai_KhoanController = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const Tai_Khoan = await getTai_Khoan(id);
-    if (Tai_Khoan) {
-      res.json(Tai_Khoan);
-    } else {
-      res.status(404).json({ message: "Không tìm thấy" });
-    }
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+const getTai_KhoanController = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const Tai_Khoan = await getTai_Khoan(id);
+  if (Tai_Khoan) {
+    res.json(Tai_Khoan);
+  } else {
+    res.status(404).json({ message: "Không tìm thấy" });
   }
-};
+});
+
+const getTai_KhoanByIdController = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const Tai_Khoan = await getTai_KhoanById(id);
+  if (Tai_Khoan) {
+    res.json(Tai_Khoan);
+  } else {
+    res.status(404).json({ message: "Không tìm thấy" });
+  }
+});
 
 const postTai_Khoan_User_PassController = async (req, res) => {
   try {
     const { TEN_TAI_KHOAN, MAT_KHAU } = req.body;
-    console.log(TEN_TAI_KHOAN, MAT_KHAU);
 
     // Kiểm tra xem cả hai trường đều có giá trị hay không
     if (!TEN_TAI_KHOAN || !MAT_KHAU) {
@@ -56,12 +63,15 @@ const postTai_Khoan_User_PassController = async (req, res) => {
 
     const user = await postTai_Khoan_User_Pass(TEN_TAI_KHOAN, MAT_KHAU);
 
+    console.log(user);
     // Kiểm tra xem tài khoản có tồn tại và mật khẩu có chính xác hay không
     if (user) {
+      console.log(user[0].AUTO_ID);
       // Tạo JWT
-      const token = generateToken(user.ID);
+      const token = generateToken(user[0].AUTO_ID);
+      console.log(token);
 
-      res.status(200).json({ token, user });
+      res.status(200).json({ user, token });
     } else {
       res.status(401).json({ message: "Sai thông tin đăng nhập" });
     }
@@ -70,41 +80,29 @@ const postTai_Khoan_User_PassController = async (req, res) => {
   }
 };
 
-const getTai_Khoan_UserController = async (req, res) => {
-  try {
-    const { TEN_TAI_KHOAN } = req.params;
-    if (TEN_TAI_KHOAN !== null) {
-      const Tai_Khoan = await getTai_Khoan_User(TEN_TAI_KHOAN);
-      res.json(req.params);
-    } else {
-      res.status(404).json({ message: "Tài khoản không tồn tại" });
-    }
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+const getTai_Khoan_UserController = asyncHandler(async (req, res) => {
+  const { TEN_TAI_KHOAN } = req.params;
+  if (TEN_TAI_KHOAN !== null) {
+    const Tai_Khoan = await getTai_Khoan_User(TEN_TAI_KHOAN);
+    res.json(req.params);
+  } else {
+    res.status(404).json({ message: "Tài khoản không tồn tại" });
   }
-};
+});
 
 const createTai_KhoanController = async (req, res) => {
   try {
-    const { TEN_TAI_KHOAN, TEN_NHAN_VIEN, CCCD, SDT, MAT_KHAU, CHUC_VU_ID } =
-      req.body;
+    const { TEN_TAI_KHOAN, TEN_NHAN_VIEN, CCCD, SDT, CHUC_VU_ID } = req.body;
 
     // Kiểm tra xem tất cả các trường đều có giá trị hay không
-    if (
-      !TEN_TAI_KHOAN ||
-      !TEN_NHAN_VIEN ||
-      !CCCD ||
-      !SDT ||
-      !MAT_KHAU ||
-      !CHUC_VU_ID
-    ) {
+    if (!TEN_TAI_KHOAN || !TEN_NHAN_VIEN || !CCCD || !SDT || !CHUC_VU_ID) {
       return res
         .status(400)
         .json({ message: "Vui lòng nhập đầy đủ thông tin" });
     }
 
     // Mã hóa mật khẩu trước khi lưu vào database
-    const hashedPassword = await bcrypt.hash(MAT_KHAU, 10);
+    const hashedPassword = await bcrypt.hash("123", 10);
 
     const newTai_Khoan = await createTai_Khoan(
       TEN_TAI_KHOAN,
@@ -176,4 +174,5 @@ export {
   getTai_Khoan_UserController,
   postTai_Khoan_User_PassController,
   GetAllNha_SiController,
+  getTai_KhoanByIdController,
 };

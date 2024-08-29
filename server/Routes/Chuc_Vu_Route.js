@@ -6,6 +6,7 @@ import {
   updateChuc_VuController,
   deleteChuc_VuController,
 } from "../Controllers/Chuc_Vu_Controller.js";
+import { protect } from "../middlewares/Auth.js";
 
 const router = Router();
 

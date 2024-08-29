@@ -14,6 +14,11 @@ const getTai_Khoan = async (AUTO_ID) => {
   return rows[0];
 };
 
+const getTai_KhoanById = async (AUTO_ID) => {
+  const [rows] = await pool.execute("CALL sp_GetTaiKhoanById(?)", [AUTO_ID]);
+  return rows[0];
+};
+
 const postTai_Khoan_User_Pass = async (TEN_TAI_KHOAN, MAT_KHAU) => {
   const [rows] = await pool.execute("CALL sp_GetTaiKhoan_User_Pass(?,?)", [
     TEN_TAI_KHOAN,
@@ -64,4 +69,5 @@ export {
   deleteTai_Khoan,
   postTai_Khoan_User_Pass,
   getAllNha_Si,
+  getTai_KhoanById,
 };

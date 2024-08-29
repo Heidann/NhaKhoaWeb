@@ -28,7 +28,11 @@ const getChuc_VuController = async (req, res) => {
 
 const createChuc_VuController = expressAsyncHandler(async (req, res) => {
   const { TEN_CHUC_VU } = req.body;
+  console.log(TEN_CHUC_VU);
+
   const newChuc_Vu = await createChuc_Vu(TEN_CHUC_VU);
+  console.log(newChuc_Vu);
+
   res.status(201).json(newChuc_Vu);
 });
 

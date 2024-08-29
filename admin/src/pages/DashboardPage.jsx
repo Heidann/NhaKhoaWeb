@@ -4,7 +4,7 @@ import Title from "../components/Title.jsx";
 import { Gauge, gaugeClasses } from "@mui/x-charts/Gauge";
 
 // import DoanhThuChart from "../components/DoanhThuChart.jsx";
-export default function TheBaoHanhPage() {
+export default function DashboardPage() {
   return (
     <>
       <Grid container spacing={3} sx={{}}>

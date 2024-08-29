@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
-import { getTai_Khoan } from "../Models/Tai_Khoan_Model.js";
+import { getTai_KhoanById } from "../Models/Tai_Khoan_Model.js";
 import asyncHandler from "express-async-handler";
 
 // @decs Authenticated User & get token
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+const generateToken = (AUTO_ID) => {
+  return jwt.sign({ AUTO_ID }, process.env.JWT_SECRET, {
     expiresIn: "1d", // 1 day
   });
 };
@@ -21,10 +21,14 @@ const protect = asyncHandler(async (req, res, next) => {
     // set token from Bearer token in headers
     try {
       token = req.headers.authorization.split(" ")[1];
+      console.log("token jwt", token);
+
       // verify token and get user id
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log(decoded.AUTO_ID);
       // get user id from decoded token
-      req.user = await getTai_KhoanController(decoded.id); // Use your MySQL model to fetch user data
+      req.user = await getTai_KhoanById(decoded.AUTO_ID);
+      console.log(req.user);
       next();
     } catch (err) {
       console.log(err);
@@ -41,8 +45,10 @@ const protect = asyncHandler(async (req, res, next) => {
 
 // admin middleware
 const admin = asyncHandler(async (req, res, next) => {
-  if (req.user && req.user.CHUC_VU_ID === 1) {
-    // Assuming CHUC_VU_ID 1 is for admin
+  console.log("kiểm tra admin", req.user);
+  console.log("kiểm tra admin", req.user[0].IS_ADMIN);
+
+  if (req.user && req.user[0].IS_ADMIN === 1) {
     next();
   } else {
     res.status(401);
