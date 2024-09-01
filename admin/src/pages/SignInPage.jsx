@@ -11,19 +11,51 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-
-// TODO remove, this demo shouldn't need to reset the theme.
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./SignInPage.css";
+// import nhakhoaImage from "../assets/nhakhoa.png";
 
 const defaultTheme = createTheme();
 
-export default function SignIn() {
-  const handleSubmit = (event) => {
+export default function SignInPage(props) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+
+    try {
+      console.log(username, password);
+
+      // Xử lý đăng nhập tài khoản
+      const login = await fetch(
+        "http://localhost:3000/api/admin/Tai_Khoan/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ TEN_TAI_KHOAN: username, MAT_KHAU: password }),
+        }
+      );
+
+      if (login.ok) {
+        const data = await login.json();
+
+        localStorage.setItem("token", data.token);
+
+        props.setIsLoggedIn(true); // Cập nhật state isLoggedIn trong component cha
+        navigate("/"); // Chuyển hướng đến trang admin
+      } else {
+        const errorData = await login.json();
+        console.error("Lỗi đăng nhập", errorData);
+      }
+    } catch (error) {
+      // Xử lý l��i
+      console.error("Lỗi kết nối đến server", error);
+    }
   };
 
   return (
@@ -59,11 +91,13 @@ export default function SignIn() {
               margin="normal"
               required
               fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
+              id="username"
+              label="User Name"
+              name="username"
+              autoComplete="username"
               autoFocus
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
             <TextField
               margin="normal"
@@ -74,6 +108,8 @@ export default function SignIn() {
               type="password"
               id="password"
               autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}

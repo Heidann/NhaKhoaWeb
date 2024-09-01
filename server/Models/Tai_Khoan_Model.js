@@ -19,10 +19,9 @@ const getTai_KhoanById = async (AUTO_ID) => {
   return rows[0];
 };
 
-const postTai_Khoan_User_Pass = async (TEN_TAI_KHOAN, MAT_KHAU) => {
-  const [rows] = await pool.execute("CALL sp_GetTaiKhoan_User_Pass(?,?)", [
+const postTaiKhoanByUser = async (TEN_TAI_KHOAN) => {
+  const [rows] = await pool.execute("CALL sp_GetTaiKhoanByUser(?)", [
     TEN_TAI_KHOAN,
-    MAT_KHAU,
   ]);
   return rows[0];
 };
@@ -43,6 +42,7 @@ const createTai_Khoan = async (
 };
 
 const updateTai_Khoan = async (
+  id,
   TEN_TAI_KHOAN,
   TEN_NHAN_VIEN,
   CCCD,
@@ -51,8 +51,15 @@ const updateTai_Khoan = async (
 ) => {
   const [result] = await pool.execute(
     "CALL sp_UpdateTaiKhoan(?,?, ?, ?, ?, ?)",
-    [TEN_TAI_KHOAN, TEN_NHAN_VIEN, CCCD, SDT, CHUC_VU_ID]
+    [id, TEN_TAI_KHOAN, TEN_NHAN_VIEN, CCCD, SDT, CHUC_VU_ID]
   );
+  return result[0];
+};
+const updateMatKhau = async (id, MAT_KHAU) => {
+  const [result] = await pool.execute("CALL sp_UpdateMatKhau(?,?)", [
+    id,
+    MAT_KHAU,
+  ]);
   return result[0];
 };
 
@@ -67,7 +74,8 @@ export {
   createTai_Khoan,
   updateTai_Khoan,
   deleteTai_Khoan,
-  postTai_Khoan_User_Pass,
+  postTaiKhoanByUser,
   getAllNha_Si,
   getTai_KhoanById,
+  updateMatKhau,
 };

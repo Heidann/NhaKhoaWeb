@@ -25,11 +25,20 @@ const LaboDetail = () => {
   const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
 
+  // Fetch data detail
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/admin/Labo/${id}`
+          `http://localhost:3000/api/admin/Labo/${id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -45,17 +54,27 @@ const LaboDetail = () => {
     fetchDataDetail();
   }, [id]);
 
+  // Handle delete
   const handleDelete = async () => {
     try {
       const response = await fetch(
         `http://localhost:3000/api/admin/Labo/${id}`,
         {
           method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
         }
       );
-      if (!response.ok) {
+      if (response.status === 403) {
+        // return dialog
+        setOpenDialog(true);
+      } else if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+
       navigate("/labo");
     } catch (error) {
       setError(error);

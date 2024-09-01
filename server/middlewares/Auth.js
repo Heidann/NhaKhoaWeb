@@ -21,14 +21,13 @@ const protect = asyncHandler(async (req, res, next) => {
     // set token from Bearer token in headers
     try {
       token = req.headers.authorization.split(" ")[1];
-      console.log("token jwt", token);
 
       // verify token and get user id
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log(decoded.AUTO_ID);
+
       // get user id from decoded token
       req.user = await getTai_KhoanById(decoded.AUTO_ID);
-      console.log(req.user);
+
       next();
     } catch (err) {
       console.log(err);
@@ -45,13 +44,10 @@ const protect = asyncHandler(async (req, res, next) => {
 
 // admin middleware
 const admin = asyncHandler(async (req, res, next) => {
-  console.log("kiểm tra admin", req.user);
-  console.log("kiểm tra admin", req.user[0].IS_ADMIN);
-
   if (req.user && req.user[0].IS_ADMIN === 1) {
     next();
   } else {
-    res.status(401);
+    res.status(403);
     throw new Error("Not authorized as an admin");
   }
 });

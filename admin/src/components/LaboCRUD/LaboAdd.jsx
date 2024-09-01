@@ -33,7 +33,14 @@ const LaboAdd = () => {
   useEffect(() => {
     const fetchLaboList = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/admin/Labo");
+        const response = await fetch("http://localhost:3000/api/admin/Labo", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        });
         if (response.ok) {
           const data = await response.json();
           setLaboList(data);
@@ -89,6 +96,8 @@ const LaboAdd = () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
       },
       body: JSON.stringify({
         TEN_LABO: tenLabo,

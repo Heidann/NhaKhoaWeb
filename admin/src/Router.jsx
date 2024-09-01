@@ -1,4 +1,6 @@
 import { Route, Routes, BrowserRouter } from "react-router-dom";
+import { useState, useEffect } from "react";
+
 import DashboardPage from "./pages/DashboardPage";
 import SignInPage from "./pages/SignInPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -55,16 +57,36 @@ import CvAdd from "./components/ChucVuCRUD/CvAdd.jsx";
 import CvDetail from "./components/ChucVuCRUD/CvDetail.jsx";
 import CvUpdate from "./components/ChucVuCRUD/CvUpdate.jsx";
 import CvDelete from "./components/ChucVuCRUD/CvDelete.jsx";
-import NkDetail from "./components/NhatKyCRD/NkDetail.jsx";
 
 const Router = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Kiểm tra trạng thái đăng nhập
+  useEffect(() => {
+    // Kiểm tra xem có thông tin đăng nhập trong LocalStorage khi component được mount
+    const checkLoginStatus = () => {
+      const token = localStorage.getItem("token"); // Giả sử bạn lưu token trong LocalStorage
+      if (token) {
+        setIsLoggedIn(true);
+      }
+    };
+
+    checkLoginStatus();
+  }, []); // [] đảm bảo useEffect chỉ chạy một lần khi component được mount
+
   return (
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/dang-nhap" element={<SignInPage />} />
           <Route path="*" element={<NotFoundPage />} />
-          <Route path="/" element={<LayoutAdmin />}>
+          <Route
+            path="/"
+            element={
+              isLoggedIn ? (
+                <LayoutAdmin />
+              ) : (
+                <SignInPage setIsLoggedIn={setIsLoggedIn} /> // Truyền setIsLoggedIn như prop
+              )
+            }
+          >
             <Route index element={<DashboardPage />} />
             {/* Khach hang */}
             <Route path="/khach-hang/:id/chi-tiet" element={<KhDetail />} />

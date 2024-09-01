@@ -12,7 +12,6 @@ import { useNavigate } from "react-router-dom";
 
 import { useState, useEffect } from "react";
 import { useMemo, Fragment } from "react";
-
 import Title from "../components/Title.jsx";
 import DataTable from "../components/DataTable.jsx";
 
@@ -29,7 +28,14 @@ export default function KhachHangPage() {
   ];
 
   const fetchInfo = async () => {
-    const response = await fetch("http://localhost:3000/api/admin/Khach_Hang");
+    const response = await fetch("http://localhost:3000/api/admin/Khach_Hang", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
     const data = await response.json();
     setData(data);
     console.log("Data fetched successfully:", data);

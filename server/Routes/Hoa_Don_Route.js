@@ -10,12 +10,13 @@ import {
 import { protect, admin } from "../middlewares/Auth.js";
 
 const router = Router();
-
-router.get("/", protect, getAllHoa_DonController);
-router.get("/:id", getHoa_DonController);
+//********** PUBLIC ROUTES ********//
 router.get("/result/:maHoaDon", getHoa_Don_By_TheBaoHanhController);
-router.post("/", protect, admin, createHoa_DonController);
-router.put("/:id", updateHoa_DonController);
-router.delete("/:id", deleteHoa_DonController);
+//********** PRIVATE ROUTES ********//
+router.post("/", protect, createHoa_DonController);
+router.get("/", protect, getAllHoa_DonController);
+//********** ADMIN ROUTES ********//
+router.get("/:id", protect, admin, getHoa_DonController);
+router.delete("/:id", protect, admin, deleteHoa_DonController);
 
 export default router;

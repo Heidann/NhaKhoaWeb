@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { Gauge, gaugeClasses } from "@mui/x-charts/Gauge";
 import { useState, useEffect } from "react";
 import { useMemo, Fragment } from "react";
-
+import CenteredNotification from "../components/CenteredNotification";
 import DataTable from "../components/DataTable.jsx";
 
 export default function LaboPage() {
@@ -21,13 +21,37 @@ export default function LaboPage() {
 
   const [data, setData] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [notificationOpen, setNotificationOpen] = useState(false);
+
+  const handleCloseNotification = () => {
+    setNotificationOpen(false);
+  };
+
   const columns = [
     { key: "AUTO_ID", label: "ID" },
     { key: "TEN_LABO", label: "Tên Labo" },
   ];
 
   const fetchInfo = async () => {
-    const response = await fetch("http://localhost:3000/api/admin/Labo");
+    const response = await fetch("http://localhost:3000/api/admin/Labo", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+
+    // Kiểm tra trạng thái phản hồi
+    if (!response.ok) {
+      // 403: đã xác thực nhưng lại không có quyền truy cập
+      if (response.status === 403) {
+        setNotificationOpen(true);
+        return;
+      } else {
+        throw new Error(`Lỗi khi tải dữ liệu: ${response.status}`);
+      }
+    }
     const data = await response.json();
     setData(data);
     console.log("Data fetched successfully:", data);
@@ -147,6 +171,16 @@ export default function LaboPage() {
           </Paper>
         </Grid>
       </Grid>
+      <CenteredNotification
+        open={notificationOpen}
+        onClose={handleCloseNotification}
+        message={
+          <h3 style={{ color: "red" }}>
+            Bạn không có quyền truy cập chức năng này
+          </h3>
+        }
+        onAfterClose={() => navigate("/")}
+      />
     </>
   );
 }

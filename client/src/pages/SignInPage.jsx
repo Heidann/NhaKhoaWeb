@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 
 const defaultTheme = createTheme();
 
-export default function SignIn() {
+export default function SignInPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -26,23 +26,32 @@ export default function SignIn() {
     event.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:3000/api/Tai_Khoan", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
+      console.log(username, password);
 
-      if (response.ok) {
-        const data = await response.json();
+      // Xử lý đăng nhập tài khoản
+      const login = await fetch(
+        "http://localhost:3000/api/admin/Tai_Khoan/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ TEN_TAI_KHOAN: username, MAT_KHAU: password }),
+        }
+      );
+
+      if (login.ok) {
+        const data = await login.json();
         localStorage.setItem("token", data.token); // Lưu token vào local storage
+        console.log("Thành Công", data.token);
         navigate("/admin"); // Chuyển hướng đến trang admin
       } else {
-        // Xử lý lỗi
+        const errorData = await login.json();
+        console.error("Lỗi đăng nhập", errorData);
       }
     } catch (error) {
-      // Xử lý lỗi
+      // Xử lý l��i
+      console.error("Lỗi kết nối đến server", error);
     }
   };
 
@@ -79,11 +88,13 @@ export default function SignIn() {
               margin="normal"
               required
               fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
+              id="username"
+              label="User Name"
+              name="username"
+              autoComplete="username"
               autoFocus
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
             <TextField
               margin="normal"
@@ -94,6 +105,8 @@ export default function SignIn() {
               type="password"
               id="password"
               autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}

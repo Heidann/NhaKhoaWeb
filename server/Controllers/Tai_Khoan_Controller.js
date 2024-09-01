@@ -4,9 +4,10 @@ import {
   createTai_Khoan,
   updateTai_Khoan,
   deleteTai_Khoan,
-  postTai_Khoan_User_Pass,
+  postTaiKhoanByUser,
   getAllNha_Si,
   getTai_KhoanById,
+  updateMatKhau,
 } from "../Models/Tai_Khoan_Model.js";
 import bcrypt from "bcrypt"; // Thêm bcrypt để mã hóa mật khẩu
 import { generateToken } from "../middlewares/Auth.js";
@@ -50,31 +51,34 @@ const getTai_KhoanByIdController = asyncHandler(async (req, res) => {
   }
 });
 
-const postTai_Khoan_User_PassController = async (req, res) => {
+// login user
+const postTaiKhoanByUserController = async (req, res) => {
   try {
     const { TEN_TAI_KHOAN, MAT_KHAU } = req.body;
 
     // Kiểm tra xem cả hai trường đều có giá trị hay không
-    if (!TEN_TAI_KHOAN || !MAT_KHAU) {
+    if (TEN_TAI_KHOAN == null) {
       return res
         .status(400)
         .json({ message: "Vui lòng nhập đầy đủ thông tin" });
     }
 
-    const user = await postTai_Khoan_User_Pass(TEN_TAI_KHOAN, MAT_KHAU);
-
-    console.log(user);
-    // Kiểm tra xem tài khoản có tồn tại và mật khẩu có chính xác hay không
-    if (user) {
-      console.log(user[0].AUTO_ID);
-      // Tạo JWT
-      const token = generateToken(user[0].AUTO_ID);
-      console.log(token);
-
-      res.status(200).json({ user, token });
-    } else {
-      res.status(401).json({ message: "Sai thông tin đăng nhập" });
+    const user = await postTaiKhoanByUser(TEN_TAI_KHOAN);
+    if (!user) {
+      return res.status(401).json({ message: "Tài khoản không tồn tại" });
     }
+
+    // So sánh mật khẩu
+    const isPasswordMatch = await bcrypt.compare(MAT_KHAU, user[0].MAT_KHAU);
+
+    if (!isPasswordMatch) {
+      return res.status(401).json({ message: "Sai mật khẩu" });
+    }
+
+    // Tạo JWT
+    const token = generateToken(user[0].AUTO_ID);
+
+    res.status(200).json({ user, token });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -121,16 +125,13 @@ const createTai_KhoanController = async (req, res) => {
 const updateTai_KhoanController = async (req, res) => {
   try {
     const { id } = req.params;
-    const { TEN_TAI_KHOAN, TEN_NHAN_VIEN, CCCD, SDT, MAT_KHAU, CHUC_VU_ID } =
-      req.body;
-
+    const { TEN_TAI_KHOAN, TEN_NHAN_VIEN, CCCD, SDT, CHUC_VU_ID } = req.body;
     // Kiểm tra xem tất cả các trường đều có giá trị hay không
     if (!TEN_TAI_KHOAN || !TEN_NHAN_VIEN || !CCCD || !SDT || !CHUC_VU_ID) {
       return res
         .status(400)
         .json({ message: "Vui lòng nhập đầy đủ thông tin" });
     }
-
     const updatedTai_Khoan = await updateTai_Khoan(
       id,
       TEN_TAI_KHOAN,
@@ -139,13 +140,46 @@ const updateTai_KhoanController = async (req, res) => {
       SDT,
       CHUC_VU_ID
     );
-    if (updatedTai_Khoan) {
-      res.json(updatedTai_Khoan);
-    } else {
-      res.status(404).json({ message: "Cập nhật không thành công" });
-    }
+    console.log(updatedTai_Khoan);
+    res.status(200).json({ message: "Cập nhật thành công" });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+const updateMatKhauController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { TEN_TAI_KHOAN, MAT_KHAU_CU, MAT_KHAU_MOI } = req.body;
+
+    // Kiểm tra xem tất cả các trường đều có giá trị hay không
+    if (!TEN_TAI_KHOAN || (!MAT_KHAU_CU && !MAT_KHAU_MOI)) {
+      return res.status(400).json({ message: "Vui lòng nhập thông tin" });
+    }
+    // Tìm tài khoản theo tên đăng nhập
+    const user = await postTaiKhoanByUser(TEN_TAI_KHOAN);
+
+    if (!user) {
+      return res.status(404).json({ message: "Tài khoản không tồn tại" });
+    }
+
+    // So sánh mật khẩu cũ
+    const isPasswordMatch = await bcrypt.compare(MAT_KHAU_CU, user[0].MAT_KHAU);
+
+    if (!isPasswordMatch) {
+      return res.status(401).json({ message: "Mật khẩu cũ không đúng" });
+    }
+
+    // Mã hóa mật khẩu mới
+    const hashedPassword = await bcrypt.hash(MAT_KHAU_MOI, 10);
+
+    // Cập nhật mật khẩu mới vào cơ sở dữ liệu
+    await updateMatKhau(id, hashedPassword);
+
+    res.status(200).json({ message: "Thay đổi mật khẩu thành công" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Lỗi hệ thống" });
   }
 };
 
@@ -172,7 +206,8 @@ export {
   updateTai_KhoanController,
   deleteTai_KhoanController,
   getTai_Khoan_UserController,
-  postTai_Khoan_User_PassController,
+  postTaiKhoanByUserController,
   GetAllNha_SiController,
   getTai_KhoanByIdController,
+  updateMatKhauController,
 };

@@ -6,13 +6,15 @@ import {
   updateLoai_DiaController,
   deleteLoai_DiaController,
 } from "../Controllers/Loai_Dia_Controller.js";
-
+import { admin, protect } from "../middlewares/Auth.js";
 const router = Router();
-
+//********** PUBLIC ROUTES ********//
+//********** PRIVATE ROUTES ********//
 router.get("/", getAllLoai_DiaController);
 router.get("/:id", getLoai_DiaController);
 router.post("/", createLoai_DiaController);
 router.put("/:id", updateLoai_DiaController);
+//********** ADMIN ROUTES ********//
 router.delete("/:id", deleteLoai_DiaController);
 
 export default router;

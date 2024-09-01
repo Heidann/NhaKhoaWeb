@@ -6,13 +6,16 @@ import {
   updateLaboController,
   deleteLaboController,
 } from "../Controllers/Labo_Controller.js";
-
+import { admin, protect } from "../middlewares/Auth.js";
 const router = Router();
+//********** PUBLIC ROUTES ********//
+//********** PRIVATE ROUTES ********//
+router.get("/", protect, getAllLaboController);
+router.get("/:id", protect, getLaboController);
+router.post("/", protect, createLaboController);
 
-router.get("/", getAllLaboController);
-router.get("/:id", getLaboController);
-router.post("/", createLaboController);
-router.put("/:id", updateLaboController);
-router.delete("/:id", deleteLaboController);
+//********** ADMIN ROUTES ********//
+router.put("/:id", protect, admin, updateLaboController);
+router.delete("/:id", protect, admin, deleteLaboController);
 
 export default router;

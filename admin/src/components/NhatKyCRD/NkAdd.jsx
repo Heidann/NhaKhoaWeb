@@ -48,7 +48,14 @@ const NkAdd = () => {
     const fetchNhaSi = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/admin/Tai_Khoan/nha_si`
+          `http://localhost:3000/api/admin/Tai_Khoan/nha_si`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -110,7 +117,15 @@ const NkAdd = () => {
     if (step === 1) {
       try {
         const resMaTheBaoHanh = await fetch(
-          `http://localhost:3000/api/admin/The_Bao_Hanh/code/${maTheBaoHanh}`
+          `http://localhost:3000/api/admin/The_Bao_Hanh/code/${maTheBaoHanh}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
         );
 
         if (!resMaTheBaoHanh.ok) {
@@ -173,6 +188,8 @@ const NkAdd = () => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
             },
             body: JSON.stringify({
               THE_BAO_HANH_ID: theBaoHanhId, // Use theBaoHanhId here

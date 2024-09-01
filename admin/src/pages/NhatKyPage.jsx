@@ -1,3 +1,5 @@
+import React, { useState, useEffect, useMemo, Fragment } from "react";
+import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
@@ -5,36 +7,58 @@ import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
-import { useNavigate } from "react-router-dom";
+import CenteredNotification from "../components/CenteredNotification";
+import DataTable from "../components/DataTable";
+import Title from "../components/Title";
 
-import { useState, useEffect } from "react";
-import { useMemo, Fragment } from "react";
-
-import Title from "../components/Title.jsx";
-import DataTable from "../components/DataTable.jsx";
-
-export default function KhachHangPage() {
-  const navigate = useNavigate(); // điều hướng trang
-
+export default function NhatKyPage() {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [notificationOpen, setNotificationOpen] = useState(false);
+
+  const handleCloseNotification = () => {
+    setNotificationOpen(false);
+  };
 
   const columns = [
-    { key: "AUTO_ID", label: "ID hóa dơn" },
+    { key: "AUTO_ID", label: "ID hóa đơn" },
     { key: "MA_THE_BAO_HANH", label: "Mã thẻ bảo hành" },
     { key: "NGAY_KICH_HOAT", label: "Ngày kích hoạt" },
     { key: "NGAY_HET_HAN", label: "Ngày hết hạn" },
   ];
 
   const fetchInfo = async () => {
-    const response = await fetch("http://localhost:3000/api/admin/Hoa_Don");
-    const data = await response.json();
-    data.forEach((item) => {
-      item.NGAY_KICH_HOAT = item.NGAY_KICH_HOAT.slice(0, 10);
-      item.NGAY_HET_HAN = item.NGAY_HET_HAN.slice(0, 10);
-    });
-    setData(data);
-    console.log("Data fetched successfully:", data);
+    try {
+      const response = await fetch("http://localhost:3000/api/admin/Hoa_Don", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      });
+
+      // Kiểm tra trạng thái phản hồi
+      if (!response.ok) {
+        if (response.status === 403) {
+          setNotificationOpen(true);
+          return;
+        } else {
+          throw new Error(`Lỗi khi tải dữ liệu: ${response.status}`);
+        }
+      }
+
+      const data = await response.json();
+      data.forEach((item) => {
+        item.NGAY_KICH_HOAT = item.NGAY_KICH_HOAT.slice(0, 10);
+        item.NGAY_HET_HAN = item.NGAY_HET_HAN.slice(0, 10);
+      });
+      setData(data);
+    } catch (error) {
+      console.error("Lỗi khi tải dữ liệu:", error);
+      alert("Đã có lỗi xảy ra. Vui lòng thử lại sau.");
+    }
   };
 
   useEffect(() => {
@@ -47,19 +71,17 @@ export default function KhachHangPage() {
     if (!searchTerm) {
       return memoizedData;
     }
-    return memoizedData.filter((item) => {
-      return (
+    return memoizedData.filter(
+      (item) =>
         item.MA_THE_BAO_HANH.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.TEN_KHACH.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.SDT.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    });
-  }, [memoizedData, searchTerm]); // Phụ thuộc vào memoizedData và searchTerm
+    );
+  }, [memoizedData, searchTerm]);
 
   return (
     <>
       <Grid container spacing={3}>
-        {/* Table */}
         <Grid item xs={12}>
           <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
             <Title>Thông Tin Khách Hàng</Title>
@@ -89,7 +111,6 @@ export default function KhachHangPage() {
                 />
               </Grid>
             </Grid>
-            {/* Thêm input cho thanh tìm kiếm */}
             {memoizedData ? (
               <Fragment>
                 <DataTable
@@ -106,6 +127,16 @@ export default function KhachHangPage() {
           </Paper>
         </Grid>
       </Grid>
+      <CenteredNotification
+        open={notificationOpen}
+        onClose={handleCloseNotification}
+        message={
+          <h3 style={{ color: "red" }}>
+            Bạn không có quyền truy cập chức năng này
+          </h3>
+        }
+        onAfterClose={() => navigate("/")}
+      />
     </>
   );
 }

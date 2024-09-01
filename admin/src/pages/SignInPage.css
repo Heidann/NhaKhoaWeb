@@ -1,0 +1,10 @@
+body {
+  background-image: url(../assets/nhakhoa.png);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 100vh;
+  width: 100%;
+  object-fit: scale-down;
+  /* background-color: blue; */
+}

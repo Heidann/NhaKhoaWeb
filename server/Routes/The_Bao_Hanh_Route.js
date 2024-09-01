@@ -8,12 +8,15 @@ import {
   getSo_LuongController,
   getTheBaoHanhID_By_MaController,
 } from "../Controllers/The_Bao_Hanh_Controller.js";
+import { protect, admin } from "../middlewares/Auth.js";
 
 const router = Router();
-
+//********** PUBLIC ROUTES ********//
+//********** PRIVATE ROUTES ********//
 router.get("/", getAllThe_Bao_HanhController);
-router.get("/:id", getThe_Bao_HanhController);
 router.get("/code/:maTheBaoHanh", getTheBaoHanhID_By_MaController);
+router.get("/:id", getThe_Bao_HanhController);
+//********** ADMIN ROUTES ********//
 router.post("/", createThe_Bao_HanhController);
 router.put("/:id", updateThe_Bao_HanhController);
 router.delete("/:id", deleteThe_Bao_HanhController);
