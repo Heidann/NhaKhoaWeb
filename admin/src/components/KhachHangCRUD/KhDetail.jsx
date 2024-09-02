@@ -4,7 +4,6 @@ import {
   Grid,
   Typography,
   Paper,
-  Box,
   Divider,
   Button,
   Dialog,
@@ -15,6 +14,7 @@ import {
 } from "@mui/material";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import CenteredNotification from "../CenteredNotification";
 import EditIcon from "@mui/icons-material/Edit";
 import Title from "../Title";
 
@@ -25,11 +25,25 @@ const KhDetail = () => {
   const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
 
+  // Thông báo khi không có quyền truy cập
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const handleCloseNotification = () => {
+    setNotificationOpen(false);
+  };
+
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/admin/Khach_Hang/${id}`
+          `http://localhost:3000/api/admin/Khach_Hang/${id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -51,12 +65,18 @@ const KhDetail = () => {
         `http://localhost:3000/api/admin/Khach_Hang/${id}`,
         {
           method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
         }
       );
-      if (response.ok) {
-        setOpenDialog(true); // Update to openDialog
-        // mess
-        alert("Xóa thành công"); // Update to alert message
+      if (response.status === 403) {
+        setNotificationOpen(true);
+        return;
+      } else if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       navigate("/khach-hang"); // Update to khach-hang
     } catch (error) {
@@ -217,6 +237,17 @@ const KhDetail = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      {/* Thông báo khi không có quyền truy cập */}
+      <CenteredNotification
+        open={notificationOpen}
+        onClose={handleCloseNotification}
+        message={
+          <h3 style={{ color: "red" }}>
+            Bạn không có quyền truy cập chức năng này
+          </h3>
+        }
+        onAfterClose={() => navigate("/")}
+      />
     </Paper>
   );
 };

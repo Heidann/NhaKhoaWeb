@@ -11,7 +11,6 @@ import KhachHangPage from "./pages/KhachHangPage.jsx";
 import KhAdd from "./components/KhachHangCRUD/KhAdd.jsx";
 import KhDetail from "./components/KhachHangCRUD/KhDetail.jsx";
 import KhUpdate from "./components/KhachHangCRUD/KhUpdate.jsx";
-import KhDelete from "./components/KhachHangCRUD/KhDelete.jsx";
 
 // import NhanVien CRUD
 import NhanVienPage from "./pages/NhanVienPage.jsx";
@@ -91,7 +90,6 @@ const Router = () => {
             {/* Khach hang */}
             <Route path="/khach-hang/:id/chi-tiet" element={<KhDetail />} />
             <Route path="/khach-hang/:id/chinh-sua" element={<KhUpdate />} />
-            <Route path="/khach-hang/:id/xoa" element={<KhDelete />} />
             <Route path="/khach-hang/them" element={<KhAdd />} />
             <Route path="/khach-hang" element={<KhachHangPage />} />
             {/* Nhan vien */}

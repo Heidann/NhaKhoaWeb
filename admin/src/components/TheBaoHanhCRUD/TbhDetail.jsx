@@ -4,7 +4,6 @@ import {
   Grid,
   Typography,
   Paper,
-  Box,
   Divider,
   Button,
   Dialog,
@@ -15,6 +14,8 @@ import {
 } from "@mui/material";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import CenteredNotification from "../CenteredNotification";
+
 import Title from "../Title";
 
 const TbhDetail = () => {
@@ -24,11 +25,25 @@ const TbhDetail = () => {
   const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
 
+  // Thông báo khi không có quyền truy cập
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const handleCloseNotification = () => {
+    setNotificationOpen(false);
+  };
+
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/admin/The_Bao_Hanh/${id}`
+          `http://localhost:3000/api/admin/The_Bao_Hanh/${id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -50,9 +65,17 @@ const TbhDetail = () => {
         `http://localhost:3000/api/admin/The_Bao_Hanh/${id}`,
         {
           method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
         }
       );
-      if (!response.ok) {
+      if (response.status === 403) {
+        setNotificationOpen(true);
+        return;
+      } else if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       navigate("/the-bao-hanh");
@@ -217,6 +240,16 @@ const TbhDetail = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <CenteredNotification
+        open={notificationOpen}
+        onClose={handleCloseNotification}
+        message={
+          <h3 style={{ color: "red" }}>
+            Bạn không có quyền truy cập chức năng này
+          </h3>
+        }
+        onAfterClose={() => navigate("/")}
+      />
     </Paper>
   );
 };

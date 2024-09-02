@@ -45,8 +45,11 @@ const updateKhach_Hang = async (
   return result[0];
 };
 
-const deleteKhach_Hang = async (AUTO_ID) => {
-  const [result] = await pool.execute("CALL sp_DeleteKhachHang(?)", [AUTO_ID]);
+const deleteKhach_Hang = async (AUTO_ID, CREATE_BY) => {
+  const [result] = await pool.execute("CALL sp_DeleteKhachHang(?,?)", [
+    AUTO_ID,
+    CREATE_BY,
+  ]);
   return result[0];
 };
 

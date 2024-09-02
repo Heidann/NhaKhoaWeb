@@ -45,8 +45,11 @@ const createHoa_Don = async (
   return result[0];
 };
 
-const deleteHoa_Don = async (AUTO_ID) => {
-  const [result] = await pool.execute("CALL sp_DeleteHoaDon(?)", [AUTO_ID]);
+const deleteHoa_Don = async (AUTO_ID, CREATE_BY) => {
+  const [result] = await pool.execute("CALL sp_DeleteHoaDon(?,?)", [
+    AUTO_ID,
+    CREATE_BY,
+  ]);
   return result[0];
 };
 

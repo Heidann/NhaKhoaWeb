@@ -19,6 +19,7 @@ import {
 import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import CenteredNotification from "../CenteredNotification";
 
 const LaboUpdate = () => {
   const { id } = useParams();
@@ -31,11 +32,25 @@ const LaboUpdate = () => {
   const [laboList, setLaboList] = useState([]); // State for labo list
   const [filteredLaboList, setFilteredLaboList] = useState([]); // State for filtered labo list
 
+  // Thông báo khi không có quyền truy cập
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const handleCloseNotification = () => {
+    setNotificationOpen(false);
+  };
+
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/admin/Labo/${id}`
+          `http://localhost:3000/api/admin/Labo/${id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -51,10 +66,18 @@ const LaboUpdate = () => {
     fetchDataDetail();
   }, [id]);
 
+  // Lấy danh sách labo
   useEffect(() => {
     const fetchLaboList = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/admin/Labo");
+        const response = await fetch("http://localhost:3000/api/admin/Labo", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        });
         if (response.ok) {
           const data = await response.json();
           setLaboList(data);
@@ -75,6 +98,7 @@ const LaboUpdate = () => {
     fetchLaboList();
   }, []);
 
+  // Xử lý sự kiện chỉnh sửa tên labo
   const handleTenLaboChange = (event) => {
     setTenLabo(event.target.value);
     // Filter labo list based on input
@@ -83,7 +107,6 @@ const LaboUpdate = () => {
     );
     setFilteredLaboList(filteredList);
   };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -110,6 +133,8 @@ const LaboUpdate = () => {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
       },
       body: JSON.stringify({
         TEN_LABO: tenLabo,
@@ -122,18 +147,11 @@ const LaboUpdate = () => {
       setMessage("Cập nhật labo thành công!");
       // Chuyển hướng về trang danh sách labo
       navigate("/labo");
-    } else {
-      const errorData = await response.json(); // Lấy dữ liệu lỗi từ server
-      if (errorData.code === "ER_DUP_ENTRY") {
-        // Kiểm tra mã lỗi
-        setOpen(true);
-        setSeverity("error");
-        setMessage(errorData.message); // Use errorData.message
-      } else {
-        setOpen(true);
-        setSeverity("error");
-        setMessage(errorData.message); // Use errorData.message
-      }
+    } else if (response.status === 403) {
+      setNotificationOpen(true);
+      return;
+    } else if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
   };
 
@@ -238,7 +256,7 @@ const LaboUpdate = () => {
               </TableHead>
               <TableBody>
                 {filteredLaboList.map((labo) => (
-                  <TableRow key={labo.MA_LABO}>
+                  <TableRow key={labo.AUTO_ID}>
                     <TableCell
                       sx={{
                         width: "100%",
@@ -260,6 +278,16 @@ const LaboUpdate = () => {
           {message}
         </Alert>
       </Snackbar>
+      <CenteredNotification
+        open={notificationOpen}
+        onClose={handleCloseNotification}
+        message={
+          <h3 style={{ color: "red" }}>
+            Bạn không có quyền truy cập chức năng này
+          </h3>
+        }
+        onAfterClose={() => navigate("/")}
+      />
     </Paper>
   );
 };

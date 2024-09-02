@@ -9,6 +9,14 @@ const getThe_Bao_Hanh = async (AUTO_ID) => {
   const [rows] = await pool.execute("CALL sp_GetTheBaoHanh(?)", [AUTO_ID]);
   return rows[0];
 };
+
+const GetStatusTheBaoHanhID_By_Ma = async (MA_THE_BAO_HANH) => {
+  const [rows] = await pool.execute("CALL sp_GetStatusTheBaoHanhID_By_Ma(?)", [
+    MA_THE_BAO_HANH,
+  ]);
+  return rows[0];
+};
+
 const GetTheBaoHanhID_By_Ma = async (MA_THE_BAO_HANH) => {
   const [rows] = await pool.execute("CALL sp_GetTheBaoHanhID_By_Ma(?)", [
     MA_THE_BAO_HANH,
@@ -44,6 +52,7 @@ const getSo_Luong = async () => {
 export {
   getAllThe_Bao_Hanh,
   getThe_Bao_Hanh,
+  GetStatusTheBaoHanhID_By_Ma,
   GetTheBaoHanhID_By_Ma,
   createThe_Bao_Hanh,
   updateThe_Bao_Hanh,

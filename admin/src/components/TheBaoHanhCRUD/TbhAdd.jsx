@@ -12,6 +12,7 @@ import {
 import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import CenteredNotification from "../CenteredNotification";
 
 const TbhAdd = () => {
   const navigate = useNavigate();
@@ -20,6 +21,12 @@ const TbhAdd = () => {
   const [severity, setSeverity] = useState("success");
   const [message, setMessage] = useState("");
   const [soLuongThe, setSoLuongThe] = useState("");
+
+  // Thông báo khi không có quyền truy cập
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const handleCloseNotification = () => {
+    setNotificationOpen(false);
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -37,6 +44,8 @@ const TbhAdd = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
         },
         body: JSON.stringify({
           SO_LUONG_THE_BAO_HANH: soLuongThe,
@@ -50,18 +59,11 @@ const TbhAdd = () => {
       setMessage("Thêm thẻ bảo hành thành công!");
       // Chuyển hướng về trang danh sách thẻ bảo hành
       navigate("/the-bao-hanh");
-    } else {
-      const errorData = await response.json(); // Lấy dữ liệu lỗi từ server
-      if (errorData.code === "ER_DUP_ENTRY") {
-        // Kiểm tra mã lỗi
-        setOpen(true);
-        setSeverity("error");
-        setMessage(errorData.message); // Use errorData.message
-      } else {
-        setOpen(true);
-        setSeverity("error");
-        setMessage(errorData.message); // Use errorData.message
-      }
+    } else if (response.status === 403) {
+      setNotificationOpen(true);
+      return;
+    } else if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
   };
 
@@ -155,6 +157,16 @@ const TbhAdd = () => {
           {message}
         </Alert>
       </Snackbar>
+      <CenteredNotification
+        open={notificationOpen}
+        onClose={handleCloseNotification}
+        message={
+          <h3 style={{ color: "red" }}>
+            Bạn không có quyền truy cập chức năng này
+          </h3>
+        }
+        onAfterClose={() => navigate("/")}
+      />
     </Paper>
   );
 };

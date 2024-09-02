@@ -12,13 +12,12 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
-  DialogActions,
   Typography,
 } from "@mui/material";
 import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import CenteredNotification from "../CenteredNotification";
 
 const KhUpdate = () => {
   const { id } = useParams();
@@ -32,24 +31,39 @@ const KhUpdate = () => {
   const [tenKhach, setTenKhach] = useState("");
   const [theBaoHanhId, setTheBaoHanhId] = useState("");
   const [phone, setPhone] = useState("");
-  const [createBy, setCreateBy] = useState("");
-  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
+  const [maTheBaoHanh, setMaTheBaoHanh] = useState("");
+
+  // Thông báo khi không có quyền truy cập
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const handleCloseNotification = () => {
+    setNotificationOpen(false);
+  };
 
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/Khach_Hang/${id}`
+        const dataKh = await fetch(
+          `http://localhost:3000/api/admin/Khach_Hang/${id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
         );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (!dataKh.ok) {
+          throw new Error(`HTTP error! status: ${dataKh.status}`);
         }
-        const data = await response.json();
+        const data = await dataKh.json();
+        console.log(data);
+
         setKhachHangDetail(data);
         setTenKhach(data[0].TEN_KHACH);
         setTheBaoHanhId(data[0].THE_BAO_HANH_ID);
         setPhone(data[0].SDT);
-        setCreateBy(data[0].CREATE_BY);
+        setMaTheBaoHanh(data[0].MA_THE_BAO_HANH);
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
@@ -59,51 +73,61 @@ const KhUpdate = () => {
     fetchDataDetail();
   }, [id]);
 
-  const handleDelete = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/admin/Khach_Hang/${id}`,
-        {
-          method: "DELETE",
+  useEffect(() => {
+    const fetchTheBaoHAnhData = async () => {
+      if (maTheBaoHanh) {
+        // Kiểm tra maTheBaoHanh đã được cập nhật
+        try {
+          const resMaTheBaoHanh = await fetch(
+            `http://localhost:3000/api/admin/The_Bao_Hanh/code/${maTheBaoHanh}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                Authorization: "Bearer " + localStorage.getItem("token"),
+              },
+            }
+          );
+          if (!resMaTheBaoHanh.ok) {
+            // Thẻ bảo hành không tồn tại
+            handleSnackbarOpen("error", "Mã thẻ bảo hành không tồn tại!");
+            return;
+          }
+
+          const theBaoHanhData = await resMaTheBaoHanh.json();
+          console.log("theBaoHanhData:", theBaoHanhData);
+
+          if (theBaoHanhData.length > 0) {
+            setTheBaoHanhId(theBaoHanhData[0].AUTO_ID);
+
+            console.log("theBaoHanhId:", theBaoHanhId);
+          } else {
+            // Thẻ bảo hành không tồn tại
+            handleSnackbarOpen("error", "Mã thẻ bảo hành không tồn tại!");
+          }
+        } catch (error) {
+          console.error("Error fetching The Bao Hanh:", error);
+          handleSnackbarOpen("error", "Lỗi khi lấy thông tin thẻ bảo hành!");
         }
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      navigate(`/khach-hang`);
-    } catch (error) {
-      setError(error);
-      console.error("Error deleting data:", error);
-    }
-  };
+    };
+    fetchTheBaoHAnhData();
+  }, [maTheBaoHanh]); // useEffect sẽ chạy lại mỗi khi maTheBaoHanh thay đổi
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-  };
-
-  const handleConfirmDelete = () => {
-    handleDelete();
-    handleCloseDialog();
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/admin/The_Bao_Hanh/code/${theBaoHanhId}`
-      );
+      console.log("maTheBaoHanh before fetch:", maTheBaoHanh);
+      console.log("theBaoHanhId before fetch:", theBaoHanhId);
 
-      if (!response.ok) {
-        // Thẻ bảo hành không tồn tại
-        handleSnackbarOpen("error", "Mã thẻ bảo hành không tồn tại!");
-        return;
-      }
-
-      const theBaoHanhData = await response.json();
-      if (theBaoHanhData.length > 0) {
-        const theBaoHanhId = theBaoHanhData[0].AUTO_ID;
-
+      // Gửi yêu cầu PUT sau khi đã có theBaoHanhId
+      try {
         // Send PUT request with THE_BAO_HANH_ID
         const khResponse = await fetch(
           `http://localhost:3000/api/admin/Khach_Hang/${id}`,
@@ -111,12 +135,13 @@ const KhUpdate = () => {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
             },
             body: JSON.stringify({
               TEN_KHACH: tenKhach,
               THE_BAO_HANH_ID: theBaoHanhId,
               SDT: phone,
-              CREATE_BY: createBy,
             }),
           }
         );
@@ -127,9 +152,9 @@ const KhUpdate = () => {
         } else {
           handleSnackbarOpen("error", "Lỗi khi cập nhật khách hàng!");
         }
-      } else {
-        // Thẻ bảo hành không tồn tại
-        handleSnackbarOpen("error", "Mã thẻ bảo hành không tồn tại!");
+      } catch (error) {
+        console.error("Error submitting form:", error);
+        handleSnackbarOpen("error", "Lỗi khi cập nhật khách hàng!");
       }
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -197,9 +222,9 @@ const KhUpdate = () => {
                 <TextField
                   fullWidth
                   label="Mã thẻ bảo hành"
-                  name="THE_BAO_HANH_ID"
+                  name="MA_THE_BAO_HANH"
                   defaultValue={khachHangDetail[0].MA_THE_BAO_HANH}
-                  onChange={(e) => setTheBaoHanhId(e.target.value)}
+                  onChange={(e) => setMaTheBaoHanh(e.target.value)}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -211,15 +236,7 @@ const KhUpdate = () => {
                   onChange={(e) => setPhone(e.target.value)}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Người tạo"
-                  name="CREATE_BY"
-                  defaultValue={khachHangDetail[0].CREATE_BY}
-                  onChange={(e) => setCreateBy(e.target.value)}
-                />
-              </Grid>
+
               {/* Add more fields as needed */}
             </Grid>
             <Grid container spacing={2} mt={2} justifyContent="flex-end">
@@ -241,25 +258,6 @@ const KhUpdate = () => {
                   {/* icon */}
                   <KeyboardArrowLeft />
                   Quay Lại
-                </Button>
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <Button
-                  sx={{
-                    padding: "10px 20px",
-                    width: "100%",
-                    backgroundColor: "#f44336",
-                    color: "white",
-                    textTransform: "capitalize",
-                    "&:hover": {
-                      backgroundColor: "#e53935",
-                    },
-                  }}
-                  variant="contained"
-                  onClick={() => setOpenDialog(true)}
-                >
-                  <DeleteForeverIcon />
-                  Xóa
                 </Button>
               </Grid>
               <Grid item xs={12} md={3}>
@@ -300,12 +298,6 @@ const KhUpdate = () => {
             hoàn tác.
           </DialogContentText>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Hủy</Button>
-          <Button onClick={handleConfirmDelete} autoFocus>
-            Xóa
-          </Button>
-        </DialogActions>
       </Dialog>
       <Snackbar
         open={openSnackbar}
@@ -316,6 +308,16 @@ const KhUpdate = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
+      <CenteredNotification
+        open={notificationOpen}
+        onClose={handleCloseNotification}
+        message={
+          <h3 style={{ color: "red" }}>
+            Bạn không có quyền truy cập chức năng này
+          </h3>
+        }
+        onAfterClose={() => navigate("/")}
+      />
     </Paper>
   );
 };

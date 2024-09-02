@@ -28,7 +28,15 @@ export default function TheBaoHanhPage() {
 
   const fetchInfo = async () => {
     const response = await fetch(
-      "http://localhost:3000/api/admin/The_Bao_Hanh"
+      "http://localhost:3000/api/admin/The_Bao_Hanh",
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      }
     );
     const data = await response.json();
     setData(data);

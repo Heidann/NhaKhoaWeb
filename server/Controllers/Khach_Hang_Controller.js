@@ -67,7 +67,9 @@ const getKhach_Hang_By_TheBaoHanhController = async (req, res) => {
 
 const createKhach_HangController = async (req, res) => {
   try {
-    const { TEN_KHACH, THE_BAO_HANH_ID, CREATE_BY, SDT } = req.body;
+    const { TEN_KHACH, THE_BAO_HANH_ID, SDT } = req.body;
+    // lấy thông tin user trong phiên làm việc
+    const CREATE_BY = req.user[0].AUTO_ID;
     const newKhach_Hang = await createKhach_Hang(
       TEN_KHACH,
       THE_BAO_HANH_ID,
@@ -83,7 +85,10 @@ const createKhach_HangController = async (req, res) => {
 const updateKhach_HangController = async (req, res) => {
   try {
     const { id } = req.params;
-    const { TEN_KHACH, THE_BAO_HANH_ID, SDT, CREATE_BY } = req.body;
+    const { TEN_KHACH, THE_BAO_HANH_ID, SDT } = req.body;
+    // lấy thông tin user trong phiên làm việc
+    const CREATE_BY = req.user[0].AUTO_ID;
+
     const updatedKhach_Hang = await updateKhach_Hang(
       id,
       TEN_KHACH,
@@ -100,8 +105,10 @@ const updateKhach_HangController = async (req, res) => {
 const deleteKhach_HangController = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await deleteKhach_Hang(id);
-    if (result && result.affectedRows > 0) {
+    // lấy thông tin user trong phiên làm việc
+    const CREATE_BY = req.user[0].AUTO_ID;
+    const result = await deleteKhach_Hang(id, CREATE_BY);
+    if (result !== null) {
       res.json({ message: "Xóa thành công" });
     } else {
       res

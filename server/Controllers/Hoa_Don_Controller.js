@@ -59,8 +59,10 @@ const createHoa_DonController = async (req, res) => {
       LOAI_DIA_ID,
       SO_LUONG_RANG,
       VI_TRI_RANG,
-      CREATE_BY,
     } = req.body;
+    // lấy thông tin user trong phiên làm việc
+    const CREATE_BY = req.user[0].AUTO_ID;
+
     const newHoa_Don = await createHoa_Don(
       THE_BAO_HANH_ID,
       NHA_KHOA,
@@ -92,42 +94,25 @@ const updateHoa_DonController = async (req, res) => {
       LOAI_DIA_ID,
       SO_LUONG_RANG,
       VI_TRI_RANG,
-      CREATE_BY,
-      CREATE_AT,
     } = req.body;
-    if (
-      THE_BAO_HANH_ID !== null ||
-      NHA_KHOA !== null ||
-      TEN_BAC_SI !== null ||
-      NGAY_KICH_HOAT !== null ||
-      NGAY_HET_HAN !== null ||
-      VAT_LIEU_ID !== null ||
-      LABO_ID !== null ||
-      LOAI_DIA_ID !== null ||
-      SO_LUONG_RANG !== null ||
-      VI_TRI_RANG !== null ||
-      CREATE_BY !== null ||
-      CREATE_AT !== null
-    ) {
-      const updatedHoa_Don = await updateHoa_Don(
-        id,
-        THE_BAO_HANH_ID,
-        NHA_KHOA,
-        TEN_BAC_SI,
-        NGAY_KICH_HOAT,
-        NGAY_HET_HAN,
-        VAT_LIEU_ID,
-        LABO_ID,
-        LOAI_DIA_ID,
-        SO_LUONG_RANG,
-        VI_TRI_RANG,
-        CREATE_BY,
-        CREATE_AT
-      );
-      res.json(updatedHoa_Don);
-    } else {
-      res.status(404).json({ message: "Cập nhật không thành công" });
-    }
+    // lấy thông tin user trong phiên làm việc
+    const CREATE_BY = req.user[0].AUTO_ID;
+
+    const updatedHoa_Don = await updateHoa_Don(
+      id,
+      THE_BAO_HANH_ID,
+      NHA_KHOA,
+      TEN_BAC_SI,
+      NGAY_KICH_HOAT,
+      NGAY_HET_HAN,
+      VAT_LIEU_ID,
+      LABO_ID,
+      LOAI_DIA_ID,
+      SO_LUONG_RANG,
+      VI_TRI_RANG,
+      CREATE_BY
+    );
+    res.json(updatedHoa_Don);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -136,8 +121,10 @@ const updateHoa_DonController = async (req, res) => {
 const deleteHoa_DonController = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await deleteHoa_Don(id);
-    if (result && result.affectedRows > 0) {
+    // lấy thông tin user trong phiên làm việc
+    const CREATE_BY = req.user[0].AUTO_ID;
+    const result = await deleteHoa_Don(id, CREATE_BY);
+    if (result !== null) {
       res.json({ message: "Xóa thành công" });
     } else {
       res

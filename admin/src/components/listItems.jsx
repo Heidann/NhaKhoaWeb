@@ -59,7 +59,7 @@ export const mainListItems = (
       <ListItemIcon>
         <LayersIcon />
       </ListItemIcon>
-      <ListItemText primary="Loại Đĩa" />
+      <ListItemText primary="Xuất xứ" />
     </ListItemButton>
     <ListItemButton component="a" href="/nhat-ky">
       <ListItemIcon>

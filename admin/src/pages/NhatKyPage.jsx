@@ -127,6 +127,7 @@ export default function NhatKyPage() {
           </Paper>
         </Grid>
       </Grid>
+      {/* Thông báo khi không có quyền truy cập */}
       <CenteredNotification
         open={notificationOpen}
         onClose={handleCloseNotification}

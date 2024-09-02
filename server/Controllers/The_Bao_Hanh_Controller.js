@@ -4,6 +4,7 @@ import {
   createThe_Bao_Hanh,
   updateThe_Bao_Hanh,
   deleteThe_Bao_Hanh,
+  GetStatusTheBaoHanhID_By_Ma,
   GetTheBaoHanhID_By_Ma,
   getSo_Luong,
 } from "../Models/The_Bao_Hanh_Model.js";
@@ -21,6 +22,20 @@ const getThe_Bao_HanhController = async (req, res) => {
   try {
     const { id } = req.params;
     const The_Bao_Hanh = await getThe_Bao_Hanh(id);
+    if (The_Bao_Hanh) {
+      res.json(The_Bao_Hanh);
+    } else {
+      res.status(404).json({ message: "Không tìm thấy" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getStatusTheBaoHanhID_By_MaController = async (req, res) => {
+  try {
+    const { maTheBaoHanh } = req.params;
+    const The_Bao_Hanh = await GetStatusTheBaoHanhID_By_Ma(maTheBaoHanh);
     if (The_Bao_Hanh) {
       res.json(The_Bao_Hanh);
     } else {
@@ -101,6 +116,7 @@ export {
   createThe_Bao_HanhController,
   updateThe_Bao_HanhController,
   deleteThe_Bao_HanhController,
+  getStatusTheBaoHanhID_By_MaController,
   getTheBaoHanhID_By_MaController,
   getSo_LuongController,
 };

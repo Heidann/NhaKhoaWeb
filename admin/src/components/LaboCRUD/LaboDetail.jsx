@@ -4,7 +4,6 @@ import {
   Grid,
   Typography,
   Paper,
-  Box,
   Divider,
   Button,
   Dialog,
@@ -15,6 +14,7 @@ import {
 } from "@mui/material";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import CenteredNotification from "../CenteredNotification";
 import EditIcon from "@mui/icons-material/Edit";
 import Title from "../Title";
 
@@ -24,6 +24,12 @@ const LaboDetail = () => {
   const [laboDetail, setLaboDetail] = useState(null);
   const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+
+  // Thông báo khi không có quyền truy cập
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const handleCloseNotification = () => {
+    setNotificationOpen(false);
+  };
 
   // Fetch data detail
   useEffect(() => {
@@ -69,8 +75,8 @@ const LaboDetail = () => {
         }
       );
       if (response.status === 403) {
-        // return dialog
-        setOpenDialog(true);
+        setNotificationOpen(true);
+        return;
       } else if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -215,6 +221,17 @@ const LaboDetail = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      {/* Thông báo khi không có quyền truy cập */}
+      <CenteredNotification
+        open={notificationOpen}
+        onClose={handleCloseNotification}
+        message={
+          <h3 style={{ color: "red" }}>
+            Bạn không có quyền truy cập chức năng này
+          </h3>
+        }
+        onAfterClose={() => navigate("/")}
+      />
     </Paper>
   );
 };
