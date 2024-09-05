@@ -14,19 +14,20 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SignInPage.css";
-
+import Alert from "@mui/material/Alert"; // Thêm import Alert
 const defaultTheme = createTheme();
 
 const SignInPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const [error, setError] = useState(null); // Thêm state để lưu thông báo lỗi
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setError(null); // Xóa thông báo lỗi khi submit
 
     try {
-      // Xử lý đăng nhập tài khoản
       const login = await fetch(
         "http://localhost:3000/api/admin/Tai_Khoan/login",
         {
@@ -44,18 +45,25 @@ const SignInPage = () => {
       if (login.ok) {
         const data = await login.json();
         console.log(data);
-
-        // Lưu token và TEN_TAI_KHOAN vào localStorage
         localStorage.setItem("token", data.token);
-        localStorage.setItem("TEN_TAI_KHOAN", username); // Lưu tên tài khoản
-        navigate("/"); // Chuyển hướng đến trang admin
+        localStorage.setItem("TEN_TAI_KHOAN", username);
+        navigate("/");
       } else {
         const errorData = await login.json();
         console.error("Lỗi đăng nhập", errorData);
+
+        // Kiểm tra message từ server và hiển thị thông báo lỗi tương ứng
+        if (errorData.message === "Tài khoản không tồn tại") {
+          setError("Sai tên tài khoản");
+        } else if (errorData.message === "Sai mật khẩu") {
+          setError("Sai mật khẩu");
+        } else {
+          setError("Lỗi đăng nhập. Vui lòng thử lại sau.");
+        }
       }
     } catch (error) {
-      // Xử lý lỗi
       console.error("Lỗi kết nối đến server", error);
+      setError("Lỗi kết nối đến server. Vui lòng thử lại sau.");
     }
   };
 
@@ -70,7 +78,6 @@ const SignInPage = () => {
             flexDirection: "column",
             alignItems: "center",
             background: "#ffffff ",
-            // "linear-gradient( to bottom right,#202A44 0%, #384A77 37%,#5069AA 100%)",
             borderRadius: 5,
             filter: "brightness(1.2) opacity(0.9)",
             padding: 2,
@@ -82,6 +89,7 @@ const SignInPage = () => {
           <Typography component="h1" variant="h5">
             Đăng Nhập
           </Typography>
+          {error && <Alert severity="error">{error}</Alert>}
           <Box
             component="form"
             onSubmit={handleSubmit}

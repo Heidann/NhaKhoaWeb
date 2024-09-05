@@ -12,7 +12,6 @@ import {
 } from "@mui/material";
 import LockResetIcon from "@mui/icons-material/LockReset";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-
 const defaultTheme = createTheme();
 
 export default function ChangePasswordPage() {
@@ -34,23 +33,28 @@ export default function ChangePasswordPage() {
     }
 
     try {
+      // Lấy AUTO_ID của user từ localStorage (giả sử bạn đã lưu nó sau khi đăng nhập)
+      const username = localStorage.getItem("TEN_TAI_KHOAN");
+      console.log(username);
+
       // Gửi yêu cầu cập nhật mật khẩu đến API
-      const response = await fetch(
-        "http://localhost:3000/api/admin/Tai_Khoan/change-password", // Thay thế bằng đường dẫn API của bạn
+      const updatePasswordResponse = await fetch(
+        `http://localhost:3000/api/admin/Tai_Khoan/change_password`, // Thay thế bằng đường dẫn API của bạn
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Thêm token vào header
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify({
-            oldPassword,
-            newPassword,
+            TEN_TAI_KHOAN: username,
+            MAT_KHAU_CU: oldPassword,
+            MAT_KHAU_MOI: newPassword,
           }),
         }
       );
 
-      if (response.ok) {
+      if (updatePasswordResponse.ok) {
         // Xử lý khi cập nhật mật khẩu thành công
         setSuccessMessage("Cập nhật mật khẩu thành công.");
         setOldPassword("");
@@ -58,7 +62,7 @@ export default function ChangePasswordPage() {
         setConfirmPassword("");
       } else {
         // Xử lý khi cập nhật mật khẩu thất bại
-        const errorData = await response.json();
+        const errorData = await updatePasswordResponse.json();
         setErrorMessage(errorData.message || "Cập nhật mật khẩu thất bại.");
       }
     } catch (error) {

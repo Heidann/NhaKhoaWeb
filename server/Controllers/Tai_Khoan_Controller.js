@@ -150,9 +150,8 @@ const updateTai_KhoanController = async (req, res) => {
 
 const updateMatKhauController = async (req, res) => {
   try {
-    const { id } = req.params;
     const { TEN_TAI_KHOAN, MAT_KHAU_CU, MAT_KHAU_MOI } = req.body;
-
+    const id = req.user[0].AUTO_ID;
     // Kiểm tra xem tất cả các trường đều có giá trị hay không
     if (!TEN_TAI_KHOAN || (!MAT_KHAU_CU && !MAT_KHAU_MOI)) {
       return res.status(400).json({ message: "Vui lòng nhập thông tin" });
@@ -163,6 +162,7 @@ const updateMatKhauController = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "Tài khoản không tồn tại" });
     }
+    console.log(user);
 
     // So sánh mật khẩu cũ
     const isPasswordMatch = await bcrypt.compare(MAT_KHAU_CU, user[0].MAT_KHAU);

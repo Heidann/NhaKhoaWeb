@@ -15,7 +15,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import LogoutIcon from "@mui/icons-material/Logout"; // Import icon Logout
 import { MainListItems, SecondaryListItems } from "../listItems";
 import { Outlet, useNavigate } from "react-router-dom"; // Import useNavigate
-
+import KeyIcon from "@mui/icons-material/Key";
 const drawerWidth = 240;
 
 const AppBar = styled(MuiAppBar, {
@@ -86,7 +86,12 @@ function LayoutAdmin() {
     localStorage.removeItem("token");
     localStorage.removeItem("TEN_TAI_KHOAN");
     // Chuyển hướng đến trang đăng nhập
-    navigate("/");
+    // Refresh lại trang
+    window.location.reload();
+  };
+  const handleChangePassword = () => {
+    // Điều hướng đến trang đổi mật khẩu
+    navigate("/doi-mat-khau");
   };
 
   // Lấy TEN_TAI_KHOAN từ localStorage (giả sử bạn đã lưu nó sau khi đăng nhập thành công)
@@ -124,7 +129,11 @@ function LayoutAdmin() {
               >
                 Dashboard - Xin chào, {tenTaiKhoan}!
               </Typography>
-
+              {/* Thêm icon đổi mật khẩu */}
+              <IconButton color="inherit" onClick={handleChangePassword}>
+                <KeyIcon />
+              </IconButton>
+              {/* Thêm icon Logout */}
               <IconButton color="inherit" onClick={handleLogout}>
                 <LogoutIcon /> {/* Hiển thị icon Logout */}
               </IconButton>

@@ -53,6 +53,7 @@ import CvDetail from "./components/ChucVuCRUD/CvDetail.jsx";
 import CvUpdate from "./components/ChucVuCRUD/CvUpdate.jsx";
 
 import ThongKePage from "./pages/ThongKePage.jsx";
+import UpdatePassWord from "./pages/UpdatePasswordPage.jsx";
 
 const Router = () => {
   return (
@@ -61,6 +62,7 @@ const Router = () => {
         <Routes>
           <Route path="*" element={<NotFoundPage />} />
           <Route path="/login" element={<SignInPage />} />
+          <Route path="/doi-mat-khau" element={<UpdatePassWord />} />
 
           {/* Đăng nhập */}
 

@@ -20,8 +20,8 @@ router.post("/login/", postTaiKhoanByUserController);
 //********** PRIVATE ROUTES ********//
 router.get("/nha_si", protect, GetAllNha_SiController);
 router.get("/:id", protect, getTai_KhoanController);
+router.put("/change_password", protect, updateMatKhauController);
 router.put("/:id", protect, updateTai_KhoanController);
-router.put("/change_password/:id", protect, updateMatKhauController);
 
 //********** ADMIN ROUTES ********//
 router.get("/", protect, admin, getAllTai_KhoanController);
