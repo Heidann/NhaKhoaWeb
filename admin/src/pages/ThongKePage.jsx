@@ -4,6 +4,7 @@ import Paper from "@mui/material/Paper";
 import Title from "../components/Title.jsx";
 import Deposits from "../components/Deposits.jsx";
 import { useEffect, useState } from "react";
+import { Typography } from "@mui/material";
 
 export default function ThongKePage() {
   const [today, setToday] = useState("");
@@ -97,34 +98,43 @@ export default function ThongKePage() {
 
   return (
     <>
-      <Grid container spacing={3}>
-        {/* Table */}
-        <Grid item xs={3}>
-          <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
-            <Title>Hôm nay</Title>
-            <Deposits result={today.count_today} />
-          </Paper>
-        </Grid>
-        {/* Table */}
-        <Grid item xs={3}>
-          <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
-            <Title>Tháng hiện tại</Title>
-            <Deposits result={month.count_month} />
-          </Paper>
-        </Grid>
-        {/* Table */}
-        <Grid item xs={3}>
-          <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
-            <Title>Quý hiện tại</Title>
-            <Deposits result={quarter.count_quarter} />
-          </Paper>
-        </Grid>
-        {/* Table */}
-        <Grid item xs={3}>
-          <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
-            <Title>Năm hiện tại</Title>
-            <Deposits result={year.count_year} />
-          </Paper>
+      <Grid container spacing={3} sx={{}}>
+        <Grid item xs={12} md={12} lg={12} margin={2}>
+          <Title>
+            Thống kê số lượng Thẻ bảo hành đã mở theo ngày, tháng, quý, và năm
+            hiện tại.
+            <br />
+          </Title>
+          <Grid container spacing={3}>
+            {/* Table */}
+            <Grid item xs={3}>
+              <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
+                <Title>Hôm nay</Title>
+                <Deposits result={today.count_today} />
+              </Paper>
+            </Grid>
+            {/* Table */}
+            <Grid item xs={3}>
+              <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
+                <Title>Tháng hiện tại</Title>
+                <Deposits result={month.count_month} />
+              </Paper>
+            </Grid>
+            {/* Table */}
+            <Grid item xs={3}>
+              <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
+                <Title>Quý hiện tại</Title>
+                <Deposits result={quarter.count_quarter} />
+              </Paper>
+            </Grid>
+            {/* Table */}
+            <Grid item xs={3}>
+              <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
+                <Title>Năm hiện tại</Title>
+                <Deposits result={year.count_year} />
+              </Paper>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
     </>

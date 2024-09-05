@@ -3,6 +3,7 @@ import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
+import ThongKePage from "./ThongKePage";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -10,6 +11,18 @@ export default function DashboardPage() {
   return (
     <>
       <Grid container spacing={3} sx={{}}>
+        {/* --- Khu vực thông tin --- */}
+
+        <ThongKePage
+          sx={{
+            p: 2,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-around",
+            height: 240,
+          }}
+        />
+
         {/* --- Khu vực button điều hướng --- */}
         <Grid item xs={12} md={4} lg={4}>
           <Paper

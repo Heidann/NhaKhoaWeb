@@ -52,7 +52,7 @@ import CvAdd from "./components/ChucVuCRUD/CvAdd.jsx";
 import CvDetail from "./components/ChucVuCRUD/CvDetail.jsx";
 import CvUpdate from "./components/ChucVuCRUD/CvUpdate.jsx";
 
-import ThongKePage from "./pages/ThongKe.jsx";
+import ThongKePage from "./pages/ThongKePage.jsx";
 
 const Router = () => {
   return (
