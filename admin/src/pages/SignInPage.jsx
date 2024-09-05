@@ -17,7 +17,7 @@ import "./SignInPage.css";
 
 const defaultTheme = createTheme();
 
-export default function SignInPage(props) {
+const SignInPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -34,7 +34,10 @@ export default function SignInPage(props) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ TEN_TAI_KHOAN: username, MAT_KHAU: password }),
+          body: JSON.stringify({
+            TEN_TAI_KHOAN: username,
+            MAT_KHAU: password,
+          }),
         }
       );
 
@@ -45,8 +48,6 @@ export default function SignInPage(props) {
         // Lưu token và TEN_TAI_KHOAN vào localStorage
         localStorage.setItem("token", data.token);
         localStorage.setItem("TEN_TAI_KHOAN", username); // Lưu tên tài khoản
-
-        props.setIsLoggedIn(true); // Cập nhật state isLoggedIn trong component cha
         navigate("/"); // Chuyển hướng đến trang admin
       } else {
         const errorData = await login.json();
@@ -140,4 +141,5 @@ export default function SignInPage(props) {
       </Container>
     </ThemeProvider>
   );
-}
+};
+export default SignInPage;

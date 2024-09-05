@@ -52,37 +52,19 @@ import CvAdd from "./components/ChucVuCRUD/CvAdd.jsx";
 import CvDetail from "./components/ChucVuCRUD/CvDetail.jsx";
 import CvUpdate from "./components/ChucVuCRUD/CvUpdate.jsx";
 
+import ThongKePage from "./pages/ThongKe.jsx";
+
 const Router = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Kiểm tra trạng thái đăng nhập
-  useEffect(() => {
-    // Kiểm tra xem có thông tin đăng nhập trong LocalStorage khi component được mount
-    const checkLoginStatus = () => {
-      const token = localStorage.getItem("token"); // Giả sử bạn lưu token trong LocalStorage
-      if (token) {
-        setIsLoggedIn(true);
-      }
-    };
-
-    checkLoginStatus();
-  }, []); // [] đảm bảo useEffect chỉ chạy một lần khi component được mount
-
   return (
     <>
       <BrowserRouter>
         <Routes>
           <Route path="*" element={<NotFoundPage />} />
+          <Route path="/login" element={<SignInPage />} />
 
           {/* Đăng nhập */}
-          <Route
-            path="/"
-            element={
-              isLoggedIn ? (
-                <LayoutAdmin />
-              ) : (
-                <SignInPage setIsLoggedIn={setIsLoggedIn} /> // Truyền setIsLoggedIn như prop
-              )
-            }
-          >
+
+          <Route path="/" element={<LayoutAdmin />}>
             <Route index element={<DashboardPage />} />
             {/* Khach hang */}
             <Route path="/khach-hang/:id/chi-tiet" element={<KhDetail />} />
@@ -122,6 +104,8 @@ const Router = () => {
             <Route path="/nhat-ky/:id/chi-tiet" element={<NhatKyDetail />} />
             <Route path="/nhat-ky/them" element={<NhatKyAdd />} />
             <Route path="/nhat-ky" element={<NhatKyPage />} />
+            {/* thong ke */}
+            <Route path="/thong-ke" element={<ThongKePage />} />
           </Route>
         </Routes>
       </BrowserRouter>

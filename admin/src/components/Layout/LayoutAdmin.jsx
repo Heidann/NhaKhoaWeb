@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useEffect, useState } from "react";
 import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import MuiDrawer from "@mui/material/Drawer";
@@ -13,7 +13,7 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import LogoutIcon from "@mui/icons-material/Logout"; // Import icon Logout
-import { mainListItems, secondaryListItems } from "../listItems";
+import { MainListItems, SecondaryListItems } from "../listItems";
 import { Outlet, useNavigate } from "react-router-dom"; // Import useNavigate
 
 const drawerWidth = 240;
@@ -66,8 +66,16 @@ const Drawer = styled(MuiDrawer, {
 const defaultTheme = createTheme();
 
 function LayoutAdmin() {
-  const [open, setOpen] = React.useState(true);
-  const navigate = useNavigate(); // Khởi tạo useNavigate
+  const [open, setOpen] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      // Chuyển hướng đến trang đăng nhập nếu không có token
+      navigate("/login");
+    }
+  }, []);
 
   const toggleDrawer = () => {
     setOpen(!open);
@@ -137,9 +145,9 @@ function LayoutAdmin() {
             </Toolbar>
             <Divider />
             <List component="nav">
-              {mainListItems}
+              <MainListItems />
               <Divider sx={{ my: 1 }} />
-              {secondaryListItems}
+              <SecondaryListItems />
             </List>
           </Drawer>
           <Box

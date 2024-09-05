@@ -10,8 +10,14 @@ const NotFoundPage = () => {
   return (
     <Container maxWidth="100%" sx={{ mt: 10 }}>
       <Grid container spacing={3} alignItems="center" justifyContent="center">
-        <Grid item xs={12} md={12} lg={12}>
-          <Box textAlign="center">
+        <Grid item xs={12} md={12} lg={3}>
+          <Box
+            textAlign="center"
+            bgcolor={"#f5f5f5"}
+            maxWidth={400}
+            p={3}
+            borderRadius={5}
+          >
             <Typography variant="h2" gutterBottom>
               404 - Trang không tồn tại
             </Typography>
