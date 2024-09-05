@@ -20,20 +20,21 @@ import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 
-const CvAdd = () => {
+const VatLieuAdd = () => {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [tenChucVu, setTenChucVu] = useState("");
-  const [chucVuList, setChucVuList] = useState([]);
+  const [tenVatLieu, setTenVatLieu] = useState("");
+  const [vatLieuList, setVatLieuList] = useState([]);
+  const [filteredVatLieuList, setFilteredVatLieuList] = useState([]); // State for filtered vat lieu list
 
   useEffect(() => {
-    const fetchChucVuList = async () => {
+    const fetchVatLieuList = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3000/api/admin/Chuc_Vu",
+          "http://localhost:3000/api/admin/Vat_Lieu",
           {
             method: "GET",
             headers: {
@@ -47,39 +48,68 @@ const CvAdd = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setChucVuList(data);
+        setVatLieuList(data);
+        setFilteredVatLieuList(data); // Initialize filtered list
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
       }
     };
 
-    fetchChucVuList();
+    fetchVatLieuList();
   }, []);
 
-  const handleChange = (event) => {
-    setTenChucVu(event.target.value);
+  // search vat lieu list
+  const handleTenVatLieuChange = (event) => {
+    setTenVatLieu(event.target.value);
+    // Filter vat lieu list based on input
+    const filteredList = vatLieuList.filter((vatLieu) =>
+      vatLieu.TEN_VAT_LIEU.toLowerCase().includes(
+        event.target.value.toLowerCase()
+      )
+    );
+    setFilteredVatLieuList(filteredList);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    if (!tenVatLieu) {
+      setOpenSnackbar(true);
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Vui lòng nhập tên vật liệu!");
+      return;
+    }
+
+    // Kiểm tra xem vật liệu đã tồn tại hay chưa
+    const isVatLieuExists = filteredVatLieuList.some(
+      (vatLieu) =>
+        vatLieu.TEN_VAT_LIEU.toLowerCase() === tenVatLieu.toLowerCase()
+    );
+
+    if (isVatLieuExists) {
+      setOpenSnackbar(true);
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Vật liệu đã tồn tại!");
+      return;
+    }
+
     try {
-      const response = await fetch("http://localhost:3000/api/admin/Chuc_Vu", {
+      const response = await fetch("http://localhost:3000/api/admin/Vat_Lieu", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
           Authorization: "Bearer " + localStorage.getItem("token"),
         },
-        body: JSON.stringify({ TEN_CHUC_VU: tenChucVu }),
+        body: JSON.stringify({ TEN_VAT_LIEU: tenVatLieu }),
       });
 
       if (response.ok) {
         setSnackbarSeverity("success");
-        setSnackbarMessage("Thêm chức vụ thành công!");
+        setSnackbarMessage("Thêm vật liệu thành công!");
         setOpenSnackbar(true);
-        navigate("/chuc-vu");
+        navigate("/vat-lieu");
       } else {
         // Xử lý lỗi từ server
         if (response.status === 403) {
@@ -126,17 +156,17 @@ const CvAdd = () => {
           />
         </Grid>
         <Grid item xs={12} md={9}>
-          <Title>Thêm chức vụ</Title>
+          <Title>Thêm vật liệu</Title>
           <Divider />
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2} mt={2}>
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Tên chức vụ"
-                  name="TEN_CHUC_VU"
-                  value={tenChucVu}
-                  onChange={handleChange}
+                  label="Tên vật liệu"
+                  name="TEN_VAT_LIEU"
+                  value={tenVatLieu}
+                  onChange={handleTenVatLieuChange} // Use the new handler
                 />
               </Grid>
             </Grid>
@@ -154,7 +184,7 @@ const CvAdd = () => {
                     },
                   }}
                   variant="contained"
-                  href={`/chuc-vu`}
+                  href={`/vat-lieu`}
                 >
                   {/* icon */}
                   <KeyboardArrowLeft />
@@ -182,31 +212,35 @@ const CvAdd = () => {
               </Grid>
             </Grid>
           </form>
-          {/* Hiển thị danh sách chức vụ */}
+          {/* Hiển thị danh sách vật liệu */}
           <Box mt={2} p={2} border={1} borderRadius={2}>
             <Typography variant="body1" mt={2}>
-              Danh sách chức vụ đã tồn tại:
+              Danh sách vật liệu đã tồn tại:
             </Typography>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Tên Chức Vụ</TableCell>
+                  <TableCell>Tên Vật Liệu</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {chucVuList.map((chucVu) => (
-                  <TableRow key={chucVu.AUTO_ID}>
-                    <TableCell
-                      sx={{
-                        width: "100%",
-                        padding: "5px",
-                        borderBottom: "1px solid rgba(224, 224, 224, 0.28)",
-                      }}
-                    >
-                      {chucVu.TEN_CHUC_VU}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {filteredVatLieuList.map(
+                  (
+                    vatLieu // Use filtered list here
+                  ) => (
+                    <TableRow key={vatLieu.AUTO_ID}>
+                      <TableCell
+                        sx={{
+                          width: "100%",
+                          padding: "5px",
+                          borderBottom: "1px solid rgba(224, 224, 224, 0.28)",
+                        }}
+                      >
+                        {vatLieu.TEN_VAT_LIEU}
+                      </TableCell>
+                    </TableRow>
+                  )
+                )}
               </TableBody>
             </Table>
           </Box>
@@ -225,4 +259,4 @@ const CvAdd = () => {
   );
 };
 
-export default CvAdd;
+export default VatLieuAdd;

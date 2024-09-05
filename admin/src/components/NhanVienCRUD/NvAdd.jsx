@@ -23,6 +23,7 @@ import {
 import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import CenteredNotification from "../CenteredNotification.jsx";
 
 const NvAdd = () => {
   const navigate = useNavigate();
@@ -40,19 +41,34 @@ const NvAdd = () => {
   const [nhanVienList, setNhanVienList] = useState([]); // State for nhân viên list
   const [filteredNhanVienList, setFilteredNhanVienList] = useState([]); // State for filtered nhân viên list
 
+  // Thông báo khi không có quyền truy cập
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const handleCloseNotification = () => {
+    setNotificationOpen(false);
+  };
+
   useEffect(() => {
     const fetchChucVuList = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/admin/Chuc_Vu");
-        if (response.ok) {
-          const data = await response.json();
-          setChucVuList(data);
-        } else {
-          // Xử lý lỗi
-          setOpen(true);
-          setSeverity("error");
-          setMessage("Lỗi khi lấy danh sách chức vụ!");
+        const response = await fetch(
+          "http://localhost:3000/api/admin/Chuc_Vu",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+              Accept: "application/json",
+            },
+          }
+        );
+        if (response.status === 403) {
+          setNotificationOpen(true);
+          return;
+        } else if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+        const data = await response.json();
+        setChucVuList(data);
       } catch (error) {
         // Xử lý lỗi
         setOpen(true);
@@ -67,7 +83,15 @@ const NvAdd = () => {
     const fetchNhanVienList = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3000/api/admin/Tai_Khoan"
+          "http://localhost:3000/api/admin/Tai_Khoan",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+              Accept: "application/json",
+            },
+          }
         );
         if (response.ok) {
           const data = await response.json();
@@ -124,24 +148,20 @@ const NvAdd = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (
-      !tenTaiKhoan ||
-      !tenNhanVien ||
-      !cccd ||
-      !sdt ||
-      !matKhau ||
-      !chucVuId
-    ) {
+    if (!tenTaiKhoan || !tenNhanVien || !sdt || !matKhau || !chucVuId) {
       setOpen(true);
       setSeverity("error");
       setMessage("Vui lòng nhập đầy đủ thông tin!");
       return;
     }
+    console.log(tenTaiKhoan, tenNhanVien, sdt, matKhau, chucVuId);
 
     const response = await fetch(`http://localhost:3000/api/admin/Tai_Khoan`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+        Accept: "application/json",
       },
       body: JSON.stringify({
         TEN_TAI_KHOAN: tenTaiKhoan,
@@ -261,10 +281,7 @@ const NvAdd = () => {
                     onChange={handleChucVuIdChange}
                   >
                     {chucVuList.map((chucVu) => (
-                      <MenuItem
-                        key={chucVu.MA_CHUC_VU}
-                        value={chucVu.MA_CHUC_VU}
-                      >
+                      <MenuItem key={chucVu.AUTO_ID} value={chucVu.AUTO_ID}>
                         {chucVu.TEN_CHUC_VU}
                       </MenuItem>
                     ))}
@@ -349,6 +366,16 @@ const NvAdd = () => {
           {message}
         </Alert>
       </Snackbar>
+      <CenteredNotification
+        open={notificationOpen}
+        onClose={handleCloseNotification}
+        message={
+          <h3 style={{ color: "red" }}>
+            Bạn không có quyền truy cập chức năng này
+          </h3>
+        }
+        onAfterClose={() => navigate("/")}
+      />
     </Paper>
   );
 };

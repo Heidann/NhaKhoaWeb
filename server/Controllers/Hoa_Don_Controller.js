@@ -55,8 +55,9 @@ const createHoa_DonController = async (req, res) => {
       NHA_KHOA,
       TEN_BAC_SI,
       SO_THANG,
+      VAT_LIEU_ID,
       LABO_ID,
-      LOAI_DIA_ID,
+      XUAT_XU_ID,
       SO_LUONG_RANG,
       VI_TRI_RANG,
     } = req.body;
@@ -68,8 +69,9 @@ const createHoa_DonController = async (req, res) => {
       NHA_KHOA,
       TEN_BAC_SI,
       SO_THANG,
+      VAT_LIEU_ID,
       LABO_ID,
-      LOAI_DIA_ID,
+      XUAT_XU_ID,
       SO_LUONG_RANG,
       VI_TRI_RANG,
       CREATE_BY

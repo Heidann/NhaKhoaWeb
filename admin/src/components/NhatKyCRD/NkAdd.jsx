@@ -17,10 +17,17 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
+  Autocomplete,
+  IconButton,
+  Tooltip,
+  CircularProgress,
 } from "@mui/material";
 import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import AddIcon from "@mui/icons-material/Add";
 
 const NkAdd = () => {
   const navigate = useNavigate();
@@ -29,20 +36,26 @@ const NkAdd = () => {
   const [severity, setSeverity] = useState("success");
   const [message, setMessage] = useState("");
   const [maTheBaoHanh, setMaTheBaoHanh] = useState("");
-  const [nhaKhoa, setNhaKhoa] = useState("Laboratoryhl Đồng Nai"); // Set default value
+  const [nhaKhoa, setNhaKhoa] = useState("Laboratoryhl Đồng Nai");
   const [tenBacSi, setTenBacSi] = useState("");
   const [soThang, setSoThang] = useState("");
   const [laboId, setLaboId] = useState("");
-  const [loaiDiaId, setLoaiDiaId] = useState("");
+  const [xuatXuId, setXuatXuId] = useState("");
   const [soLuongRang, setSoLuongRang] = useState("");
   const [viTriRang, setViTriRang] = useState("");
-  const [createBy, setCreateBy] = useState("");
   const [step, setStep] = useState(1);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [nhaSiList, setNhaSiList] = useState([]);
   const [laboList, setLaboList] = useState([]);
-  const [loaiDiaList, setLoaiDiaList] = useState([]);
-  const [theBaoHanhId, setTheBaoHanhId] = useState(null); // Add state for THE_BAO_HANH_ID
+  const [xuatXuList, setXuatXuList] = useState([]);
+  const [vatLieuList, setVatLieuList] = useState([]);
+  const [theBaoHanhId, setTheBaoHanhId] = useState(null);
+  const [vatLieuId, setVatLieuId] = useState("");
+  const [vatLieuInput, setVatLieuInput] = useState(""); // State cho TextField TEN_VAT_LIEU
+  const [selectedValue, setSelectedValue] = useState(null);
+  const [showAddButton, setShowAddButton] = useState(false); // Hiển thị button "Thêm nhanh"
+  const [addingVatLieu, setAddingVatLieu] = useState(false); // Đang thêm vật liệu
+  const [addVatLieuSuccess, setAddVatLieuSuccess] = useState(null); // Trạng thái thêm vật liệu
 
   useEffect(() => {
     const fetchNhaSi = async () => {
@@ -54,6 +67,7 @@ const NkAdd = () => {
             headers: {
               "Content-Type": "application/json",
               Authorization: "Bearer " + localStorage.getItem("token"),
+              Accept: "application/json",
             },
           }
         );
@@ -70,7 +84,14 @@ const NkAdd = () => {
 
     const fetchLabo = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/admin/Labo`);
+        const response = await fetch(`http://localhost:3000/api/admin/Labo`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -82,25 +103,57 @@ const NkAdd = () => {
       }
     };
 
-    const fetchLoaiDia = async () => {
+    const fetchXuatXu = async () => {
+      // Changed from fetchLoaiDia to fetchXuatXu
       try {
         const response = await fetch(
-          `http://localhost:3000/api/admin/Loai_Dia`
+          `http://localhost:3000/api/admin/Xuat_Xu`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setLoaiDiaList(data);
+        setXuatXuList(data); // Update xuatXuList
       } catch (error) {
         setError(error);
-        console.error("Error fetching loai dia data:", error);
+        console.error("Error fetching xuat xu data:", error);
       }
     };
-
+    const fetchVatLieu = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/admin/Vat_Lieu`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setVatLieuList(data);
+      } catch (error) {
+        setError(error);
+        console.error("Error fetching vat lieu data:", error);
+      }
+    };
     fetchNhaSi();
     fetchLabo();
-    fetchLoaiDia();
+    fetchXuatXu();
+    fetchVatLieu();
   }, []);
 
   const handleNextStep = () => {
@@ -110,7 +163,7 @@ const NkAdd = () => {
   const handlePreviousStep = () => {
     setStep(step - 1);
   };
-
+  // handle get THE_BAO_HANH_ID
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -158,30 +211,28 @@ const NkAdd = () => {
         !tenBacSi ||
         !soThang ||
         !laboId ||
-        !loaiDiaId ||
+        !xuatXuId ||
         !soLuongRang ||
-        !viTriRang ||
-        !createBy
+        !viTriRang
       ) {
         setOpen(true);
         setSeverity("error");
         setMessage("Vui lòng nhập đầy đủ thông tin!");
         return;
       }
-      console.log({
-        THE_BAO_HANH_ID: theBaoHanhId, // Use theBaoHanhId here
-        NHA_KHOA: nhaKhoa,
-        TEN_BAC_SI: tenBacSi,
-        SO_THANG: soThang,
-
-        LABO_ID: laboId,
-        LOAI_DIA_ID: loaiDiaId,
-        SO_LUONG_RANG: soLuongRang,
-        VI_TRI_RANG: viTriRang,
-        CREATE_BY: createBy,
-      });
 
       try {
+        console.log(
+          theBaoHanhId,
+          nhaKhoa,
+          tenBacSi,
+          soThang,
+          vatLieuId,
+          laboId,
+          xuatXuId,
+          soLuongRang,
+          viTriRang
+        );
         const Nkresponse = await fetch(
           `http://localhost:3000/api/admin/Hoa_Don`,
           {
@@ -192,16 +243,15 @@ const NkAdd = () => {
               Authorization: "Bearer " + localStorage.getItem("token"),
             },
             body: JSON.stringify({
-              THE_BAO_HANH_ID: theBaoHanhId, // Use theBaoHanhId here
+              THE_BAO_HANH_ID: theBaoHanhId,
               NHA_KHOA: nhaKhoa,
               TEN_BAC_SI: tenBacSi,
               SO_THANG: soThang,
-
+              VAT_LIEU_ID: vatLieuId,
               LABO_ID: laboId,
-              LOAI_DIA_ID: loaiDiaId,
+              XUAT_XU_ID: xuatXuId,
               SO_LUONG_RANG: soLuongRang,
               VI_TRI_RANG: viTriRang,
-              CREATE_BY: createBy,
             }),
           }
         );
@@ -315,58 +365,88 @@ const NkAdd = () => {
             )}
             {step === 2 && (
               <Grid container spacing={2} mt={2}>
+                {/* ... (other fields) */}
+
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    label="Nha Khoa"
+                    label="Mã Thẻ Bảo Hành"
+                    name="THE_BAO_HANH_ID"
+                    value={maTheBaoHanh}
+                    disabled
+                  />
+                </Grid>
+
+                {/* NHA_KHOA */}
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Nhà Khoa"
                     name="NHA_KHOA"
                     value={nhaKhoa}
                     onChange={(e) => setNhaKhoa(e.target.value)}
-                    disabled // Disable the field
                   />
                 </Grid>
+
+                {/* TEN_BAC_SI (Select) */}
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth>
-                    <InputLabel id="ten-bac-si-label">Tên Bác Sĩ</InputLabel>
+                    <InputLabel id="tenBacSi-select-label">Nha Sĩ</InputLabel>
                     <Select
-                      labelId="ten-bac-si-label"
-                      id="ten-bac-si"
-                      value={tenBacSi}
+                      labelId="tenBacSi-select-label"
+                      id="tenBacSi-select"
+                      value={tenBacSi} // Sử dụng state tenBacSi
                       onChange={(e) => setTenBacSi(e.target.value)}
                     >
                       {nhaSiList.map((nhaSi) => (
                         <MenuItem key={nhaSi.AUTO_ID} value={nhaSi.AUTO_ID}>
+                          {/* Giả sử HO_TEN là trường lưu tên bác sĩ */}
                           {nhaSi.TEN_NHAN_VIEN}
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
                 </Grid>
+
+                {/* THOI_GIAN */}
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Thời Gian (tháng)"
+                    name="THOI_GIAN"
+                    value={soThang}
+                    onChange={(e) => setSoThang(e.target.value)}
+                  />
+                </Grid>
+
+                {/* TEN_VAT_LIEU (Autocomplete kết hợp Select) */}
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth>
-                    <InputLabel id="so-thang-label">Số Tháng</InputLabel>
+                    <InputLabel id="vatLieu-select-label">
+                      Tên Vật Liệu
+                    </InputLabel>
                     <Select
-                      labelId="so-thang-label"
-                      id="so-thang"
-                      value={soThang}
-                      onChange={(e) => setSoThang(e.target.value)}
+                      labelId="vatLieu-select-label"
+                      id="vatLieu-select"
+                      value={vatLieuId}
+                      onChange={(e) => setVatLieuId(e.target.value)}
                     >
-                      <MenuItem value={3}>3</MenuItem>
-                      <MenuItem value={6}>6</MenuItem>
-                      <MenuItem value={9}>9</MenuItem>
-                      <MenuItem value={12}>12</MenuItem>
-                      <MenuItem value={18}>18</MenuItem>
-                      <MenuItem value={24}>24</MenuItem>
+                      {vatLieuList.map((vatLieu) => (
+                        <MenuItem key={vatLieu.AUTO_ID} value={vatLieu.AUTO_ID}>
+                          {vatLieu.TEN_VAT_LIEU}
+                        </MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                 </Grid>
 
+                {/* TEN_LABO (Select) */}
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth>
-                    <InputLabel id="labo-id-label">Labo ID</InputLabel>
+                    <InputLabel id="labo-select-label">Tên Labo</InputLabel>
                     <Select
-                      labelId="labo-id-label"
-                      id="labo-id"
+                      labelId="labo-select-label"
+                      id="labo-select"
                       value={laboId}
                       onChange={(e) => setLaboId(e.target.value)}
                     >
@@ -378,23 +458,29 @@ const NkAdd = () => {
                     </Select>
                   </FormControl>
                 </Grid>
+
+                {/* TÊN_XUAT_XU (Select) */}
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth>
-                    <InputLabel id="loai-dia-id-label">Loại Dia ID</InputLabel>
+                    <InputLabel id="xuatXu-select-label">
+                      Tên Xuất Xứ
+                    </InputLabel>
                     <Select
-                      labelId="loai-dia-id-label"
-                      id="loai-dia-id"
-                      value={loaiDiaId}
-                      onChange={(e) => setLoaiDiaId(e.target.value)}
+                      labelId="xuatXu-select-label"
+                      id="xuatXu-select"
+                      value={xuatXuId}
+                      onChange={(e) => setXuatXuId(e.target.value)}
                     >
-                      {loaiDiaList.map((loaiDia) => (
-                        <MenuItem key={loaiDia.AUTO_ID} value={loaiDia.AUTO_ID}>
-                          {loaiDia.TEN_LOAI_DIA}
+                      {xuatXuList.map((xuatXu) => (
+                        <MenuItem key={xuatXu.AUTO_ID} value={xuatXu.AUTO_ID}>
+                          {xuatXu.TEN_XUAT_XU}
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
                 </Grid>
+
+                {/* SO_LUONG_RANG */}
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
@@ -404,6 +490,8 @@ const NkAdd = () => {
                     onChange={(e) => setSoLuongRang(e.target.value)}
                   />
                 </Grid>
+
+                {/* VI_TRI_RANG */}
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
@@ -413,15 +501,8 @@ const NkAdd = () => {
                     onChange={(e) => setViTriRang(e.target.value)}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Người tạo"
-                    name="CREATE_BY"
-                    value={createBy}
-                    onChange={(e) => setCreateBy(e.target.value)}
-                  />
-                </Grid>
+
+                {/* ... (other fields) */}
                 <Grid container spacing={2} mt={2} justifyContent="flex-end">
                   <Grid item xs={12} md={3}>
                     <Button

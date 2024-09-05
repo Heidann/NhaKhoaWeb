@@ -22,21 +22,23 @@ const createHoa_Don = async (
   NHA_KHOA,
   TEN_BAC_SI,
   SO_THANG,
+  VAT_LIEU_ID,
   LABO_ID,
-  LOAI_DIA_ID,
+  XUAT_XU_ID,
   SO_LUONG_RANG,
   VI_TRI_RANG,
   CREATE_BY
 ) => {
   const [result] = await pool.execute(
-    "CALL sp_InsertHoaDon(?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    "CALL sp_InsertHoaDon(?, ?, ?, ?, ?, ?, ?, ?, ?,?)",
     [
       THE_BAO_HANH_ID,
       NHA_KHOA,
       TEN_BAC_SI,
       SO_THANG,
+      VAT_LIEU_ID,
       LABO_ID,
-      LOAI_DIA_ID,
+      XUAT_XU_ID,
       SO_LUONG_RANG,
       VI_TRI_RANG,
       CREATE_BY,

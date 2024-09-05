@@ -3,31 +3,38 @@ import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
-import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
+import Skeleton from "@mui/material/Skeleton";
 import Button from "@mui/material/Button"; // Import Button component
+import * as XLSX from "xlsx"; // Import XLSX library
 
 import { useNavigate } from "react-router-dom";
 
 import { useState, useEffect } from "react";
 import { useMemo, Fragment } from "react";
-import * as XLSX from "xlsx"; // Import XLSX library
-
 import Title from "../components/Title.jsx";
 import DataTable from "../components/DataTable.jsx";
 
-export default function TheBaoHanhPage() {
+export default function ChucVuPage() {
   const navigate = useNavigate(); // điều hướng trang
 
   const [data, setData] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+
   const columns = [
-    { key: "MA_CHUC_VU", label: "ID" },
-    { key: "TEN_CHUC_VU", label: "Tên Chức Vụ" },
+    { key: "MA_CHUC_VU", label: "Mã chức vụ" },
+    { key: "TEN_CHUC_VU", label: "Tên chức vụ" },
   ];
 
   const fetchInfo = async () => {
-    const response = await fetch("http://localhost:3000/api/admin/Chuc_Vu");
+    const response = await fetch("http://localhost:3000/api/admin/Chuc_Vu", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
     const data = await response.json();
     setData(data);
     console.log("Data fetched successfully:", data);
@@ -39,13 +46,17 @@ export default function TheBaoHanhPage() {
 
   const memoizedData = useMemo(() => data, [data]);
 
+  // Cải thiện filteredData
   const filteredData = useMemo(() => {
     if (!searchTerm) {
       return memoizedData;
     }
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
     return memoizedData.filter((item) => {
-      // Lọc dựa trên các trường bạn muốn tìm kiếm
-      return item.TEN_CHUC_VU.toLowerCase().includes(searchTerm.toLowerCase());
+      return (
+        item.MA_CHUC_VU.toLowerCase().includes(lowerCaseSearchTerm) ||
+        item.TEN_CHUC_VU.toLowerCase().includes(lowerCaseSearchTerm)
+      );
     });
   }, [memoizedData, searchTerm]); // Phụ thuộc vào memoizedData và searchTerm
 
@@ -59,7 +70,7 @@ export default function TheBaoHanhPage() {
   return (
     <>
       <Grid container spacing={3}>
-        {/* Table*/}
+        {/* Table */}
         <Grid item xs={12}>
           <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
             <Title>Thông Tin Chức Vụ</Title>
@@ -81,7 +92,7 @@ export default function TheBaoHanhPage() {
                 <TextField
                   id="standard-basic"
                   label="Tìm kiếm"
-                  placeholder="Nhập mã chức vụ"
+                  placeholder="Nhập mã chức vụ hoặc tên chức vụ"
                   variant="standard"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -103,7 +114,7 @@ export default function TheBaoHanhPage() {
               </Fragment>
             ) : (
               <Box sx={{ display: "flex" }}>
-                <CircularProgress />
+                <Skeleton />
               </Box>
             )}
           </Paper>

@@ -61,6 +61,7 @@ const LaboAdd = () => {
     fetchLaboList();
   }, []);
 
+  // search labo list
   const handleTenLaboChange = (event) => {
     setTenLabo(event.target.value);
     // Filter labo list based on input

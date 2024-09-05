@@ -1,39 +1,41 @@
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
   Grid,
+  Typography,
   Paper,
   Divider,
   Button,
   TextField,
   Snackbar,
   Alert,
-  Typography,
   Table,
-  TableBody,
-  TableCell,
   TableHead,
   TableRow,
+  TableCell,
+  TableBody,
   Box,
 } from "@mui/material";
 import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 
-const CvAdd = () => {
+const XuatXuUpdate = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const [error, setError] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [tenChucVu, setTenChucVu] = useState("");
-  const [chucVuList, setChucVuList] = useState([]);
+  const [tenXuatXu, setTenXuatXu] = useState(""); // State for tên xuất xứ
+  const [xuatXuList, setXuatXuList] = useState([]); // State for xuất xứ list
+  const [filteredXuatXuList, setFilteredXuatXuList] = useState([]); // State for filtered xuất xứ list
 
   useEffect(() => {
-    const fetchChucVuList = async () => {
+    const fetchDataDetail = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3000/api/admin/Chuc_Vu",
+          `http://localhost:3000/api/admin/Xuat_Xu/${id}`,
           {
             method: "GET",
             headers: {
@@ -47,39 +49,108 @@ const CvAdd = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setChucVuList(data);
+        setTenXuatXu(data[0].TEN_XUAT_XU); // Initialize tenXuatXu state
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
       }
     };
 
-    fetchChucVuList();
+    fetchDataDetail();
+  }, [id]);
+
+  useEffect(() => {
+    const fetchXuatXuList = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/admin/Xuat_Xu",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setXuatXuList(data);
+          setFilteredXuatXuList(data); // Initialize filtered list
+        } else {
+          // Xử lý lỗi
+          setOpenSnackbar(true);
+          setSnackbarSeverity("error");
+          setSnackbarMessage("Lỗi khi lấy danh sách xuất xứ!");
+        }
+      } catch (error) {
+        // Xử lý lỗi
+        setOpenSnackbar(true);
+        setSnackbarSeverity("error");
+        setSnackbarMessage("Lỗi kết nối đến server!");
+      }
+    };
+    fetchXuatXuList();
   }, []);
 
-  const handleChange = (event) => {
-    setTenChucVu(event.target.value);
+  const handleTenXuatXuChange = (event) => {
+    setTenXuatXu(event.target.value);
+    // Filter xuất xứ list based on input
+    const filteredList = xuatXuList.filter((xuatXu) =>
+      xuatXu.TEN_XUAT_XU.toLowerCase().includes(
+        event.target.value.toLowerCase()
+      )
+    );
+    setFilteredXuatXuList(filteredList);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    if (!tenXuatXu) {
+      setOpenSnackbar(true);
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Vui lòng nhập tên xuất xứ!");
+      return;
+    }
+
+    // Kiểm tra xem xuất xứ đã tồn tại hay chưa
+    const isXuatXuExists = filteredXuatXuList.some(
+      (xuatXu) => xuatXu.TEN_XUAT_XU.toLowerCase() === tenXuatXu.toLowerCase()
+    );
+
+    if (isXuatXuExists) {
+      setOpenSnackbar(true);
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Xuất xứ đã tồn tại!");
+      return;
+    }
+
     try {
-      const response = await fetch("http://localhost:3000/api/admin/Chuc_Vu", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-        body: JSON.stringify({ TEN_CHUC_VU: tenChucVu }),
-      });
+      console.log(id, tenXuatXu);
+
+      const response = await fetch(
+        `http://localhost:3000/api/admin/Xuat_Xu/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+          body: JSON.stringify({
+            TEN_XUAT_XU: tenXuatXu,
+          }),
+        }
+      );
 
       if (response.ok) {
-        setSnackbarSeverity("success");
-        setSnackbarMessage("Thêm chức vụ thành công!");
+        // Xử lý khi cập nhật xuất xứ thành công
         setOpenSnackbar(true);
-        navigate("/chuc-vu");
+        setSnackbarSeverity("success");
+        setSnackbarMessage("Cập nhật xuất xứ thành công!");
+        // Chuyển hướng về trang danh sách xuất xứ
+        navigate("/xuat-xu");
       } else {
         // Xử lý lỗi từ server
         if (response.status === 403) {
@@ -88,7 +159,7 @@ const CvAdd = () => {
         } else {
           const errorData = await response.json();
           setSnackbarSeverity("error");
-          setSnackbarMessage(errorData.message);
+          setSnackbarMessage(errorData.message); // Use errorData.message
         }
         setOpenSnackbar(true);
       }
@@ -107,6 +178,7 @@ const CvAdd = () => {
     setOpenSnackbar(false);
   };
 
+  // handle error
   if (error) {
     return <div>Error: {error.message}</div>;
   }
@@ -126,17 +198,22 @@ const CvAdd = () => {
           />
         </Grid>
         <Grid item xs={12} md={9}>
-          <Title>Thêm chức vụ</Title>
+          <Title>Cập nhật xuất xứ</Title>
           <Divider />
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2} mt={2}>
               <Grid item xs={12} md={6}>
+                <Typography variant="body1" gutterBottom>
+                  <b>ID:</b> {id}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Tên chức vụ"
-                  name="TEN_CHUC_VU"
-                  value={tenChucVu}
-                  onChange={handleChange}
+                  label="Tên xuất xứ"
+                  name="TEN_XUAT_XU"
+                  value={tenXuatXu}
+                  onChange={handleTenXuatXuChange}
                 />
               </Grid>
             </Grid>
@@ -154,7 +231,7 @@ const CvAdd = () => {
                     },
                   }}
                   variant="contained"
-                  href={`/chuc-vu`}
+                  href={`/xuat-xu`}
                 >
                   {/* icon */}
                   <KeyboardArrowLeft />
@@ -177,25 +254,25 @@ const CvAdd = () => {
                   variant="contained"
                 >
                   <EditIcon />
-                  Thêm
+                  Cập nhật
                 </Button>
               </Grid>
             </Grid>
           </form>
-          {/* Hiển thị danh sách chức vụ */}
+          {/* Hiển thị danh sách xuất xứ */}
           <Box mt={2} p={2} border={1} borderRadius={2}>
             <Typography variant="body1" mt={2}>
-              Danh sách chức vụ đã tồn tại:
+              Danh sách xuất xứ đã tồn tại:
             </Typography>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Tên Chức Vụ</TableCell>
+                  <TableCell>Tên Xuất Xứ</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {chucVuList.map((chucVu) => (
-                  <TableRow key={chucVu.AUTO_ID}>
+                {filteredXuatXuList.map((xuatXu) => (
+                  <TableRow key={xuatXu.AUTO_ID}>
                     <TableCell
                       sx={{
                         width: "100%",
@@ -203,7 +280,7 @@ const CvAdd = () => {
                         borderBottom: "1px solid rgba(224, 224, 224, 0.28)",
                       }}
                     >
-                      {chucVu.TEN_CHUC_VU}
+                      {xuatXu.TEN_XUAT_XU}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -225,4 +302,4 @@ const CvAdd = () => {
   );
 };
 
-export default CvAdd;
+export default XuatXuUpdate;

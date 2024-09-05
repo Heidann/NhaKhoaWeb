@@ -14,7 +14,6 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SignInPage.css";
-// import nhakhoaImage from "../assets/nhakhoa.png";
 
 const defaultTheme = createTheme();
 
@@ -27,8 +26,6 @@ export default function SignInPage(props) {
     event.preventDefault();
 
     try {
-      console.log(username, password);
-
       // Xử lý đăng nhập tài khoản
       const login = await fetch(
         "http://localhost:3000/api/admin/Tai_Khoan/login",
@@ -43,8 +40,11 @@ export default function SignInPage(props) {
 
       if (login.ok) {
         const data = await login.json();
+        console.log(data);
 
+        // Lưu token và TEN_TAI_KHOAN vào localStorage
         localStorage.setItem("token", data.token);
+        localStorage.setItem("TEN_TAI_KHOAN", username); // Lưu tên tài khoản
 
         props.setIsLoggedIn(true); // Cập nhật state isLoggedIn trong component cha
         navigate("/"); // Chuyển hướng đến trang admin
@@ -53,7 +53,7 @@ export default function SignInPage(props) {
         console.error("Lỗi đăng nhập", errorData);
       }
     } catch (error) {
-      // Xử lý l��i
+      // Xử lý lỗi
       console.error("Lỗi kết nối đến server", error);
     }
   };

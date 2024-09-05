@@ -25,20 +25,30 @@ const NvDetail = () => {
   const [nhanVienDetail, setNhanVienDetail] = useState(null);
   const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [openSnackbar, setOpenSnackbar] = useState(false); // State for Snackbar
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // State for Snackbar severity
-  const [snackbarMessage, setSnackbarMessage] = useState(""); // State for Snackbar message
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/admin/Tai_Khoan/${id}`
+          `http://localhost:3000/api/admin/Tai_Khoan/${id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
+        console.log(data);
+
         setNhanVienDetail(data);
       } catch (error) {
         setError(error);
@@ -51,28 +61,41 @@ const NvDetail = () => {
 
   const handleDelete = async () => {
     try {
-      // Kiểm tra xem nhân viên có phải là admin (mã 10000000) hay không
-      if (nhanVienDetail[0].AUTO_ID === 10000000) {
-        // Nếu là admin, hiển thị thông báo lỗi
-        setOpenSnackbar(true);
-        setSnackbarSeverity("error");
-        setSnackbarMessage("Không thể xóa nhân viên quản trị!");
-        return;
-      }
       const response = await fetch(
         `http://localhost:3000/api/admin/Tai_Khoan/${id}`,
         {
           method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
         }
       );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+
+      if (response.ok) {
+        // Xóa thành công
+        setSnackbarSeverity("success");
+        setSnackbarMessage("Xóa nhân viên thành công!");
+        setOpenSnackbar(true);
+        navigate("/nhan-vien"); // Chuyển hướng sau khi xóa
+      } else {
+        // Xử lý lỗi từ server
+        if (response.status === 403) {
+          setSnackbarSeverity("error");
+          setSnackbarMessage("Bạn không có quyền truy cập chức năng này!");
+        } else {
+          const errorData = await response.json();
+          setSnackbarSeverity("error");
+          setSnackbarMessage(errorData.message || "Xóa nhân viên thất bại!");
+        }
+        setOpenSnackbar(true);
       }
-      // Chuyển hướng về trang danh sách nhân viên sau khi xóa thành công
-      navigate("/nhan-vien");
     } catch (error) {
-      setError(error);
       console.error("Error deleting data:", error);
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Đã có lỗi xảy ra. Vui lòng thử lại sau.");
+      setOpenSnackbar(true);
     }
   };
 
@@ -116,7 +139,6 @@ const NvDetail = () => {
         <Grid item xs={12} md={3}>
           <Avatar
             alt="Profile Picture"
-            src={nhanVienDetail[0].HINH_ANH} // Assuming you have an image field
             sx={{
               width: 100,
               height: 100,

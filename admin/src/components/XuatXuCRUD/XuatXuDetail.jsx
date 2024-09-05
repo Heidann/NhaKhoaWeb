@@ -20,10 +20,10 @@ import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import EditIcon from "@mui/icons-material/Edit";
 import Title from "../Title";
 
-const CvDetail = () => {
+const XuatXuDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [chucVuDetail, setChucVuDetail] = useState(null);
+  const [xuatXuDetail, setXuatXuDetail] = useState(null);
   const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -34,9 +34,8 @@ const CvDetail = () => {
     const fetchDataDetail = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/admin/Chuc_Vu/${id}`,
+          `http://localhost:3000/api/admin/Xuat_Xu/${id}`,
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -48,7 +47,7 @@ const CvDetail = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setChucVuDetail(data[0]); // Assuming data is an array and you want the first element
+        setXuatXuDetail(data[0]); // Assuming API returns an array with one object
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
@@ -61,7 +60,7 @@ const CvDetail = () => {
   const handleDelete = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/admin/Chuc_Vu/${id}`,
+        `http://localhost:3000/api/admin/Xuat_Xu/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -71,26 +70,25 @@ const CvDetail = () => {
           },
         }
       );
-
       if (response.ok) {
-        // Xóa thành công
         setSnackbarSeverity("success");
-        setSnackbarMessage("Xóa chức vụ thành công!");
+        setSnackbarMessage("Xóa xuất xứ thành công!");
         setOpenSnackbar(true);
-        navigate("/chuc-vu"); // Chuyển hướng sau khi xóa
+        navigate("/xuat-xu"); // Redirect to the Xuat_Xu list page
       } else {
-        // Xử lý lỗi từ server
+        // Handle errors from server
         if (response.status === 403) {
           setSnackbarSeverity("error");
           setSnackbarMessage("Bạn không có quyền truy cập chức năng này!");
         } else {
           const errorData = await response.json();
           setSnackbarSeverity("error");
-          setSnackbarMessage(errorData.message || "Xóa chức vụ thất bại!");
+          setSnackbarMessage(errorData.message);
         }
         setOpenSnackbar(true);
       }
     } catch (error) {
+      setError(error);
       console.error("Error deleting data:", error);
       setSnackbarSeverity("error");
       setSnackbarMessage("Đã có lỗi xảy ra. Vui lòng thử lại sau.");
@@ -120,7 +118,7 @@ const CvDetail = () => {
   }
 
   // handle loading
-  if (!chucVuDetail) {
+  if (!xuatXuDetail) {
     return <div>Loading...</div>;
   }
 
@@ -139,88 +137,49 @@ const CvDetail = () => {
           />
         </Grid>
         <Grid item xs={12} md={9}>
-          <Title>Chi tiết chức vụ</Title>
+          <Title>Chi tiết xuất xứ</Title>
           <Divider />
           <Grid container spacing={2} mt={2}>
             <Grid item xs={12} md={6}>
               <Typography variant="body1" gutterBottom>
-                <b>ID:</b> {chucVuDetail.AUTO_ID}
+                <b>ID:</b> {xuatXuDetail.AUTO_ID}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography variant="body1" gutterBottom>
-                <b>Mã chức vụ:</b> {chucVuDetail.MA_CHUC_VU}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
-                <b>Tên chức vụ:</b> {chucVuDetail.TEN_CHUC_VU}
+                <b>Tên xuất xứ:</b> {xuatXuDetail.TEN_XUAT_XU}
               </Typography>
             </Grid>
             {/* Add more fields as needed */}
           </Grid>
         </Grid>
       </Grid>
-      <Grid container spacing={2} mt={2} justifyContent="flex-end">
-        <Grid item xs={12} md={3}>
-          <Button
-            sx={{
-              width: "100%",
-              padding: "10px 20px",
-              backgroundColor: "gray",
-              color: "white",
-              textTransform: "capitalize",
-              "&:hover": {
-                backgroundColor: "#e53935",
-              },
-            }}
-            variant="contained"
-            href={`/chuc-vu`}
-          >
-            {/* icon */}
-            <KeyboardArrowLeft />
-            Quay Lại
-          </Button>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Button
-            sx={{
-              padding: "10px 20px",
-              width: "100%",
-              backgroundColor: "#f44336",
-              color: "white",
-              textTransform: "capitalize",
-              "&:hover": {
-                backgroundColor: "#e53935",
-              },
-            }}
-            variant="contained"
-            onClick={() => setOpenDialog(true)}
-          >
-            <DeleteForeverIcon />
-            Xóa
-          </Button>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Button
-            sx={{
-              padding: "10px 20px",
-              width: "100%",
-              backgroundColor: "#4CAF50",
-              color: "white",
-              textTransform: "capitalize",
-              "&:hover": {
-                backgroundColor: "#45a049",
-              },
-            }}
-            variant="contained"
-            href={`/chuc-vu/${id}/chinh-sua`}
-          >
-            <EditIcon />
-            Cập nhật
-          </Button>
-        </Grid>
-      </Grid>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
+        <Button
+          variant="contained"
+          href={`/xuat-xu`}
+          startIcon={<KeyboardArrowLeft />}
+          sx={{ mr: 2, backgroundColor: "gray", color: "white" }}
+        >
+          Quay Lại
+        </Button>
+        <Button
+          variant="contained"
+          href={`/xuat-xu/${id}/chinh-sua`}
+          startIcon={<EditIcon />}
+          sx={{ mr: 2, backgroundColor: "#4CAF50", color: "white" }}
+        >
+          Cập nhật
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => setOpenDialog(true)}
+          startIcon={<DeleteForeverIcon />}
+          sx={{ backgroundColor: "#f44336", color: "white" }}
+        >
+          Xóa
+        </Button>
+      </Box>
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
@@ -228,11 +187,11 @@ const CvDetail = () => {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          {"Xác nhận xóa chức vụ?"}
+          {"Xác nhận xóa xuất xứ?"}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Bạn có chắc chắn muốn xóa chức vụ này? Hành động này không thể hoàn
+            Bạn có chắc chắn muốn xóa xuất xứ này? Hành động này không thể hoàn
             tác.
           </DialogContentText>
         </DialogContent>
@@ -243,7 +202,6 @@ const CvDetail = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      {/* Snackbar thông báo */}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={6000}
@@ -257,4 +215,4 @@ const CvDetail = () => {
   );
 };
 
-export default CvDetail;
+export default XuatXuDetail;

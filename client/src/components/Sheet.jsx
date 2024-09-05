@@ -463,10 +463,10 @@ export default function SheetPage() {
                               </TableRow>
                               <TableRow>
                                 <TableCell sx={tableCellStyles}>
-                                  Loại đĩa
+                                  Xuất Xứ
                                 </TableCell>
                                 <TableCell sx={tableCellStyles}>
-                                  {item.TEN_LOAI_DIA}
+                                  {item.TEN_XUAT_XU}
                                 </TableCell>
                               </TableRow>
                               <TableRow>

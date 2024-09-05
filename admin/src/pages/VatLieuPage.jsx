@@ -1,31 +1,40 @@
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
-import Title from "../components/Title.jsx";
 import TextField from "@mui/material/TextField";
 import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
-import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
+import Skeleton from "@mui/material/Skeleton";
+import Button from "@mui/material/Button"; // Import Button component
+import * as XLSX from "xlsx"; // Import XLSX library
 
 import { useNavigate } from "react-router-dom";
-import { Gauge, gaugeClasses } from "@mui/x-charts/Gauge";
+
 import { useState, useEffect } from "react";
 import { useMemo, Fragment } from "react";
-
+import Title from "../components/Title.jsx";
 import DataTable from "../components/DataTable.jsx";
 
-export default function TheBaoHanhPage() {
+export default function VatLieuPage() {
   const navigate = useNavigate(); // điều hướng trang
 
   const [data, setData] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+
   const columns = [
     { key: "AUTO_ID", label: "ID" },
     { key: "TEN_VAT_LIEU", label: "Tên Vật Liệu" },
   ];
 
   const fetchInfo = async () => {
-    const response = await fetch("http://localhost:3000/api/admin/Vat_Lieu");
+    const response = await fetch("http://localhost:3000/api/admin/Vat_Lieu", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
     const data = await response.json();
     setData(data);
     console.log("Data fetched successfully:", data);
@@ -36,72 +45,43 @@ export default function TheBaoHanhPage() {
   }, []);
 
   const memoizedData = useMemo(() => data, [data]);
+
+  // Cải thiện filteredData
   const filteredData = useMemo(() => {
     if (!searchTerm) {
       return memoizedData;
     }
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
     return memoizedData.filter((item) => {
-      // Lọc dựa trên các trường bạn muốn tìm kiếm
-      return item.MA_THE_BAO_HANH.toLowerCase().includes(
-        searchTerm.toLowerCase()
+      return (
+        // item.AUTO_ID.toLowerCase().includes(lowerCaseSearchTerm) ||
+        item.TEN_VAT_LIEU.toLowerCase().includes(lowerCaseSearchTerm)
       );
     });
   }, [memoizedData, searchTerm]); // Phụ thuộc vào memoizedData và searchTerm
 
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Vật Liệu");
+    XLSX.writeFile(workbook, "VatLieu.xlsx");
+  };
+
   return (
     <>
       <Grid container spacing={3}>
-        {/* Chart */}
-        <Grid item xs={12} md={8} lg={8}>
-          <Paper
-            sx={{
-              p: 2,
-              display: "flex",
-              flexDirection: "column",
-              height: 240,
-            }}
-          >
-            {/* <Chart /> */}
-          </Paper>
-        </Grid>
-        {/* Recent Deposits */}
-        <Grid item xs={12} md={4} lg={4}>
-          <Paper
-            sx={{
-              p: 2,
-              display: "flex",
-              flexDirection: "column",
-              height: 240,
-            }}
-          >
-            <Title>Đã kích hoạt</Title>
-            <Gauge
-              value={75}
-              startAngle={-110}
-              endAngle={110}
-              sx={{
-                [`& .${gaugeClasses.valueText}`]: {
-                  fontSize: 40,
-                  transform: "translate(0px, 0px)",
-                },
-              }}
-              text={({ value, valueMax }) => `${value} / ${valueMax}`}
-            />
-          </Paper>
-        </Grid>
-        {/* Recent Orders */}
+        {/* Table */}
         <Grid item xs={12}>
           <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
-            <Title>Thông Tin Thẻ Bảo Hành</Title>
+            <Title>Thông Tin Vật Liệu</Title>
             <Grid container spacing={3}>
               <Grid item xs={1} md={1} lg={1}>
-                {" "}
                 <Box sx={{ "& > :not(style)": { m: 1 } }}>
                   <Fab
                     size="small"
                     color="secondary"
                     aria-label="add"
-                    onClick={() => navigate("/the-bao-hanh/them")}
+                    onClick={() => navigate("/vat-lieu/them")}
                   >
                     <AddIcon />
                   </Fab>
@@ -112,7 +92,7 @@ export default function TheBaoHanhPage() {
                 <TextField
                   id="standard-basic"
                   label="Tìm kiếm"
-                  placeholder="Nhập mã thẻ bao hành"
+                  placeholder="Nhập tên vật liệu"
                   variant="standard"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -126,12 +106,15 @@ export default function TheBaoHanhPage() {
                 <DataTable
                   columns={columns}
                   rows={filteredData}
-                  tableType="the-bao-hanh"
+                  tableType="vat-lieu"
                 />
+                <Button variant="contained" onClick={exportToExcel}>
+                  Xuất Excel
+                </Button>
               </Fragment>
             ) : (
               <Box sx={{ display: "flex" }}>
-                <CircularProgress />
+                <Skeleton />
               </Box>
             )}
           </Paper>

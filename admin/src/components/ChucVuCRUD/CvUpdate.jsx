@@ -4,132 +4,66 @@ import {
   Grid,
   Typography,
   Paper,
-  Box,
   Divider,
   Button,
   TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
   Snackbar,
   Alert,
+  Box,
 } from "@mui/material";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
-import EditIcon from "@mui/icons-material/Edit";
 import Title from "../Title";
+import EditIcon from "@mui/icons-material/Edit";
+import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 
 const CvUpdate = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [chucVuDetail, setChucVuDetail] = useState(null);
   const [error, setError] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [tenChucVu, setTenChucVu] = useState(""); // State for chức vụ name
-  const [chucVuList, setChucVuList] = useState([]); // State for chức vụ list
-  const [filteredChucVuList, setFilteredChucVuList] = useState([]); // State for filtered chức vụ list
-  const [openSnackbar, setOpenSnackbar] = useState(false); // State for Snackbar
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // State for Snackbar severity
-  const [snackbarMessage, setSnackbarMessage] = useState(""); // State for Snackbar message
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [chucVuData, setChucVuData] = useState({
+    AUTO_ID: "",
+    MA_CHUC_VU: "",
+    TEN_CHUC_VU: "",
+  });
 
   useEffect(() => {
-    const fetchDataDetail = async () => {
+    const fetchData = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/admin/Chuc_Vu/${id}`
+          `http://localhost:3000/api/admin/Chuc_Vu/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setChucVuDetail(data);
-        setTenChucVu(data[0].TEN_CHUC_VU); // Set initial value for tenChucVu
+        setChucVuData(data[0]); // Assuming data is an array and you want the first element
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
       }
     };
 
-    fetchDataDetail();
+    fetchData();
   }, [id]);
 
-  useEffect(() => {
-    const fetchChucVuList = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/api/admin/Chuc_Vu");
-        if (response.ok) {
-          const data = await response.json();
-          setChucVuList(data);
-          setFilteredChucVuList(data); // Initialize filtered list
-        } else {
-          // Xử lý lỗi
-          handleSnackbarOpen("error", "Lỗi khi lấy danh sách chức vụ!");
-        }
-      } catch (error) {
-        // Xử lý lỗi
-        handleSnackbarOpen("error", "Lỗi kết nối đến server!");
-      }
-    };
-    fetchChucVuList();
-  }, []);
-
-  const handleTenChucVuChange = (event) => {
-    setTenChucVu(event.target.value);
-    // Filter chức vụ list based on input
-    const filteredList = chucVuList.filter((chucVu) =>
-      chucVu.TEN_CHUC_VU.toLowerCase().includes(
-        event.target.value.toLowerCase()
-      )
-    );
-    setFilteredChucVuList(filteredList);
-  };
-
-  const handleDelete = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/admin/Chuc_Vu/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      navigate(`/chuc-vu`);
-    } catch (error) {
-      setError(error);
-      console.error("Error deleting data:", error);
-    }
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-  };
-
-  const handleConfirmDelete = () => {
-    handleDelete();
-    handleCloseDialog();
+  const handleChange = (event) => {
+    setChucVuData({
+      ...chucVuData,
+      [event.target.name]: event.target.value,
+    });
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-    // Kiểm tra xem chức vụ đã tồn tại hay chưa
-    const isChucVuExists = filteredChucVuList.some(
-      (chucVu) => chucVu.TEN_CHUC_VU.toLowerCase() === tenChucVu.toLowerCase()
-    );
-
-    if (isChucVuExists) {
-      handleSnackbarOpen("error", "Chức vụ đã tồn tại!");
-      return;
-    }
 
     try {
       const response = await fetch(
@@ -138,46 +72,49 @@ const CvUpdate = () => {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
           },
-          body: JSON.stringify({
-            MA_CHUC_VU: event.target.MA_CHUC_VU.value,
-            TEN_CHUC_VU: event.target.TEN_CHUC_VU.value,
-          }),
+          body: JSON.stringify(chucVuData),
         }
       );
+
       if (response.ok) {
-        handleSnackbarOpen("success", "Cập nhật chức vụ thành công!");
+        setSnackbarSeverity("success");
+        setSnackbarMessage("Cập nhật thông tin chức vụ thành công!");
+        setOpenSnackbar(true);
         navigate("/chuc-vu");
       } else {
-        handleSnackbarOpen("error", "Lỗi khi cập nhật chức vụ!");
+        // Xử lý lỗi từ server
+        if (response.status === 403) {
+          setSnackbarSeverity("error");
+          setSnackbarMessage("Bạn không có quyền truy cập chức năng này!");
+        } else {
+          const errorData = await response.json();
+          setSnackbarSeverity("error");
+          setSnackbarMessage(
+            errorData.message || "Cập nhật thông tin chức vụ thất bại!"
+          );
+        }
+        setOpenSnackbar(true);
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
-      handleSnackbarOpen("error", "Lỗi khi cập nhật chức vụ!");
+      console.error("Error updating data:", error);
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Đã có lỗi xảy ra. Vui lòng thử lại sau.");
+      setOpenSnackbar(true);
     }
   };
 
-  const handleSnackbarOpen = (severity, message) => {
-    setSnackbarSeverity(severity);
-    setSnackbarMessage(message);
-    setOpenSnackbar(true);
-  };
-
-  const handleSnackbarClose = (event, reason) => {
+  const handleCloseSnackbar = (event, reason) => {
     if (reason === "clickaway") {
       return;
     }
     setOpenSnackbar(false);
   };
 
-  // handle error
   if (error) {
     return <div>Error: {error.message}</div>;
-  }
-
-  // handle loading
-  if (!chucVuDetail) {
-    return <div>Loading...</div>;
   }
 
   return (
@@ -201,7 +138,7 @@ const CvUpdate = () => {
             <Grid container spacing={2} mt={2}>
               <Grid item xs={12} md={6}>
                 <Typography variant="body1" gutterBottom>
-                  <b>ID:</b> {chucVuDetail[0].AUTO_ID}
+                  <b>ID:</b> {chucVuData.AUTO_ID}
                 </Typography>
               </Grid>
               <Grid item xs={12} md={6}>
@@ -209,7 +146,8 @@ const CvUpdate = () => {
                   fullWidth
                   label="Mã chức vụ"
                   name="MA_CHUC_VU"
-                  defaultValue={chucVuDetail[0].MA_CHUC_VU}
+                  value={chucVuData.MA_CHUC_VU}
+                  onChange={handleChange}
                   disabled
                 />
               </Grid>
@@ -218,11 +156,10 @@ const CvUpdate = () => {
                   fullWidth
                   label="Tên chức vụ"
                   name="TEN_CHUC_VU"
-                  value={tenChucVu}
-                  onChange={handleTenChucVuChange}
+                  value={chucVuData.TEN_CHUC_VU}
+                  onChange={handleChange}
                 />
               </Grid>
-              {/* Add more fields as needed */}
             </Grid>
             <Grid container spacing={2} mt={2} justifyContent="flex-end">
               <Grid item xs={12} md={3}>
@@ -247,25 +184,6 @@ const CvUpdate = () => {
               </Grid>
               <Grid item xs={12} md={3}>
                 <Button
-                  sx={{
-                    padding: "10px 20px",
-                    width: "100%",
-                    backgroundColor: "#f44336",
-                    color: "white",
-                    textTransform: "capitalize",
-                    "&:hover": {
-                      backgroundColor: "#e53935",
-                    },
-                  }}
-                  variant="contained"
-                  onClick={() => setOpenDialog(true)}
-                >
-                  <DeleteForeverIcon />
-                  Xóa
-                </Button>
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <Button
                   type="submit"
                   sx={{
                     padding: "10px 20px",
@@ -285,56 +203,14 @@ const CvUpdate = () => {
               </Grid>
             </Grid>
           </form>
-          {/* Hiển thị danh sách chức vụ */}
-          <Box mt={2} p={2} border={1} borderRadius={2}>
-            <Typography variant="body2" mt={2}>
-              Danh sách chức vụ đã tồn tại:
-            </Typography>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Tên Chức Vụ</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredChucVuList.map((chucVu) => (
-                  <TableRow key={chucVu.MA_CHUC_VU}>
-                    <TableCell>{chucVu.TEN_CHUC_VU}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Box>
         </Grid>
       </Grid>
-      <Dialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          {"Xác nhận xóa chức vụ?"}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Bạn có chắc chắn muốn xóa chức vụ này? Hành động này không thể hoàn
-            tác.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Hủy</Button>
-          <Button onClick={handleConfirmDelete} autoFocus>
-            Xóa
-          </Button>
-        </DialogActions>
-      </Dialog>
       <Snackbar
         open={openSnackbar}
         autoHideDuration={6000}
-        onClose={handleSnackbarClose}
+        onClose={handleCloseSnackbar}
       >
-        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity}>
           {snackbarMessage}
         </Alert>
       </Snackbar>

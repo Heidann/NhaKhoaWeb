@@ -10,12 +10,12 @@ import List from "@mui/material/List";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
-import Badge from "@mui/material/Badge";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import NotificationsIcon from "@mui/icons-material/Notifications";
+import LogoutIcon from "@mui/icons-material/Logout"; // Import icon Logout
 import { mainListItems, secondaryListItems } from "../listItems";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom"; // Import useNavigate
+
 const drawerWidth = 240;
 
 const AppBar = styled(MuiAppBar, {
@@ -66,11 +66,23 @@ const Drawer = styled(MuiDrawer, {
 const defaultTheme = createTheme();
 
 function LayoutAdmin() {
-  // Accept children prop
   const [open, setOpen] = React.useState(true);
+  const navigate = useNavigate(); // Khởi tạo useNavigate
+
   const toggleDrawer = () => {
     setOpen(!open);
   };
+
+  const handleLogout = () => {
+    // Xóa thông tin đăng nhập khỏi localStorage
+    localStorage.removeItem("token");
+    localStorage.removeItem("TEN_TAI_KHOAN");
+    // Chuyển hướng đến trang đăng nhập
+    navigate("/");
+  };
+
+  // Lấy TEN_TAI_KHOAN từ localStorage (giả sử bạn đã lưu nó sau khi đăng nhập thành công)
+  const tenTaiKhoan = localStorage.getItem("TEN_TAI_KHOAN") || "User";
 
   return (
     <>
@@ -102,12 +114,11 @@ function LayoutAdmin() {
                 noWrap
                 sx={{ flexGrow: 1 }}
               >
-                Dashboard
+                Dashboard - Xin chào, {tenTaiKhoan}!
               </Typography>
-              <IconButton color="inherit">
-                <Badge badgeContent={4} color="secondary">
-                  <NotificationsIcon />
-                </Badge>
+
+              <IconButton color="inherit" onClick={handleLogout}>
+                <LogoutIcon /> {/* Hiển thị icon Logout */}
               </IconButton>
             </Toolbar>
           </AppBar>

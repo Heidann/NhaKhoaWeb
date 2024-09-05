@@ -128,6 +128,9 @@ const KhUpdate = () => {
 
       // Gửi yêu cầu PUT sau khi đã có theBaoHanhId
       try {
+        console.log("maTheBaoHanh after fetch:", maTheBaoHanh);
+        console.log("theBaoHanhId after fetch:", theBaoHanhId);
+
         // Send PUT request with THE_BAO_HANH_ID
         const khResponse = await fetch(
           `http://localhost:3000/api/admin/Khach_Hang/${id}`,

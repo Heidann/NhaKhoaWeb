@@ -1,31 +1,40 @@
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
-import Title from "../components/Title.jsx";
 import TextField from "@mui/material/TextField";
 import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
-import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
+import Skeleton from "@mui/material/Skeleton";
+import Button from "@mui/material/Button";
+import * as XLSX from "xlsx";
 
 import { useNavigate } from "react-router-dom";
-import { Gauge, gaugeClasses } from "@mui/x-charts/Gauge";
+
 import { useState, useEffect } from "react";
 import { useMemo, Fragment } from "react";
-
+import Title from "../components/Title.jsx";
 import DataTable from "../components/DataTable.jsx";
 
-export default function TheBaoHanhPage() {
-  const navigate = useNavigate(); // điều hướng trang
+export default function XuatXuPage() {
+  const navigate = useNavigate();
 
   const [data, setData] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+
   const columns = [
     { key: "AUTO_ID", label: "ID" },
-    { key: "TEN_LOAI_DIA", label: "Tên Loại Đĩa" },
+    { key: "TEN_XUAT_XU", label: "Xuất Xứ" },
   ];
 
   const fetchInfo = async () => {
-    const response = await fetch("http://localhost:3000/api/admin/Loai_Dia");
+    const response = await fetch("http://localhost:3000/api/admin/Xuat_Xu", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
     const data = await response.json();
     setData(data);
     console.log("Data fetched successfully:", data);
@@ -36,72 +45,40 @@ export default function TheBaoHanhPage() {
   }, []);
 
   const memoizedData = useMemo(() => data, [data]);
+
+  // Chỉnh sửa filteredData
   const filteredData = useMemo(() => {
     if (!searchTerm) {
       return memoizedData;
     }
     return memoizedData.filter((item) => {
-      // Lọc dựa trên các trường bạn muốn tìm kiếm
-      return item.MA_THE_BAO_HANH.toLowerCase().includes(
-        searchTerm.toLowerCase()
-      );
+      // Chú ý: Thay 'TEN_XUAT_XU' bằng tên trường muốn tìm kiếm trong dữ liệu xuất xứ
+      return item.TEN_XUAT_XU.toLowerCase().includes(searchTerm.toLowerCase());
     });
-  }, [memoizedData, searchTerm]); // Phụ thuộc vào memoizedData và searchTerm
+  }, [memoizedData, searchTerm]);
+
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Xuất xứ");
+    XLSX.writeFile(workbook, "XuatXu.xlsx");
+  };
 
   return (
     <>
       <Grid container spacing={3}>
-        {/* Chart */}
-        <Grid item xs={12} md={8} lg={8}>
-          <Paper
-            sx={{
-              p: 2,
-              display: "flex",
-              flexDirection: "column",
-              height: 240,
-            }}
-          >
-            {/* <Chart /> */}
-          </Paper>
-        </Grid>
-        {/* Recent Deposits */}
-        <Grid item xs={12} md={4} lg={4}>
-          <Paper
-            sx={{
-              p: 2,
-              display: "flex",
-              flexDirection: "column",
-              height: 240,
-            }}
-          >
-            <Title>Đã kích hoạt</Title>
-            <Gauge
-              value={75}
-              startAngle={-110}
-              endAngle={110}
-              sx={{
-                [`& .${gaugeClasses.valueText}`]: {
-                  fontSize: 40,
-                  transform: "translate(0px, 0px)",
-                },
-              }}
-              text={({ value, valueMax }) => `${value} / ${valueMax}`}
-            />
-          </Paper>
-        </Grid>
-        {/* Recent Orders */}
+        {/* Table */}
         <Grid item xs={12}>
           <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
-            <Title>Thông Tin Thẻ Bảo Hành</Title>
+            <Title>Thông Tin Xuất Xứ</Title>
             <Grid container spacing={3}>
               <Grid item xs={1} md={1} lg={1}>
-                {" "}
                 <Box sx={{ "& > :not(style)": { m: 1 } }}>
                   <Fab
                     size="small"
                     color="secondary"
                     aria-label="add"
-                    onClick={() => navigate("/loai-dia/them")}
+                    onClick={() => navigate("/xuat-xu/them")}
                   >
                     <AddIcon />
                   </Fab>
@@ -112,7 +89,7 @@ export default function TheBaoHanhPage() {
                 <TextField
                   id="standard-basic"
                   label="Tìm kiếm"
-                  placeholder="Nhập mã thẻ bao hành"
+                  placeholder="Nhập tên xuất xứ"
                   variant="standard"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -120,18 +97,20 @@ export default function TheBaoHanhPage() {
                 />
               </Grid>
             </Grid>
-            {/* Thêm input cho thanh tìm kiếm */}
             {memoizedData ? (
               <Fragment>
                 <DataTable
                   columns={columns}
                   rows={filteredData}
-                  tableType="loai-dia"
+                  tableType="xuat-xu"
                 />
+                <Button variant="contained" onClick={exportToExcel}>
+                  Xuất Excel
+                </Button>
               </Fragment>
             ) : (
               <Box sx={{ display: "flex" }}>
-                <CircularProgress />
+                <Skeleton />
               </Box>
             )}
           </Paper>

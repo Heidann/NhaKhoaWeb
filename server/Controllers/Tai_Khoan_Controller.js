@@ -127,10 +127,11 @@ const updateTai_KhoanController = async (req, res) => {
     const { id } = req.params;
     const { TEN_TAI_KHOAN, TEN_NHAN_VIEN, CCCD, SDT, CHUC_VU_ID } = req.body;
     // Kiểm tra xem tất cả các trường đều có giá trị hay không
-    if (!TEN_TAI_KHOAN || !TEN_NHAN_VIEN || !CCCD || !SDT || !CHUC_VU_ID) {
-      return res
-        .status(400)
-        .json({ message: "Vui lòng nhập đầy đủ thông tin" });
+    if (!TEN_TAI_KHOAN || !TEN_NHAN_VIEN || !CHUC_VU_ID) {
+      return res.status(400).json({
+        message:
+          "Vui lòng nhập ít nhất thông tin Tên tài khoản, tên nhân viên và chức vụ!",
+      });
     }
     const updatedTai_Khoan = await updateTai_Khoan(
       id,
@@ -187,7 +188,7 @@ const deleteTai_KhoanController = async (req, res) => {
   try {
     const { id } = req.params;
     const result = await deleteTai_Khoan(id);
-    if (result && result.affectedRows > 0) {
+    if (result !== null && result !== false) {
       res.json({ message: "Xóa thành công" });
     } else {
       res

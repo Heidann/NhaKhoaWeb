@@ -51,9 +51,14 @@ export default function NhatKyPage() {
 
       const data = await response.json();
       data.forEach((item) => {
-        item.NGAY_KICH_HOAT = item.NGAY_KICH_HOAT.slice(0, 10);
-        item.NGAY_HET_HAN = item.NGAY_HET_HAN.slice(0, 10);
+        item.NGAY_KICH_HOAT = item.NGAY_KICH_HOAT
+          ? item.NGAY_KICH_HOAT.slice(0, 10)
+          : null;
+        item.NGAY_HET_HAN = item.NGAY_HET_HAN
+          ? item.NGAY_HET_HAN.slice(0, 10)
+          : null;
       });
+
       setData(data);
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu:", error);

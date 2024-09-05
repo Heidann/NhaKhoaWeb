@@ -45,10 +45,18 @@ const KhDetail = () => {
             },
           }
         );
-        if (!response.ok) {
+        if (response.status === 403) {
+          setNotificationOpen(true);
+          return;
+        } else if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
+        // format CREATE_BY
+        data.forEach((item) => {
+          item.CREATE_AT = item.CREATE_AT.slice(0, 10);
+        });
+
         setKhDetail(data); // Use khDetail
       } catch (error) {
         setError(error);
@@ -134,7 +142,7 @@ const KhDetail = () => {
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography variant="body1" gutterBottom>
-                <b>Số điện thoại:</b> {khDetail[0].SDT}
+                <b>Số điện thoại:</b> {khDetail[0].SDT || "N/A"}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
@@ -144,12 +152,12 @@ const KhDetail = () => {
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography variant="body1" gutterBottom>
-                <b>Ngày tạo:</b> {khDetail[0].CREATE_AT}
+                <b>Ngày tạo:</b> {khDetail[0].CREATE_AT || "N/A"}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography variant="body1" gutterBottom>
-                <b>Tên nhân viên:</b> {khDetail[0].TEN_NHAN_VIEN}
+                <b>Cập nhật cuối:</b> {khDetail[0].TEN_NHAN_VIEN || "N/A"}
               </Typography>
             </Grid>
           </Grid>

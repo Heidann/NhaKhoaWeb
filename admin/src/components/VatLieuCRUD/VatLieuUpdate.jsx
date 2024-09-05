@@ -19,29 +19,44 @@ import {
 import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import CenteredNotification from "../CenteredNotification";
 
-const LoaiDiaUpdate = () => {
+const VatLieuUpdate = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [error, setError] = useState(null);
   const [open, setOpen] = useState(false);
   const [severity, setSeverity] = useState("success");
   const [message, setMessage] = useState("");
-  const [tenLoaiDia, setTenLoaiDia] = useState(""); // State for tên loại đĩa
-  const [loaiDiaList, setLoaiDiaList] = useState([]); // State for loại đĩa list
-  const [filteredLoaiDiaList, setFilteredLoaiDiaList] = useState([]); // State for filtered loại đĩa list
+  const [tenVatLieu, setTenVatLieu] = useState(""); // State for tên vật liệu
+  const [vatLieuList, setVatLieuList] = useState([]); // State for vật liệu list
+  const [filteredVatLieuList, setFilteredVatLieuList] = useState([]); // State for filtered vật liệu list
+
+  // Thông báo khi không có quyền truy cập
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const handleCloseNotification = () => {
+    setNotificationOpen(false);
+  };
 
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/admin/Loai_Dia/${id}`
+          `http://localhost:3000/api/admin/Vat_Lieu/${id}`, // Thay đổi endpoint
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setTenLoaiDia(data[0].TEN_LOAI_DIA); // Initialize tenLoaiDia state
+        setTenVatLieu(data[0].TEN_VAT_LIEU); // Initialize tenVatLieu state
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
@@ -51,21 +66,31 @@ const LoaiDiaUpdate = () => {
     fetchDataDetail();
   }, [id]);
 
+  // Lấy danh sách vật liệu
   useEffect(() => {
-    const fetchLoaiDiaList = async () => {
+    const fetchVatLieuList = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3000/api/admin/Loai_Dia"
+          "http://localhost:3000/api/admin/Vat_Lieu",
+          {
+            // Thay đổi endpoint
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
         );
         if (response.ok) {
           const data = await response.json();
-          setLoaiDiaList(data);
-          setFilteredLoaiDiaList(data); // Initialize filtered list
+          setVatLieuList(data);
+          setFilteredVatLieuList(data); // Initialize filtered list
         } else {
           // Xử lý lỗi
           setOpen(true);
           setSeverity("error");
-          setMessage("Lỗi khi lấy danh sách loại đĩa!");
+          setMessage("Lỗi khi lấy danh sách vật liệu!"); // Thay đổi message
         }
       } catch (error) {
         // Xử lý lỗi
@@ -74,74 +99,70 @@ const LoaiDiaUpdate = () => {
         setMessage("Lỗi kết nối đến server!");
       }
     };
-    fetchLoaiDiaList();
+    fetchVatLieuList();
   }, []);
 
-  const handleTenLoaiDiaChange = (event) => {
-    setTenLoaiDia(event.target.value);
-    // Filter loại đĩa list based on input
-    const filteredList = loaiDiaList.filter((loaiDia) =>
-      loaiDia.TEN_LOAI_DIA.toLowerCase().includes(
+  // Xử lý sự kiện chỉnh sửa tên vật liệu
+  const handleTenVatLieuChange = (event) => {
+    setTenVatLieu(event.target.value);
+    // Filter vật liệu list based on input
+    const filteredList = vatLieuList.filter((vatLieu) =>
+      vatLieu.TEN_VAT_LIEU.toLowerCase().includes(
         event.target.value.toLowerCase()
       )
     );
-    setFilteredLoaiDiaList(filteredList);
+    setFilteredVatLieuList(filteredList);
   };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!tenLoaiDia) {
+    if (!tenVatLieu) {
       setOpen(true);
       setSeverity("error");
-      setMessage("Vui lòng nhập tên loại đĩa!");
+      setMessage("Vui lòng nhập tên vật liệu!"); // Thay đổi message
       return;
     }
 
-    // Kiểm tra xem loại đĩa đã tồn tại hay chưa
-    const isLoaiDiaExists = filteredLoaiDiaList.some(
-      (loaiDia) =>
-        loaiDia.TEN_LOAI_DIA.toLowerCase() === tenLoaiDia.toLowerCase()
+    // Kiểm tra xem vật liệu đã tồn tại hay chưa
+    const isVatLieuExists = filteredVatLieuList.some(
+      (vatLieu) =>
+        vatLieu.TEN_VAT_LIEU.toLowerCase() === tenVatLieu.toLowerCase()
     );
 
-    if (isLoaiDiaExists) {
+    if (isVatLieuExists) {
       setOpen(true);
       setSeverity("error");
-      setMessage("Loại đĩa đã tồn tại!");
+      setMessage("Vật liệu đã tồn tại!"); // Thay đổi message
       return;
     }
 
     const response = await fetch(
-      `http://localhost:3000/api/admin/Loai_Dia/${id}`,
+      `http://localhost:3000/api/admin/Vat_Lieu/${id}`,
       {
+        // Thay đổi endpoint
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
         },
         body: JSON.stringify({
-          TEN_LOAI_DIA: tenLoaiDia,
+          TEN_VAT_LIEU: tenVatLieu, // Thay đổi tên trường
         }),
       }
     );
     if (response.ok) {
-      // Xử lý khi cập nhật loại đĩa thành công
+      // Xử lý khi cập nhật vật liệu thành công
       setOpen(true);
       setSeverity("success");
-      setMessage("Cập nhật loại đĩa thành công!");
-      // Chuyển hướng về trang danh sách loại đĩa
-      navigate("/loai-dia");
-    } else {
-      const errorData = await response.json(); // Lấy dữ liệu lỗi từ server
-      if (errorData.code === "ER_DUP_ENTRY") {
-        // Kiểm tra mã lỗi
-        setOpen(true);
-        setSeverity("error");
-        setMessage(errorData.message); // Use errorData.message
-      } else {
-        setOpen(true);
-        setSeverity("error");
-        setMessage(errorData.message); // Use errorData.message
-      }
+      setMessage("Cập nhật vật liệu thành công!"); // Thay đổi message
+      // Chuyển hướng về trang danh sách vật liệu
+      navigate("/vat-lieu"); // Thay đổi đường dẫn
+    } else if (response.status === 403) {
+      setNotificationOpen(true);
+      return;
+    } else if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
   };
 
@@ -172,7 +193,7 @@ const LoaiDiaUpdate = () => {
           />
         </Grid>
         <Grid item xs={12} md={9}>
-          <Title>Cập nhật loại đĩa</Title>
+          <Title>Cập nhật vật liệu</Title> {/* Thay đổi title */}
           <Divider />
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2} mt={2}>
@@ -184,10 +205,10 @@ const LoaiDiaUpdate = () => {
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Tên loại đĩa"
-                  name="TEN_LOAI_DIA"
-                  value={tenLoaiDia}
-                  onChange={handleTenLoaiDiaChange}
+                  label="Tên vật liệu" // Thay đổi label
+                  name="TEN_VAT_LIEU" // Thay đổi tên trường
+                  value={tenVatLieu}
+                  onChange={handleTenVatLieuChange}
                 />
               </Grid>
             </Grid>
@@ -205,7 +226,7 @@ const LoaiDiaUpdate = () => {
                     },
                   }}
                   variant="contained"
-                  href={`/loai-dia`}
+                  href={`/vat-lieu`} // Thay đổi đường dẫn
                 >
                   {/* icon */}
                   <KeyboardArrowLeft />
@@ -233,20 +254,20 @@ const LoaiDiaUpdate = () => {
               </Grid>
             </Grid>
           </form>
-          {/* Hiển thị danh sách loại đĩa */}
+          {/* Hiển thị danh sách vật liệu */}
           <Box mt={2} p={2} border={1} borderRadius={2}>
             <Typography variant="body1" mt={2}>
-              Danh sách loại đĩa đã tồn tại:
+              Danh sách vật liệu đã tồn tại: {/* Thay đổi text */}
             </Typography>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Tên Loại Đĩa</TableCell>
+                  <TableCell>Tên Vật Liệu</TableCell> {/* Thay đổi text */}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredLoaiDiaList.map((loaiDia) => (
-                  <TableRow key={loaiDia.MA_LOAI_DIA}>
+                {filteredVatLieuList.map((vatLieu) => (
+                  <TableRow key={vatLieu.AUTO_ID}>
                     <TableCell
                       sx={{
                         width: "100%",
@@ -254,7 +275,7 @@ const LoaiDiaUpdate = () => {
                         borderBottom: "1px solid rgba(224, 224, 224, 0.28)",
                       }}
                     >
-                      {loaiDia.TEN_LOAI_DIA}
+                      {vatLieu.TEN_VAT_LIEU} {/* Thay đổi tên trường */}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -268,8 +289,18 @@ const LoaiDiaUpdate = () => {
           {message}
         </Alert>
       </Snackbar>
+      <CenteredNotification
+        open={notificationOpen}
+        onClose={handleCloseNotification}
+        message={
+          <h3 style={{ color: "red" }}>
+            Bạn không có quyền truy cập chức năng này
+          </h3>
+        }
+        onAfterClose={() => navigate("/")}
+      />
     </Paper>
   );
 };
 
-export default LoaiDiaUpdate;
+export default VatLieuUpdate;

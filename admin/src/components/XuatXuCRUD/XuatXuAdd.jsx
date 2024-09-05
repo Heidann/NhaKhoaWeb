@@ -20,20 +20,21 @@ import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 
-const CvAdd = () => {
+const XuatXuAdd = () => {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [tenChucVu, setTenChucVu] = useState("");
-  const [chucVuList, setChucVuList] = useState([]);
+  const [tenXuatXu, setTenXuatXu] = useState("");
+  const [xuatXuList, setXuatXuList] = useState([]);
+  const [filteredXuatXuList, setFilteredXuatXuList] = useState([]); // State for filtered xuat xu list
 
   useEffect(() => {
-    const fetchChucVuList = async () => {
+    const fetchXuatXuList = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3000/api/admin/Chuc_Vu",
+          "http://localhost:3000/api/admin/Xuat_Xu",
           {
             method: "GET",
             headers: {
@@ -47,39 +48,72 @@ const CvAdd = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setChucVuList(data);
+        console.log(data);
+
+        setXuatXuList(data);
+        setFilteredXuatXuList(data); // Initialize filtered list
+
+        console.log(xuatXuList);
+        console.log(filteredXuatXuList);
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
       }
     };
 
-    fetchChucVuList();
+    fetchXuatXuList();
   }, []);
 
-  const handleChange = (event) => {
-    setTenChucVu(event.target.value);
+  // search xuat xu list
+  const handleTenXuatXuChange = (event) => {
+    setTenXuatXu(event.target.value);
+    // Filter xuat xu list based on input
+    const filteredList = xuatXuList.filter((xuatXu) =>
+      xuatXu.TEN_XUAT_XU.toLowerCase().includes(
+        event.target.value.toLowerCase()
+      )
+    );
+    setFilteredXuatXuList(filteredList);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    if (!tenXuatXu) {
+      setOpenSnackbar(true);
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Vui lòng nhập tên xuất xứ!");
+      return;
+    }
+
+    // Kiểm tra xem xuất xứ đã tồn tại hay chưa
+    const isXuatXuExists = filteredXuatXuList.some(
+      (xuatXu) => xuatXu.TEN_XUAT_XU.toLowerCase() === tenXuatXu.toLowerCase()
+    );
+
+    if (isXuatXuExists) {
+      setOpenSnackbar(true);
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Xuất xứ đã tồn tại!");
+      return;
+    }
+
     try {
-      const response = await fetch("http://localhost:3000/api/admin/Chuc_Vu", {
+      const response = await fetch("http://localhost:3000/api/admin/Xuat_Xu", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
           Authorization: "Bearer " + localStorage.getItem("token"),
         },
-        body: JSON.stringify({ TEN_CHUC_VU: tenChucVu }),
+        body: JSON.stringify({ TEN_XUAT_XU: tenXuatXu }),
       });
 
       if (response.ok) {
         setSnackbarSeverity("success");
-        setSnackbarMessage("Thêm chức vụ thành công!");
+        setSnackbarMessage("Thêm xuất xứ thành công!");
         setOpenSnackbar(true);
-        navigate("/chuc-vu");
+        navigate("/xuat-xu"); // Điều hướng đến trang danh sách xuất xứ
       } else {
         // Xử lý lỗi từ server
         if (response.status === 403) {
@@ -126,17 +160,17 @@ const CvAdd = () => {
           />
         </Grid>
         <Grid item xs={12} md={9}>
-          <Title>Thêm chức vụ</Title>
+          <Title>Thêm xuất xứ</Title>
           <Divider />
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2} mt={2}>
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Tên chức vụ"
-                  name="TEN_CHUC_VU"
-                  value={tenChucVu}
-                  onChange={handleChange}
+                  label="Tên xuất xứ"
+                  name="TEN_XUAT_XU"
+                  value={tenXuatXu}
+                  onChange={handleTenXuatXuChange}
                 />
               </Grid>
             </Grid>
@@ -154,7 +188,7 @@ const CvAdd = () => {
                     },
                   }}
                   variant="contained"
-                  href={`/chuc-vu`}
+                  href={`/xuat-xu`} // Điều hướng đến trang danh sách xuất xứ
                 >
                   {/* icon */}
                   <KeyboardArrowLeft />
@@ -182,20 +216,20 @@ const CvAdd = () => {
               </Grid>
             </Grid>
           </form>
-          {/* Hiển thị danh sách chức vụ */}
+          {/* Hiển thị danh sách xuất xứ */}
           <Box mt={2} p={2} border={1} borderRadius={2}>
             <Typography variant="body1" mt={2}>
-              Danh sách chức vụ đã tồn tại:
+              Danh sách xuất xứ đã tồn tại:
             </Typography>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Tên Chức Vụ</TableCell>
+                  <TableCell>Tên Xuất Xứ</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {chucVuList.map((chucVu) => (
-                  <TableRow key={chucVu.AUTO_ID}>
+                {filteredXuatXuList.map((xuatXu) => (
+                  <TableRow key={xuatXu.AUTO_ID}>
                     <TableCell
                       sx={{
                         width: "100%",
@@ -203,7 +237,7 @@ const CvAdd = () => {
                         borderBottom: "1px solid rgba(224, 224, 224, 0.28)",
                       }}
                     >
-                      {chucVu.TEN_CHUC_VU}
+                      {xuatXu.TEN_XUAT_XU}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -225,4 +259,4 @@ const CvAdd = () => {
   );
 };
 
-export default CvAdd;
+export default XuatXuAdd;

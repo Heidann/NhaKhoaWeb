@@ -4,7 +4,6 @@ import {
   Grid,
   Typography,
   Paper,
-  Box,
   Divider,
   Button,
   Dialog,
@@ -12,32 +11,48 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Alert, // Import Alert component
 } from "@mui/material";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import EditIcon from "@mui/icons-material/Edit";
 import Title from "../Title";
+import CenteredNotification from "../CenteredNotification";
 
-const LoaiDiaDetail = () => {
+const VatLieuDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [loaiDiaDetail, setLoaiDiaDetail] = useState(null);
+  const [vatLieuDetail, setVatLieuDetail] = useState(null); // Đổi tên thành vatLieuDetail
   const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+
+  // Thông báo khi không có quyền truy cập
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const handleCloseNotification = () => {
+    setNotificationOpen(false);
+  };
 
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/admin/Loai_Dia/${id}`
+          `http://localhost:3000/api/admin/Vat_Lieu/${id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setLoaiDiaDetail(data);
+        setVatLieuDetail(data[0]); // Gán data[0] cho vatLieuDetail
       } catch (error) {
-        setError(error);
+        setError(error.message); // Hiển thị thông báo lỗi
         console.error("Error fetching data detail:", error);
       }
     };
@@ -48,17 +63,26 @@ const LoaiDiaDetail = () => {
   const handleDelete = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/admin/Loai_Dia/${id}`,
+        `http://localhost:3000/api/admin/Vat_Lieu/${id}`,
         {
           method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
         }
       );
-      if (!response.ok) {
+
+      if (response.status === 403) {
+        setNotificationOpen(true);
+        return;
+      } else if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      navigate("/loai-dia");
+      navigate("/vat-lieu");
     } catch (error) {
-      setError(error);
+      setError(error.message); // Hiển thị thông báo lỗi
       console.error("Error deleting data:", error);
     }
   };
@@ -74,11 +98,15 @@ const LoaiDiaDetail = () => {
 
   // handle error
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return (
+      <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
+        <Alert severity="error">{error}</Alert>
+      </Paper>
+    );
   }
 
   // handle loading
-  if (!loaiDiaDetail) {
+  if (!vatLieuDetail) {
     return <div>Loading...</div>;
   }
 
@@ -97,17 +125,18 @@ const LoaiDiaDetail = () => {
           />
         </Grid>
         <Grid item xs={12} md={9}>
-          <Title>Chi tiết loại đĩa</Title>
+          <Title>Chi tiết vật liệu</Title> {/* Sửa title */}
           <Divider />
           <Grid container spacing={2} mt={2}>
             <Grid item xs={12} md={6}>
               <Typography variant="body1" gutterBottom>
-                <b>ID:</b> {loaiDiaDetail[0].AUTO_ID}
+                <b>ID:</b> {vatLieuDetail.AUTO_ID}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography variant="body1" gutterBottom>
-                <b>Tên loại đĩa:</b> {loaiDiaDetail[0].TEN_LOAI_DIA}
+                <b>Tên vật liệu:</b> {vatLieuDetail.TEN_VAT_LIEU}{" "}
+                {/* Sửa tên trường */}
               </Typography>
             </Grid>
             {/* Add more fields as needed */}
@@ -128,7 +157,7 @@ const LoaiDiaDetail = () => {
               },
             }}
             variant="contained"
-            href={`/loai-dia`}
+            href={`/vat-lieu`} // Sửa đường dẫn
           >
             {/* icon */}
             <KeyboardArrowLeft />
@@ -148,7 +177,7 @@ const LoaiDiaDetail = () => {
               },
             }}
             variant="contained"
-            href={`/loai-dia/${id}/chinh-sua`} // Link to update page
+            href={`/vat-lieu/${id}/chinh-sua`} // Sửa đường dẫn
           >
             <EditIcon />
             Cập nhật
@@ -181,11 +210,11 @@ const LoaiDiaDetail = () => {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          {"Xác nhận xóa loại đĩa?"}
+          {"Xác nhận xóa vật liệu?"} {/* Sửa title */}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Bạn có chắc chắn muốn xóa loại đĩa này? Hành động này không thể hoàn
+            Bạn có chắc chắn muốn xóa vật liệu này? Hành động này không thể hoàn
             tác.
           </DialogContentText>
         </DialogContent>
@@ -196,8 +225,19 @@ const LoaiDiaDetail = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      {/* Thông báo khi không có quyền truy cập */}
+      <CenteredNotification
+        open={notificationOpen}
+        onClose={handleCloseNotification}
+        message={
+          <h3 style={{ color: "red" }}>
+            Bạn không có quyền truy cập chức năng này
+          </h3>
+        }
+        onAfterClose={() => navigate("/")}
+      />
     </Paper>
   );
 };
 
-export default LoaiDiaDetail;
+export default VatLieuDetail;

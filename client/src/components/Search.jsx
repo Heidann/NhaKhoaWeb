@@ -127,7 +127,7 @@ export default function Search() {
                 }}
               >
                 <TextField
-                  placeholder="C363205"
+                  placeholder="H36365"
                   variant="outlined"
                   margin="normal"
                   required

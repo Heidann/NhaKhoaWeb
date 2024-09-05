@@ -12,12 +12,20 @@ import { useMemo, Fragment } from "react";
 
 import Title from "../components/Title.jsx";
 import DataTable from "../components/DataTable.jsx";
+import CenteredNotification from "../components/CenteredNotification.jsx";
 
 export default function NhanVienPage() {
   const navigate = useNavigate(); // điều hướng trang
 
   const [data, setData] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Thông báo khi không có quyền truy cập
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const handleCloseNotification = () => {
+    setNotificationOpen(false);
+  };
+
   const columns = [
     { key: "AUTO_ID", label: "ID" },
     { key: "TEN_TAI_KHOAN", label: "Tên Tài Khoản" },
@@ -27,7 +35,20 @@ export default function NhanVienPage() {
   ];
 
   const fetchInfo = async () => {
-    const response = await fetch("http://localhost:3000/api/admin/Tai_Khoan");
+    const response = await fetch("http://localhost:3000/api/admin/Tai_Khoan", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+    if (response.status === 403) {
+      setNotificationOpen(true);
+      return;
+    } else if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     const data = await response.json();
     setData(data);
     console.log("Data fetched successfully:", data);
@@ -103,6 +124,16 @@ export default function NhanVienPage() {
           </Paper>
         </Grid>
       </Grid>
+      <CenteredNotification
+        open={notificationOpen}
+        onClose={handleCloseNotification}
+        message={
+          <h3 style={{ color: "red" }}>
+            Bạn không có quyền truy cập chức năng này
+          </h3>
+        }
+        onAfterClose={() => navigate("/")}
+      />
     </>
   );
 }
