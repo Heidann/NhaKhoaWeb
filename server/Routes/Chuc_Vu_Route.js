@@ -13,9 +13,9 @@ const router = Router();
 //********** PRIVATE ROUTES ********//
 router.get("/", protect, getAllChuc_VuController);
 router.get("/:id", protect, getChuc_VuController);
+router.post("/", protect, createChuc_VuController);
+router.put("/:id", protect, updateChuc_VuController);
 //********** ADMIN ROUTES ********//
-router.post("/", protect, admin, createChuc_VuController);
-router.put("/:id", protect, admin, updateChuc_VuController);
-router.delete("/:id", protect, admin, deleteChuc_VuController);
+router.delete("/:id", protect, deleteChuc_VuController);
 
 export default router;

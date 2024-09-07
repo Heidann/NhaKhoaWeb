@@ -106,6 +106,13 @@ const LaboDetail = () => {
   if (!laboDetail) {
     return <div>Loading...</div>;
   }
+  const styleText = {
+    fontSize: 18,
+    lineHeight: 1.4,
+    textAlign: "left",
+    color: "rgba(0, 0, 0, 0.87)",
+    marginLeft: "auto",
+  };
 
   return (
     <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
@@ -126,12 +133,12 @@ const LaboDetail = () => {
           <Divider />
           <Grid container spacing={2} mt={2}>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>ID:</b> {laboDetail[0].AUTO_ID}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Tên labo:</b> {laboDetail[0].TEN_LABO}
               </Typography>
             </Grid>

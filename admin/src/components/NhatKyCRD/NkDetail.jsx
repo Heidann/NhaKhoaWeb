@@ -43,6 +43,10 @@ const NkDetail = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
+        data.forEach((item) => {
+          item.NGAY_KICH_HOAT = item.NGAY_KICH_HOAT.slice(0, 10);
+          item.NGAY_HET_HAN = item.NGAY_HET_HAN.slice(0, 10);
+        });
         setNkDetail(data);
       } catch (error) {
         setError(error);
@@ -90,6 +94,13 @@ const NkDetail = () => {
   if (!nkDetail) {
     return <div>Loading...</div>;
   }
+  const styleText = {
+    fontSize: 18,
+    lineHeight: 1.4,
+    textAlign: "left",
+    color: "rgba(0, 0, 0, 0.87)",
+    marginLeft: "auto",
+  };
 
   return (
     <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
@@ -110,83 +121,74 @@ const NkDetail = () => {
           <Divider />
           <Grid container spacing={2} mt={2}>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>ID:</b> {nkDetail[0].AUTO_ID}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
-                <b>ID Thẻ Bảo Hành:</b> {nkDetail[0].THE_BAO_HANH_ID}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
-                <b>Tên Khách Hàng:</b> {nkDetail[0].TEN_KHACH}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
-                <b>Mã Thẻ Bảo Hành:</b> {nkDetail[0].MA_THE_BAO_HANH}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Nha Khoa:</b> {nkDetail[0].NHA_KHOA}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
-                <b>Nha Sĩ:</b> {nkDetail[0].BAC_SI}
+              <Typography variant="body1" gutterBottom sx={styleText}>
+                <b>Mã Thẻ Bảo Hành:</b> {nkDetail[0].MA_THE_BAO_HANH}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
-                <b>Ngày Kích Hoạt:</b> {nkDetail[0].NGAY_KICH_HOAT}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
-                <b>Ngày Hết Hạn:</b> {nkDetail[0].NGAY_HET_HAN}
+              <Typography variant="body1" gutterBottom sx={styleText}>
+                <b>Tên Khách Hàng:</b> {nkDetail[0].TEN_KHACH}
               </Typography>
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
-                <b>ID Labo:</b> {nkDetail[0].LABO_ID}
+              <Typography variant="body1" gutterBottom sx={styleText}>
+                <b>Nha Sĩ:</b> {nkDetail[0].BAC_SI}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
+                <b>Ngày Kích Hoạt:</b> {nkDetail[0].NGAY_KICH_HOAT}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Tên Labo:</b> {nkDetail[0].TEN_LABO}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
-                <b>ID Loại Dia:</b> {nkDetail[0].LOAI_DIA_ID}
+              <Typography variant="body1" gutterBottom sx={styleText}>
+                <b>Ngày Hết Hạn:</b> {nkDetail[0].NGAY_HET_HAN}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
-                <b>Tên Loại Dia:</b> {nkDetail[0].TEN_LOAI_DIA}
+              <Typography variant="body1" gutterBottom sx={styleText}>
+                <b>Tên Vật Liệu:</b> {nkDetail[0].TEN_VAT_LIEU}
               </Typography>
             </Grid>
+
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Số Lượng Răng:</b> {nkDetail[0].SO_LUONG_RANG}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
+                <b>Tên Xuất Xứ:</b> {nkDetail[0].TEN_XUAT_XU}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Vị Trí Răng:</b> {nkDetail[0].VI_TRI_RANG}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Ngày Tạo:</b> {nkDetail[0].CREATE_AT}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Tên Nhân Viên:</b> {nkDetail[0].TEN_NHAN_VIEN}
               </Typography>
             </Grid>
@@ -212,44 +214,6 @@ const NkDetail = () => {
             {/* icon */}
             <KeyboardArrowLeft />
             Quay Lại
-          </Button>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Button
-            sx={{
-              padding: "10px 20px",
-              width: "100%",
-              backgroundColor: "#f44336",
-              color: "white",
-              textTransform: "capitalize",
-              "&:hover": {
-                backgroundColor: "#e53935",
-              },
-            }}
-            variant="contained"
-            onClick={() => setOpenDialog(true)}
-          >
-            <DeleteForeverIcon />
-            Xóa
-          </Button>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Button
-            sx={{
-              padding: "10px 20px",
-              width: "100%",
-              backgroundColor: "#4CAF50",
-              color: "white",
-              textTransform: "capitalize",
-              "&:hover": {
-                backgroundColor: "#45a049",
-              },
-            }}
-            variant="contained"
-            href={`/nhat-ky/${id}/chinh-sua`} // Update to the correct route
-          >
-            <EditIcon />
-            Cập nhật
           </Button>
         </Grid>
       </Grid>

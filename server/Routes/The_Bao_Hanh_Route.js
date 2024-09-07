@@ -23,8 +23,8 @@ router.get(
 );
 router.get("/code/:maTheBaoHanh", protect, getTheBaoHanhID_By_MaController);
 router.get("/:id", protect, getThe_Bao_HanhController);
+router.post("/", protect, createThe_Bao_HanhController);
+router.put("/:id", protect, updateThe_Bao_HanhController);
 //********** ADMIN ROUTES ********//
-router.post("/", protect, admin, createThe_Bao_HanhController);
-router.put("/:id", protect, admin, updateThe_Bao_HanhController);
 router.delete("/:id", protect, admin, deleteThe_Bao_HanhController);
 export default router;

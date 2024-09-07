@@ -16,7 +16,7 @@ router.get("/:id", protect, getVat_LieuController);
 router.post("/", protect, createVat_LieuController);
 router.put("/:id", protect, updateVat_LieuController);
 
+router.delete("/:id", protect, deleteVat_LieuController);
 //********** ADMIN ROUTES ********//
-router.delete("/:id", protect, admin, deleteVat_LieuController);
 
 export default router;

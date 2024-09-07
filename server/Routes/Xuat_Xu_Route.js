@@ -14,7 +14,7 @@ router.get("/", protect, getAllXuat_XuController);
 router.get("/:id", protect, getXuat_XuController);
 router.post("/", protect, createXuat_XuController);
 router.put("/:id", protect, updateXuat_XuController);
+router.delete("/:id", protect, deleteXuat_XuController);
 //********** ADMIN ROUTES ********//
-router.delete("/:id", protect, admin, deleteXuat_XuController);
 
 export default router;

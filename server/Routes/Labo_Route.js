@@ -13,9 +13,8 @@ const router = Router();
 router.get("/", protect, getAllLaboController);
 router.get("/:id", protect, getLaboController);
 router.post("/", protect, createLaboController);
-
+router.put("/:id", protect, updateLaboController);
+router.delete("/:id", protect, deleteLaboController);
 //********** ADMIN ROUTES ********//
-router.put("/:id", protect, admin, updateLaboController);
-router.delete("/:id", protect, admin, deleteLaboController);
 
 export default router;

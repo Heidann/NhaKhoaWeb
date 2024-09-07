@@ -176,7 +176,7 @@ const KhAdd = () => {
 
   const handleConfirmationDialogConfirm = () => {
     // Navigate to add new bill page with THE_BAO_HANH_ID
-    navigate(`/hoa-don/add?theBaoHanhId=${maTheBaoHanh}`);
+    navigate(`/nhat-ky/them`);
   };
 
   const handleClose = (event, reason) => {

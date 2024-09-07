@@ -111,6 +111,13 @@ const KhDetail = () => {
   if (!khDetail) {
     return <div>Loading...</div>;
   }
+  const styleText = {
+    fontSize: 18,
+    lineHeight: 1.4,
+    textAlign: "left",
+    color: "rgba(0, 0, 0, 0.87)",
+    marginLeft: "auto",
+  };
 
   return (
     <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
@@ -131,32 +138,32 @@ const KhDetail = () => {
           <Divider />
           <Grid container spacing={2} mt={2}>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>ID:</b> {khDetail[0].AUTO_ID}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Tên khách hàng:</b> {khDetail[0].TEN_KHACH}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Số điện thoại:</b> {khDetail[0].SDT || "N/A"}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Mã thẻ bảo hành:</b> {khDetail[0].MA_THE_BAO_HANH}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Ngày tạo:</b> {khDetail[0].CREATE_AT || "N/A"}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Cập nhật cuối:</b> {khDetail[0].TEN_NHAN_VIEN || "N/A"}
               </Typography>
             </Grid>

@@ -18,14 +18,14 @@ const router = Router();
 router.post("/login/", postTaiKhoanByUserController);
 
 //********** PRIVATE ROUTES ********//
+
 router.get("/nha_si", protect, GetAllNha_SiController);
 router.get("/:id", protect, getTai_KhoanController);
 router.put("/change_password", protect, updateMatKhauController);
 router.put("/:id", protect, updateTai_KhoanController);
-
+router.get("/", protect, getAllTai_KhoanController);
+router.post("/", protect, createTai_KhoanController);
 //********** ADMIN ROUTES ********//
-router.get("/", protect, admin, getAllTai_KhoanController);
-router.post("/", protect, admin, createTai_KhoanController);
 router.delete("/:id", protect, admin, deleteTai_KhoanController);
 
 export default router;

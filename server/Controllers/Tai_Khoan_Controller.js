@@ -78,7 +78,7 @@ const postTaiKhoanByUserController = async (req, res) => {
     // Tạo JWT
     const token = generateToken(user[0].AUTO_ID);
 
-    res.status(200).json({ user, token });
+    res.status(200).json({ token });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

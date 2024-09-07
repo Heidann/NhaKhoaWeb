@@ -114,6 +114,13 @@ const TbhDetail = () => {
       </div>
     );
   }
+  const styleText = {
+    fontSize: 18,
+    lineHeight: 1.4,
+    textAlign: "left",
+    color: "rgba(0, 0, 0, 0.87)",
+    marginLeft: "auto",
+  };
 
   return (
     <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
@@ -134,46 +141,46 @@ const TbhDetail = () => {
           <Divider />
           <Grid container spacing={2} mt={2}>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>ID:</b> {theBaoHanhDetail[0].AUTO_ID || "N/A"}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Mã thẻ bảo hành:</b>{" "}
                 {theBaoHanhDetail[0].MA_THE_BAO_HANH || "N/A"}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Tên khách hàng:</b> {theBaoHanhDetail[0].TEN_KHACH || "N/A"}
               </Typography>
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Người tạo:</b> {theBaoHanhDetail[0].CREATE_BY || "N/A"}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Ngày tạo:</b> {theBaoHanhDetail[0].CREATE_AT || "N/A"}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Tên tài khoản:</b>{" "}
                 {theBaoHanhDetail[0].TEN_TAI_KHOAN || "N/A"}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Tên nhân viên:</b>{" "}
                 {theBaoHanhDetail[0].TEN_NHAN_VIEN || "N/A"}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Số điện thoại:</b> {theBaoHanhDetail[0].SDT || "N/A"}
               </Typography>
             </Grid>

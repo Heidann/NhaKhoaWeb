@@ -109,6 +109,13 @@ const VatLieuDetail = () => {
   if (!vatLieuDetail) {
     return <div>Loading...</div>;
   }
+  const styleText = {
+    fontSize: 18,
+    lineHeight: 1.4,
+    textAlign: "left",
+    color: "rgba(0, 0, 0, 0.87)",
+    marginLeft: "auto",
+  };
 
   return (
     <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
@@ -129,12 +136,12 @@ const VatLieuDetail = () => {
           <Divider />
           <Grid container spacing={2} mt={2}>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>ID:</b> {vatLieuDetail.AUTO_ID}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" gutterBottom>
+              <Typography variant="body1" gutterBottom sx={styleText}>
                 <b>Tên vật liệu:</b> {vatLieuDetail.TEN_VAT_LIEU}{" "}
                 {/* Sửa tên trường */}
               </Typography>

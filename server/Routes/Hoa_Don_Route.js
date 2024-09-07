@@ -15,8 +15,8 @@ router.get("/result/:maHoaDon", getHoa_Don_By_TheBaoHanhController);
 //********** PRIVATE ROUTES ********//
 router.post("/", protect, createHoa_DonController);
 router.get("/", protect, getAllHoa_DonController);
+router.get("/:id", protect, getHoa_DonController);
 //********** ADMIN ROUTES ********//
-router.get("/:id", protect, admin, getHoa_DonController);
 router.delete("/:id", protect, admin, deleteHoa_DonController);
 
 export default router;

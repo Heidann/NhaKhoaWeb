@@ -7,7 +7,7 @@ const router = Router();
 //********** ADMIN ROUTES ********//
 
 // Thống kê số lượng bảo hành hôm nay
-router.get("/today", protect, admin, async (req, res) => {
+router.get("/today", protect, async (req, res) => {
   try {
     const [rows] = await pool.execute(
       "SELECT GetWarrantyCountToday() AS count_today"
@@ -20,7 +20,7 @@ router.get("/today", protect, admin, async (req, res) => {
 });
 
 // Thống kê số lượng bảo hành tháng hiện tại
-router.get("/month", protect, admin, async (req, res) => {
+router.get("/month", protect, async (req, res) => {
   try {
     const [rows] = await pool.execute(
       "SELECT GetWarrantyCountMonth() AS count_month"
@@ -33,7 +33,7 @@ router.get("/month", protect, admin, async (req, res) => {
 });
 
 // Thống kê số lượng bảo hành quý hiện tại
-router.get("/quarter", protect, admin, async (req, res) => {
+router.get("/quarter", protect, async (req, res) => {
   try {
     const [rows] = await pool.execute(
       "SELECT GetWarrantyCountQuarter() AS count_quarter"
@@ -46,7 +46,7 @@ router.get("/quarter", protect, admin, async (req, res) => {
 });
 
 // Thống kê số lượng bảo hành năm hiện tại
-router.get("/year", protect, admin, async (req, res) => {
+router.get("/year", protect, async (req, res) => {
   try {
     const [rows] = await pool.execute(
       "SELECT GetWarrantyCountQuarter() AS count_year"

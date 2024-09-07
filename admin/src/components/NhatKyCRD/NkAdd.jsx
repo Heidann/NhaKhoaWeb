@@ -222,17 +222,6 @@ const NkAdd = () => {
       }
 
       try {
-        console.log(
-          theBaoHanhId,
-          nhaKhoa,
-          tenBacSi,
-          soThang,
-          vatLieuId,
-          laboId,
-          xuatXuId,
-          soLuongRang,
-          viTriRang
-        );
         const Nkresponse = await fetch(
           `http://localhost:3000/api/admin/Hoa_Don`,
           {
@@ -277,8 +266,20 @@ const NkAdd = () => {
     setShowConfirmationDialog(false);
   };
 
-  const handleConfirmationDialogConfirm = () => {
-    navigate(`/hoa-don/add?theBaoHanhId=${maTheBaoHanh}`);
+  const handleConfirmationDialogConfirm = (action) => {
+    setShowConfirmationDialog(false); // Đóng dialog
+
+    if (action === "viewDetail") {
+      // Chuyển hướng đến trang xem chi tiết hóa đơn
+      // Thay thế '/hoa-don/chi-tiet/id' bằng đường dẫn thực tế
+      window.open(
+        `http://localhost:5174/tra-cuu?maTheBaoHanh=${maTheBaoHanh}`,
+        "_blank"
+      );
+    } else {
+      // Chuyển hướng về danh sách nhật ký
+      navigate("/nhat-ky");
+    }
   };
 
   const handleClose = (event, reason) => {
@@ -556,18 +557,24 @@ const NkAdd = () => {
         open={showConfirmationDialog}
         onClose={handleConfirmationDialogClose}
       >
-        <DialogTitle>Thêm hóa đơn mới cho khách hàng?</DialogTitle>
+        <DialogTitle>Thêm nhật ký thành công!</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Bạn có muốn thêm hóa đơn mới cho khách hàng này?
+            Bạn muốn thực hiện hành động nào tiếp theo?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => navigate("/nhat-ky")} autoFocus>
+          <Button
+            onClick={() => handleConfirmationDialogConfirm("backToList")}
+            autoFocus
+          >
             Quay lại danh sách
           </Button>
-          <Button onClick={handleConfirmationDialogConfirm} autoFocus>
-            Có
+          <Button
+            onClick={() => handleConfirmationDialogConfirm("viewDetail")}
+            autoFocus
+          >
+            Xem chi tiết hóa đơn
           </Button>
         </DialogActions>
       </Dialog>
