@@ -19,6 +19,7 @@ import {
 import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import axios from "axios";
 
 const CvAdd = () => {
   const navigate = useNavigate();
@@ -32,10 +33,9 @@ const CvAdd = () => {
   useEffect(() => {
     const fetchChucVuList = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:3000/api/admin/Chuc_Vu",
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Chuc_Vu`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -43,11 +43,7 @@ const CvAdd = () => {
             },
           }
         );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setChucVuList(data);
+        setChucVuList(response.data); // Axios tự động parse JSON
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
@@ -63,19 +59,28 @@ const CvAdd = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+    // Kiểm tra rỗng trước khi gửi request
+    if (tenChucVu.trim() === "") {
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Vui lòng nhập tên chức vụ!");
+      setOpenSnackbar(true);
+      return; // Dừng xử lý nếu tên chức vụ rỗng
+    }
     try {
-      const response = await fetch("http://localhost:3000/api/admin/Chuc_Vu", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-        body: JSON.stringify({ TEN_CHUC_VU: tenChucVu }),
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/Chuc_Vu`, // Sử dụng VITE_API_BASE_URL
+        { TEN_CHUC_VU: tenChucVu }, // Axios tự động stringify
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }
+      );
 
-      if (response.ok) {
+      if (response.status === 201) {
+        // Kiểm tra status 201 (Created)
         setSnackbarSeverity("success");
         setSnackbarMessage("Thêm chức vụ thành công!");
         setOpenSnackbar(true);
@@ -86,9 +91,9 @@ const CvAdd = () => {
           setSnackbarSeverity("error");
           setSnackbarMessage("Bạn không có quyền truy cập chức năng này!");
         } else {
-          const errorData = await response.json();
+          // Axios tự động parse JSON error
           setSnackbarSeverity("error");
-          setSnackbarMessage(errorData.message);
+          setSnackbarMessage(response.data.message || "Lỗi server");
         }
         setOpenSnackbar(true);
       }

@@ -15,7 +15,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SignInPage.css";
 import Alert from "@mui/material/Alert";
-
+import axios from "axios";
 const defaultTheme = createTheme();
 
 const SignInPage = () => {
@@ -29,49 +29,45 @@ const SignInPage = () => {
     setError(null); // Xóa thông báo lỗi khi submit
 
     try {
-      const login = await fetch(
-        "http://localhost:3000/api/admin/Tai_Khoan/login",
+      // Sử dụng Axios để gửi yêu cầu POST
+      const response = await axios.post(
+        "http://localhost:3000/api/admin/Tai_Khoan/login", // Thay thế bằng URL API của bạn
         {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            TEN_TAI_KHOAN: username,
-            MAT_KHAU: password,
-          }),
+          TEN_TAI_KHOAN: username,
+          MAT_KHAU: password,
         }
       );
 
-      if (login.ok) {
-        const data = await login.json();
+      // Lấy dữ liệu từ response.data
+      const data = response.data;
 
-        // Lưu trữ access token trong localStorage
-        localStorage.setItem("token", data.token);
+      // Lưu trữ access token trong localStorage
+      localStorage.setItem("token", data.token);
 
-        // Lưu trữ username trong localStorage
-        localStorage.setItem("TEN_TAI_KHOAN", data.TEN_TAI_KHOAN);
+      // Lưu trữ username trong localStorage
+      localStorage.setItem("TEN_TAI_KHOAN", data.user[0].TEN_TAI_KHOAN);
 
-        // Lưu trữ refresh token trong localStorage
-        localStorage.setItem("refreshToken", data.refreshToken);
+      // Lưu trữ refresh token trong localStorage
+      localStorage.setItem("refreshToken", data.refreshToken);
 
-        navigate("/");
-      } else {
-        const errorData = await login.json();
-        console.error("Lỗi đăng nhập", errorData);
-
-        // Kiểm tra message từ server và hiển thị thông báo lỗi tương ứng
-        if (errorData.message === "Tài khoản không tồn tại") {
-          setError("Sai tên tài khoản");
-        } else if (errorData.message === "Sai mật khẩu") {
-          setError("Sai mật khẩu");
-        } else {
-          setError("Lỗi đăng nhập. Vui lòng thử lại sau.");
-        }
-      }
+      navigate("/");
     } catch (error) {
-      console.error("Lỗi kết nối đến server", error);
-      setError("Lỗi kết nối đến server. Vui lòng thử lại sau.");
+      // Xử lý lỗi từ Axios
+      if (error.response) {
+        // Lỗi từ server (ví dụ: 401, 404)
+        console.error("Lỗi server:", error.response.data);
+
+        // Hiển thị thông báo lỗi từ server
+        setError(error.response.data.message || "Lỗi đăng nhập.");
+      } else if (error.request) {
+        // Yêu cầu được gửi đi nhưng không nhận được phản hồi
+        console.error("Lỗi kết nối:", error.request);
+        setError("Lỗi kết nối đến server.");
+      } else {
+        // Lỗi khác (ví dụ: lỗi khi tạo request)
+        console.error("Lỗi:", error.message);
+        setError("Lỗi đăng nhập. Vui lòng thử lại sau.");
+      }
     }
   };
 

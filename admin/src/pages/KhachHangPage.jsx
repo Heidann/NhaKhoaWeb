@@ -14,7 +14,7 @@ import { useState, useEffect } from "react";
 import { useMemo, Fragment } from "react";
 import Title from "../components/Title.jsx";
 import DataTable from "../components/DataTable.jsx";
-
+import axios from "axios";
 export default function KhachHangPage() {
   const navigate = useNavigate(); // điều hướng trang
 
@@ -28,17 +28,22 @@ export default function KhachHangPage() {
   ];
 
   const fetchInfo = async () => {
-    const response = await fetch("http://localhost:3000/api/admin/Khach_Hang", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-    });
-    const data = await response.json();
-    setData(data);
-    console.log("Data fetched successfully:", data);
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/Khach_Hang`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }
+      );
+
+      setData(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
   };
 
   useEffect(() => {

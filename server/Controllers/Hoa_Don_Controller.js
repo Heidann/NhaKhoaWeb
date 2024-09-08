@@ -76,7 +76,7 @@ const createHoa_DonController = async (req, res) => {
       VI_TRI_RANG,
       CREATE_BY
     );
-    res.status(201).json(req.body);
+    res.status(200).json(req.body);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

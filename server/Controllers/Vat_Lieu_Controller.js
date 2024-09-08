@@ -33,7 +33,7 @@ const createVat_LieuController = async (req, res) => {
   try {
     const { TEN_VAT_LIEU } = req.body;
     const newThe_Bao_Hanh = await createVat_Lieu(TEN_VAT_LIEU);
-    res.status(201).json(req.body);
+    res.status(200).json(req.body);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

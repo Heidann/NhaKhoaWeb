@@ -33,7 +33,7 @@ const createLaboController = async (req, res) => {
   try {
     const { TEN_LABO } = req.body;
     const newLabo = await createLabo(TEN_LABO);
-    res.status(201).json(req.body);
+    res.status(200).json(req.body);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

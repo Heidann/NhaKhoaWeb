@@ -74,9 +74,9 @@ const createKhach_HangController = async (req, res) => {
       TEN_KHACH,
       THE_BAO_HANH_ID,
       CREATE_BY,
-      SDT
+      SDT || null
     );
-    res.status(201).json({ message: "Thêm thành công!" });
+    res.status(200).json({ message: "Thêm thành công!" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -96,7 +96,7 @@ const updateKhach_HangController = async (req, res) => {
       SDT,
       CREATE_BY
     );
-    res.status(201).json({ message: "Cập nhật thành công!" });
+    res.status(200).json({ message: "Cập nhật thành công!" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

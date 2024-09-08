@@ -9,18 +9,6 @@ export default function DashboardPage() {
   return (
     <>
       <Grid container spacing={3} sx={{}}>
-        {/* --- Khu vực thông tin --- */}
-
-        {/* <ThongKePage
-          sx={{
-            p: 2,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-around",
-            height: 240,
-          }}
-        /> */}
-
         {/* --- Khu vực button điều hướng --- */}
         <Grid item xs={12} md={4} lg={4}>
           <Button

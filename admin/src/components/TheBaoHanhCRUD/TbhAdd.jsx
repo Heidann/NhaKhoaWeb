@@ -13,6 +13,7 @@ import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import CenteredNotification from "../CenteredNotification";
+import axios from "axios";
 
 const TbhAdd = () => {
   const navigate = useNavigate();
@@ -38,26 +39,22 @@ const TbhAdd = () => {
       return;
     }
 
-    const response = await fetch(
-      `http://localhost:3000/api/admin/The_Bao_Hanh`,
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL}/The_Bao_Hanh`, // Sử dụng VITE_API_BASE_URL
+      { SO_LUONG_THE_BAO_HANH: soLuongThe },
       {
-        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
           Authorization: "Bearer " + localStorage.getItem("token"),
         },
-        body: JSON.stringify({
-          SO_LUONG_THE_BAO_HANH: soLuongThe,
-        }),
       }
     );
-    if (response.ok) {
-      // Xử lý khi thêm thẻ bảo hành thành công
+
+    if (response.status === 200) {
       setOpen(true);
       setSeverity("success");
       setMessage("Thêm thẻ bảo hành thành công!");
-      // Chuyển hướng về trang danh sách thẻ bảo hành
       navigate("/the-bao-hanh");
     } else if (response.status === 403) {
       setNotificationOpen(true);

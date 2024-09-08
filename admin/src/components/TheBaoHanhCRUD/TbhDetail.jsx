@@ -15,7 +15,7 @@ import {
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import CenteredNotification from "../CenteredNotification";
-
+import axios from "axios";
 import Title from "../Title";
 
 const TbhDetail = () => {
@@ -34,10 +34,9 @@ const TbhDetail = () => {
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/The_Bao_Hanh/${id}`,
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/The_Bao_Hanh/${id}`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -45,17 +44,17 @@ const TbhDetail = () => {
             },
           }
         );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        if (data.length === 0) {
-          // Nếu data là mảng rỗng, hiển thị thông báo
 
-          console.log("Data is empty");
-          setOpenDialog(true);
+        if (response.status === 200) {
+          if (response.data.length === 0) {
+            // Nếu data là mảng rỗng, hiển thị thông báo
+            console.log("Data is empty");
+            setOpenDialog(true);
+          } else {
+            setTheBaoHanhDetail(response.data);
+          }
         } else {
-          setTheBaoHanhDetail(data);
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
       } catch (error) {
         setError(error.message); // Hiển thị thông báo lỗi
@@ -68,10 +67,9 @@ const TbhDetail = () => {
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/admin/The_Bao_Hanh/${id}`,
+      const response = await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/The_Bao_Hanh/${id}`, // Sử dụng VITE_API_BASE_URL
         {
-          method: "DELETE",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
@@ -79,19 +77,20 @@ const TbhDetail = () => {
           },
         }
       );
-      if (response.status === 403) {
+
+      if (response.status === 200) {
+        navigate("/the-bao-hanh");
+      } else if (response.status === 403) {
         setNotificationOpen(true);
         return;
-      } else if (!response.ok) {
+      } else {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      navigate("/the-bao-hanh");
     } catch (error) {
       setError(error);
       console.error("Error deleting data:", error);
     }
   };
-
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };

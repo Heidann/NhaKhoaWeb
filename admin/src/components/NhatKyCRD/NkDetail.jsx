@@ -1,37 +1,23 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import {
-  Grid,
-  Typography,
-  Paper,
-  Box,
-  Divider,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-} from "@mui/material";
+import { Grid, Typography, Paper, Divider, Button } from "@mui/material";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
-import EditIcon from "@mui/icons-material/Edit";
-import Title from "../Title";
 
+import Title from "../Title";
+import axios from "axios";
 const NkDetail = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
+
   const [nkDetail, setNkDetail] = useState(null);
   const [error, setError] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/Hoa_Don/${id}`,
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Hoa_Don/${id}`,
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -39,15 +25,17 @@ const NkDetail = () => {
             },
           }
         );
-        if (!response.ok) {
+
+        if (response.status === 200) {
+          const data = response.data;
+          data.forEach((item) => {
+            item.NGAY_KICH_HOAT = item.NGAY_KICH_HOAT.slice(0, 10);
+            item.NGAY_HET_HAN = item.NGAY_HET_HAN.slice(0, 10);
+          });
+          setNkDetail(data);
+        } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        data.forEach((item) => {
-          item.NGAY_KICH_HOAT = item.NGAY_KICH_HOAT.slice(0, 10);
-          item.NGAY_HET_HAN = item.NGAY_HET_HAN.slice(0, 10);
-        });
-        setNkDetail(data);
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
@@ -56,34 +44,6 @@ const NkDetail = () => {
 
     fetchDataDetail();
   }, [id]);
-
-  const handleDelete = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/admin/Hoa_Don/${id}`, // Update API endpoint
-        {
-          method: "DELETE",
-        }
-      );
-      if (response.ok) {
-        setOpenDialog(true);
-        alert("Xóa thành công");
-      }
-      navigate("/nhat-ky"); // Update to the correct route
-    } catch (error) {
-      setError(error);
-      console.error("Error deleting data:", error);
-    }
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-  };
-
-  const handleConfirmDelete = () => {
-    handleDelete();
-    handleCloseDialog();
-  };
 
   // handle error
   if (error) {
@@ -217,28 +177,6 @@ const NkDetail = () => {
           </Button>
         </Grid>
       </Grid>
-      <Dialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          {"Xác nhận xóa nhật ký?"} {/* Update dialog title */}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Bạn có chắc chắn muốn xóa nhật ký này? Hành động này không thể hoàn
-            tác.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Hủy</Button>
-          <Button onClick={handleConfirmDelete} autoFocus>
-            Xóa
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Paper>
   );
 };

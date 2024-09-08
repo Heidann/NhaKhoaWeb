@@ -51,7 +51,7 @@ const getTheBaoHanhID_By_MaController = async (req, res) => {
     const { maTheBaoHanh } = req.params;
     const The_Bao_Hanh = await GetTheBaoHanhID_By_Ma(maTheBaoHanh);
     if (The_Bao_Hanh) {
-      res.json(The_Bao_Hanh);
+      res.status(200).json(The_Bao_Hanh);
     } else {
       res.status(404).json({ message: "Không tìm thấy" });
     }
@@ -64,7 +64,7 @@ const createThe_Bao_HanhController = async (req, res) => {
   try {
     const { SO_LUONG_THE_BAO_HANH } = req.body;
     const newThe_Bao_Hanh = await createThe_Bao_Hanh(SO_LUONG_THE_BAO_HANH);
-    res.status(201).json(req.body);
+    res.status(200).json(req.body);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -14,7 +14,7 @@ import {
 import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
-
+import axios from "axios";
 const CvUpdate = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -31,8 +31,8 @@ const CvUpdate = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/Chuc_Vu/${id}`,
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Chuc_Vu/${id}`, // Sử dụng VITE_API_BASE_URL
           {
             headers: {
               "Content-Type": "application/json",
@@ -41,11 +41,8 @@ const CvUpdate = () => {
             },
           }
         );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setChucVuData(data[0]); // Assuming data is an array and you want the first element
+
+        setChucVuData(response.data[0]); // Axios tự động parse JSON
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
@@ -66,20 +63,20 @@ const CvUpdate = () => {
     event.preventDefault();
 
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/admin/Chuc_Vu/${id}`,
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_BASE_URL}/Chuc_Vu/${id}`, // Sử dụng VITE_API_BASE_URL
+        chucVuData, // Axios tự động stringify data
         {
-          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
             Authorization: "Bearer " + localStorage.getItem("token"),
           },
-          body: JSON.stringify(chucVuData),
         }
       );
 
-      if (response.ok) {
+      if (response.status === 200) {
+        // Kiểm tra status 200 (OK)
         setSnackbarSeverity("success");
         setSnackbarMessage("Cập nhật thông tin chức vụ thành công!");
         setOpenSnackbar(true);
@@ -90,10 +87,10 @@ const CvUpdate = () => {
           setSnackbarSeverity("error");
           setSnackbarMessage("Bạn không có quyền truy cập chức năng này!");
         } else {
-          const errorData = await response.json();
+          // Axios tự động parse JSON error
           setSnackbarSeverity("error");
           setSnackbarMessage(
-            errorData.message || "Cập nhật thông tin chức vụ thất bại!"
+            response.data.message || "Cập nhật thông tin chức vụ thất bại!"
           );
         }
         setOpenSnackbar(true);

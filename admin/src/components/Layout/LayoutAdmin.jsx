@@ -16,6 +16,8 @@ import LogoutIcon from "@mui/icons-material/Logout"; // Import icon Logout
 import { MainListItems, SecondaryListItems } from "../listItems";
 import { Outlet, useNavigate } from "react-router-dom"; // Import useNavigate
 import KeyIcon from "@mui/icons-material/Key";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 const drawerWidth = 240;
 
 const AppBar = styled(MuiAppBar, {
@@ -67,8 +69,8 @@ const defaultTheme = createTheme();
 
 function LayoutAdmin() {
   const [open, setOpen] = useState(true);
+  const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
-
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -84,7 +86,9 @@ function LayoutAdmin() {
   const handleLogout = () => {
     // Xóa thông tin đăng nhập khỏi localStorage
     localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
     localStorage.removeItem("TEN_TAI_KHOAN");
+
     // Chuyển hướng đến trang đăng nhập
     // Refresh lại trang
     window.location.reload();
@@ -93,10 +97,15 @@ function LayoutAdmin() {
     // Điều hướng đến trang đổi mật khẩu
     navigate("/doi-mat-khau");
   };
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
 
-  // Lấy TEN_TAI_KHOAN từ localStorage (giả sử bạn đã lưu nó sau khi đăng nhập thành công)
-  const tenTaiKhoan = localStorage.getItem("TEN_TAI_KHOAN") || "User";
-
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+  //
+  const user = localStorage.getItem("TEN_TAI_KHOAN");
   return (
     <>
       <ThemeProvider theme={defaultTheme}>
@@ -127,16 +136,27 @@ function LayoutAdmin() {
                 noWrap
                 sx={{ flexGrow: 1 }}
               >
-                Dashboard - Xin chào, {tenTaiKhoan}!
+                Dashboard - Xin chào {user}!
               </Typography>
-              {/* Thêm icon đổi mật khẩu */}
-              <IconButton color="inherit" onClick={handleChangePassword}>
-                <KeyIcon />
+
+              {/* Nút Menu */}
+              <IconButton color="inherit" onClick={handleMenuOpen}>
+                <MenuIcon />
               </IconButton>
-              {/* Thêm icon Logout */}
-              <IconButton color="inherit" onClick={handleLogout}>
-                <LogoutIcon /> {/* Hiển thị icon Logout */}
-              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+              >
+                <MenuItem onClick={handleChangePassword}>
+                  <KeyIcon sx={{ mr: 1 }} />
+                  Đổi mật khẩu
+                </MenuItem>
+                <MenuItem onClick={handleLogout}>
+                  <LogoutIcon sx={{ mr: 1 }} />
+                  Đăng xuất
+                </MenuItem>
+              </Menu>
             </Toolbar>
           </AppBar>
           <Drawer variant="permanent" open={open}>

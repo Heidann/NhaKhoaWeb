@@ -4,7 +4,6 @@ import {
   Grid,
   Typography,
   Paper,
-  Box,
   Divider,
   Button,
   Dialog,
@@ -19,7 +18,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import EditIcon from "@mui/icons-material/Edit";
 import Title from "../Title";
-
+import axios from "axios";
 const CvDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -33,10 +32,9 @@ const CvDetail = () => {
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/Chuc_Vu/${id}`,
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Chuc_Vu/${id}`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -44,11 +42,8 @@ const CvDetail = () => {
             },
           }
         );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setChucVuDetail(data[0]); // Assuming data is an array and you want the first element
+
+        setChucVuDetail(response.data[0]); // Axios tự động parse JSON
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
@@ -60,10 +55,9 @@ const CvDetail = () => {
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/admin/Chuc_Vu/${id}`,
+      const response = await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/Chuc_Vu/${id}`, // Sử dụng VITE_API_BASE_URL
         {
-          method: "DELETE",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
@@ -72,21 +66,21 @@ const CvDetail = () => {
         }
       );
 
-      if (response.ok) {
-        // Xóa thành công
+      if (response.status === 200) {
+        // Kiểm tra status 200 (OK)
         setSnackbarSeverity("success");
         setSnackbarMessage("Xóa chức vụ thành công!");
         setOpenSnackbar(true);
-        navigate("/chuc-vu"); // Chuyển hướng sau khi xóa
+        navigate("/chuc-vu");
       } else {
         // Xử lý lỗi từ server
         if (response.status === 403) {
           setSnackbarSeverity("error");
           setSnackbarMessage("Bạn không có quyền truy cập chức năng này!");
         } else {
-          const errorData = await response.json();
+          // Axios tự động parse JSON error
           setSnackbarSeverity("error");
-          setSnackbarMessage(errorData.message || "Xóa chức vụ thất bại!");
+          setSnackbarMessage(response.data.message || "Xóa chức vụ thất bại!");
         }
         setOpenSnackbar(true);
       }

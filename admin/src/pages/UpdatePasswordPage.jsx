@@ -12,6 +12,8 @@ import {
 } from "@mui/material";
 import LockResetIcon from "@mui/icons-material/LockReset";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 const defaultTheme = createTheme();
 
 export default function ChangePasswordPage() {
@@ -20,6 +22,7 @@ export default function ChangePasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -35,39 +38,46 @@ export default function ChangePasswordPage() {
     try {
       // Lấy AUTO_ID của user từ localStorage (giả sử bạn đã lưu nó sau khi đăng nhập)
       const username = localStorage.getItem("TEN_TAI_KHOAN");
-      console.log(username);
 
-      // Gửi yêu cầu cập nhật mật khẩu đến API
-      const updatePasswordResponse = await fetch(
-        `http://localhost:3000/api/admin/Tai_Khoan/change_password`, // Thay thế bằng đường dẫn API của bạn
+      // Sử dụng Axios để gửi yêu cầu PUT
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_BASE_URL}/Tai_Khoan/change_password`, // Sử dụng VITE_API_BASE_URL
         {
-          method: "PUT",
+          TEN_TAI_KHOAN: username,
+          MAT_KHAU_CU: oldPassword,
+          MAT_KHAU_MOI: newPassword,
+        },
+        {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-          body: JSON.stringify({
-            TEN_TAI_KHOAN: username,
-            MAT_KHAU_CU: oldPassword,
-            MAT_KHAU_MOI: newPassword,
-          }),
         }
       );
 
-      if (updatePasswordResponse.ok) {
-        // Xử lý khi cập nhật mật khẩu thành công
-        setSuccessMessage("Cập nhật mật khẩu thành công.");
-        setOldPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-      } else {
-        // Xử lý khi cập nhật mật khẩu thất bại
-        const errorData = await updatePasswordResponse.json();
-        setErrorMessage(errorData.message || "Cập nhật mật khẩu thất bại.");
-      }
+      // Xử lý khi cập nhật mật khẩu thành công
+      setSuccessMessage("Cập nhật mật khẩu thành công.");
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      navigate("/");
     } catch (error) {
-      console.error("Lỗi kết nối đến server", error);
-      setErrorMessage("Có lỗi xảy ra. Vui lòng thử lại sau.");
+      // Xử lý lỗi từ Axios
+      if (error.response) {
+        // Lỗi từ server (ví dụ: 401, 404)
+        console.error("Lỗi server:", error.response.data);
+        setErrorMessage(
+          error.response.data.message || "Cập nhật mật khẩu thất bại."
+        );
+      } else if (error.request) {
+        // Yêu cầu được gửi đi nhưng không nhận được phản hồi
+        console.error("Lỗi kết nối:", error.request);
+        setErrorMessage("Lỗi kết nối đến server.");
+      } else {
+        // Lỗi khác (ví dụ: lỗi khi tạo request)
+        console.error("Lỗi:", error.message);
+        setErrorMessage("Có lỗi xảy ra. Vui lòng thử lại sau.");
+      }
     }
   };
 

@@ -18,7 +18,7 @@ import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import EditIcon from "@mui/icons-material/Edit";
 import Title from "../Title";
 import { Alert, Snackbar } from "@mui/material";
-
+import axios from "axios";
 const NvDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -32,10 +32,9 @@ const NvDetail = () => {
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/Tai_Khoan/${id}`,
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Tai_Khoan/${id}`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -43,13 +42,12 @@ const NvDetail = () => {
             },
           }
         );
-        if (!response.ok) {
+
+        if (response.status === 200) {
+          setNhanVienDetail(response.data);
+        } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        console.log(data);
-
-        setNhanVienDetail(data);
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
@@ -61,10 +59,9 @@ const NvDetail = () => {
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/admin/Tai_Khoan/${id}`,
+      const response = await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/Tai_Khoan/${id}`, // Sử dụng VITE_API_BASE_URL
         {
-          method: "DELETE",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
@@ -73,7 +70,7 @@ const NvDetail = () => {
         }
       );
 
-      if (response.ok) {
+      if (response.status === 200) {
         // Xóa thành công
         setSnackbarSeverity("success");
         setSnackbarMessage("Xóa nhân viên thành công!");
@@ -85,9 +82,10 @@ const NvDetail = () => {
           setSnackbarSeverity("error");
           setSnackbarMessage("Bạn không có quyền truy cập chức năng này!");
         } else {
-          const errorData = await response.json();
           setSnackbarSeverity("error");
-          setSnackbarMessage(errorData.message || "Xóa nhân viên thất bại!");
+          setSnackbarMessage(
+            response.data.message || "Xóa nhân viên thất bại!"
+          ); // Lấy message lỗi (nếu có)
         }
         setOpenSnackbar(true);
       }

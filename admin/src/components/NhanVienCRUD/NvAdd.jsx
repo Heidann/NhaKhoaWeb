@@ -24,7 +24,7 @@ import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import CenteredNotification from "../CenteredNotification.jsx";
-
+import axios from "axios";
 const NvAdd = () => {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
@@ -50,10 +50,9 @@ const NvAdd = () => {
   useEffect(() => {
     const fetchChucVuList = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:3000/api/admin/Chuc_Vu",
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Chuc_Vu`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Authorization: "Bearer " + localStorage.getItem("token"),
@@ -61,14 +60,20 @@ const NvAdd = () => {
             },
           }
         );
-        if (response.status === 403) {
-          setNotificationOpen(true);
-          return;
-        } else if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+
+        if (response.status === 200) {
+          setChucVuList(response.data);
+        } else {
+          // Xử lý lỗi từ server
+          if (response.status === 403) {
+            setNotificationOpen(true);
+            return;
+          } else {
+            setOpen(true);
+            setSeverity("error");
+            setMessage(response.data.message || "Đã có lỗi xảy ra.");
+          }
         }
-        const data = await response.json();
-        setChucVuList(data);
       } catch (error) {
         // Xử lý lỗi
         setOpen(true);
@@ -76,16 +81,16 @@ const NvAdd = () => {
         setMessage("Lỗi kết nối đến server!");
       }
     };
+
     fetchChucVuList();
   }, []);
 
   useEffect(() => {
     const fetchNhanVienList = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:3000/api/admin/Tai_Khoan",
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Tai_Khoan`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Authorization: "Bearer " + localStorage.getItem("token"),
@@ -93,15 +98,15 @@ const NvAdd = () => {
             },
           }
         );
-        if (response.ok) {
-          const data = await response.json();
-          setNhanVienList(data);
-          setFilteredNhanVienList(data); // Initialize filtered list
+
+        if (response.status === 200) {
+          setNhanVienList(response.data);
+          setFilteredNhanVienList(response.data); // Initialize filtered list
         } else {
-          // Xử lý lỗi
+          // Xử lý lỗi từ server
           setOpen(true);
           setSeverity("error");
-          setMessage("Lỗi khi lấy danh sách nhân viên!");
+          setMessage(response.data.message || "Đã có lỗi xảy ra.");
         }
       } catch (error) {
         // Xử lý lỗi
@@ -110,6 +115,7 @@ const NvAdd = () => {
         setMessage("Lỗi kết nối đến server!");
       }
     };
+
     fetchNhanVienList();
   }, []);
 
@@ -154,46 +160,54 @@ const NvAdd = () => {
       setMessage("Vui lòng nhập đầy đủ thông tin!");
       return;
     }
-    console.log(tenTaiKhoan, tenNhanVien, sdt, matKhau, chucVuId);
 
-    const response = await fetch(`http://localhost:3000/api/admin/Tai_Khoan`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        TEN_TAI_KHOAN: tenTaiKhoan,
-        TEN_NHAN_VIEN: tenNhanVien,
-        CCCD: cccd,
-        SDT: sdt,
-        MAT_KHAU: matKhau,
-        CHUC_VU_ID: chucVuId,
-      }),
-    });
-    if (response.ok) {
-      // Xử lý khi thêm nhân viên thành công
-      setOpen(true);
-      setSeverity("success");
-      setMessage("Thêm nhân viên thành công!");
-      // Chuyển hướng về trang danh sách nhân viên
-      navigate("/nhan-vien");
-    } else {
-      const errorData = await response.json(); // Lấy dữ liệu lỗi từ server
-      if (errorData.code === "ER_DUP_ENTRY") {
-        // Kiểm tra mã lỗi
+    try {
+      console.log(tenTaiKhoan, tenNhanVien, sdt, matKhau, chucVuId, cccd);
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/Tai_Khoan`, // Sử dụng VITE_API_BASE_URL
+        {
+          TEN_TAI_KHOAN: tenTaiKhoan,
+          TEN_NHAN_VIEN: tenNhanVien,
+          CCCD: cccd,
+          SDT: sdt,
+          MAT_KHAU: matKhau,
+          CHUC_VU_ID: chucVuId,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+            Accept: "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        // Xử lý khi thêm nhân viên thành công
         setOpen(true);
-        setSeverity("error");
-        setMessage(errorData.message); // Use errorData.message
+        setSeverity("success");
+        setMessage("Thêm nhân viên thành công!");
+        // Chuyển hướng về trang danh sách nhân viên
+        navigate("/nhan-vien");
       } else {
-        setOpen(true);
-        setSeverity("error");
-        setMessage(errorData.message); // Use errorData.message
+        // Xử lý lỗi từ server
+        if (response.status === 403) {
+          setNotificationOpen(true);
+          return;
+        } else {
+          setOpen(true);
+          setSeverity("error");
+          setMessage(response.data.message || "Đã có lỗi xảy ra.");
+        }
       }
+    } catch (error) {
+      // Xử lý lỗi
+      setOpen(true);
+      setSeverity("error");
+      setMessage("Lỗi kết nối đến server!");
     }
   };
-
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
       return;

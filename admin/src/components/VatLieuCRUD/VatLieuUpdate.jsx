@@ -20,6 +20,7 @@ import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import CenteredNotification from "../CenteredNotification";
+import axios from "axios";
 
 const VatLieuUpdate = () => {
   const { id } = useParams();
@@ -28,9 +29,9 @@ const VatLieuUpdate = () => {
   const [open, setOpen] = useState(false);
   const [severity, setSeverity] = useState("success");
   const [message, setMessage] = useState("");
-  const [tenVatLieu, setTenVatLieu] = useState(""); // State for tên vật liệu
-  const [vatLieuList, setVatLieuList] = useState([]); // State for vật liệu list
-  const [filteredVatLieuList, setFilteredVatLieuList] = useState([]); // State for filtered vật liệu list
+  const [tenVatLieu, setTenVatLieu] = useState("");
+  const [vatLieuList, setVatLieuList] = useState([]);
+  const [filteredVatLieuList, setFilteredVatLieuList] = useState([]);
 
   // Thông báo khi không có quyền truy cập
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -41,10 +42,9 @@ const VatLieuUpdate = () => {
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/Vat_Lieu/${id}`, // Thay đổi endpoint
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Vat_Lieu/${id}`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -52,11 +52,12 @@ const VatLieuUpdate = () => {
             },
           }
         );
-        if (!response.ok) {
+
+        if (response.status === 200) {
+          setTenVatLieu(response.data[0].TEN_VAT_LIEU);
+        } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        setTenVatLieu(data[0].TEN_VAT_LIEU); // Initialize tenVatLieu state
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
@@ -66,15 +67,12 @@ const VatLieuUpdate = () => {
     fetchDataDetail();
   }, [id]);
 
-  // Lấy danh sách vật liệu
   useEffect(() => {
     const fetchVatLieuList = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:3000/api/admin/Vat_Lieu",
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/admin/Vat_Lieu`, // Sử dụng VITE_API_BASE_URL
           {
-            // Thay đổi endpoint
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -82,15 +80,15 @@ const VatLieuUpdate = () => {
             },
           }
         );
-        if (response.ok) {
-          const data = await response.json();
-          setVatLieuList(data);
-          setFilteredVatLieuList(data); // Initialize filtered list
+
+        if (response.status === 200) {
+          setVatLieuList(response.data);
+          setFilteredVatLieuList(response.data);
         } else {
           // Xử lý lỗi
           setOpen(true);
           setSeverity("error");
-          setMessage("Lỗi khi lấy danh sách vật liệu!"); // Thay đổi message
+          setMessage("Lỗi khi lấy danh sách vật liệu!");
         }
       } catch (error) {
         // Xử lý lỗi
@@ -99,13 +97,12 @@ const VatLieuUpdate = () => {
         setMessage("Lỗi kết nối đến server!");
       }
     };
+
     fetchVatLieuList();
   }, []);
 
-  // Xử lý sự kiện chỉnh sửa tên vật liệu
   const handleTenVatLieuChange = (event) => {
     setTenVatLieu(event.target.value);
-    // Filter vật liệu list based on input
     const filteredList = vatLieuList.filter((vatLieu) =>
       vatLieu.TEN_VAT_LIEU.toLowerCase().includes(
         event.target.value.toLowerCase()
@@ -113,17 +110,17 @@ const VatLieuUpdate = () => {
     );
     setFilteredVatLieuList(filteredList);
   };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!tenVatLieu) {
       setOpen(true);
       setSeverity("error");
-      setMessage("Vui lòng nhập tên vật liệu!"); // Thay đổi message
+      setMessage("Vui lòng nhập tên vật liệu!");
       return;
     }
 
-    // Kiểm tra xem vật liệu đã tồn tại hay chưa
     const isVatLieuExists = filteredVatLieuList.some(
       (vatLieu) =>
         vatLieu.TEN_VAT_LIEU.toLowerCase() === tenVatLieu.toLowerCase()
@@ -132,37 +129,39 @@ const VatLieuUpdate = () => {
     if (isVatLieuExists) {
       setOpen(true);
       setSeverity("error");
-      setMessage("Vật liệu đã tồn tại!"); // Thay đổi message
+      setMessage("Vật liệu đã tồn tại!");
       return;
     }
 
-    const response = await fetch(
-      `http://localhost:3000/api/admin/Vat_Lieu/${id}`,
-      {
-        // Thay đổi endpoint
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-        body: JSON.stringify({
-          TEN_VAT_LIEU: tenVatLieu, // Thay đổi tên trường
-        }),
+    try {
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_BASE_URL}/Vat_Lieu/${id}`, // Sử dụng VITE_API_BASE_URL
+        { TEN_VAT_LIEU: tenVatLieu },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setOpen(true);
+        setSeverity("success");
+        setMessage("Cập nhật vật liệu thành công!");
+        navigate("/vat-lieu");
+      } else if (response.status === 403) {
+        setNotificationOpen(true);
+        return;
+      } else {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    );
-    if (response.ok) {
-      // Xử lý khi cập nhật vật liệu thành công
+    } catch (error) {
+      console.error("Error updating data:", error);
       setOpen(true);
-      setSeverity("success");
-      setMessage("Cập nhật vật liệu thành công!"); // Thay đổi message
-      // Chuyển hướng về trang danh sách vật liệu
-      navigate("/vat-lieu"); // Thay đổi đường dẫn
-    } else if (response.status === 403) {
-      setNotificationOpen(true);
-      return;
-    } else if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      setSeverity("error");
+      setMessage("Đã có lỗi xảy ra. Vui lòng thử lại sau.");
     }
   };
 
@@ -173,7 +172,6 @@ const VatLieuUpdate = () => {
     setOpen(false);
   };
 
-  // handle error
   if (error) {
     return <div>Error: {error.message}</div>;
   }

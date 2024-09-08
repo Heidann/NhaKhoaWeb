@@ -18,7 +18,7 @@ import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import EditIcon from "@mui/icons-material/Edit";
 import Title from "../Title";
 import CenteredNotification from "../CenteredNotification";
-
+import axios from "axios";
 const VatLieuDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -35,10 +35,9 @@ const VatLieuDetail = () => {
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/Vat_Lieu/${id}`,
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Vat_Lieu/${id}`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -46,13 +45,14 @@ const VatLieuDetail = () => {
             },
           }
         );
-        if (!response.ok) {
+
+        if (response.status === 200) {
+          setVatLieuDetail(response.data[0]);
+        } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        setVatLieuDetail(data[0]); // Gán data[0] cho vatLieuDetail
       } catch (error) {
-        setError(error.message); // Hiển thị thông báo lỗi
+        setError(error.message);
         console.error("Error fetching data detail:", error);
       }
     };
@@ -62,10 +62,9 @@ const VatLieuDetail = () => {
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/admin/Vat_Lieu/${id}`,
+      const response = await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/Vat_Lieu/${id}`, // Sử dụng VITE_API_BASE_URL
         {
-          method: "DELETE",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
@@ -74,15 +73,15 @@ const VatLieuDetail = () => {
         }
       );
 
-      if (response.status === 403) {
+      if (response.status === 200) {
+        navigate("/vat-lieu");
+      } else if (response.status === 403) {
         setNotificationOpen(true);
-        return;
-      } else if (!response.ok) {
+      } else {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      navigate("/vat-lieu");
     } catch (error) {
-      setError(error.message); // Hiển thị thông báo lỗi
+      setError(error.message);
       console.error("Error deleting data:", error);
     }
   };

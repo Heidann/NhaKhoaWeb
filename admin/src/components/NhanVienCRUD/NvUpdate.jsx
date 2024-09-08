@@ -18,7 +18,7 @@ import {
 import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
-
+import axios from "axios";
 const NvUpdate = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -39,10 +39,9 @@ const NvUpdate = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/Tai_Khoan/${id}`,
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Tai_Khoan/${id}`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -50,11 +49,12 @@ const NvUpdate = () => {
             },
           }
         );
-        if (!response.ok) {
+
+        if (response.status === 200) {
+          setNhanVienData(response.data[0]); // Assuming data is an array and you want the first element
+        } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        setNhanVienData(data[0]); // Assuming data is an array and you want the first element
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
@@ -63,10 +63,9 @@ const NvUpdate = () => {
 
     const fetchChucVu = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:3000/api/admin/Chuc_Vu",
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Chuc_Vu`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -74,11 +73,12 @@ const NvUpdate = () => {
             },
           }
         );
-        if (!response.ok) {
+
+        if (response.status === 200) {
+          setChucVuList(response.data);
+        } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        setChucVuList(data);
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
@@ -100,22 +100,19 @@ const NvUpdate = () => {
     event.preventDefault();
 
     try {
-      console.log(nhanVienData.CHUC_VU_ID);
-
-      const response = await fetch(
-        `http://localhost:3000/api/admin/Tai_Khoan/${id}`,
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_BASE_URL}/Tai_Khoan/${id}`, // Sử dụng VITE_API_BASE_URL
+        nhanVienData, // Gửi trực tiếp nhanVienData
         {
-          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
             Authorization: "Bearer " + localStorage.getItem("token"),
           },
-          body: JSON.stringify(nhanVienData),
         }
       );
 
-      if (response.ok) {
+      if (response.status === 200) {
         setSnackbarSeverity("success");
         setSnackbarMessage("Cập nhật thông tin nhân viên thành công!");
         setOpenSnackbar(true);
@@ -126,9 +123,8 @@ const NvUpdate = () => {
           setSnackbarSeverity("error");
           setSnackbarMessage("Bạn không có quyền truy cập chức năng này!");
         } else {
-          const errorData = await response.json();
           setSnackbarSeverity("error");
-          setSnackbarMessage(errorData.message);
+          setSnackbarMessage(response.data.message || "Cập nhật thất bại!"); // Lấy message lỗi (nếu có)
         }
         setOpenSnackbar(true);
       }

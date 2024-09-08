@@ -33,7 +33,7 @@ const createXuat_XuController = async (req, res) => {
   try {
     const { TEN_XUAT_XU } = req.body;
     const newTEN_XUAT_XU = await createXuat_Xu(TEN_XUAT_XU);
-    res.status(201).json(req.body);
+    res.status(200).json(req.body);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

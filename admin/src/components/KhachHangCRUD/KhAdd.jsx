@@ -17,6 +17,7 @@ import {
 import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import axios from "axios";
 
 const KhAdd = () => {
   const navigate = useNavigate();
@@ -44,10 +45,11 @@ const KhAdd = () => {
     if (step === 1) {
       // Step 1: Check if maTheBaoHanh has been used
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/The_Bao_Hanh/statusCode/${maTheBaoHanh}`,
+        const response = await axios.get(
+          `${
+            import.meta.env.VITE_API_BASE_URL
+          }/The_Bao_Hanh/statusCode/${maTheBaoHanh}`,
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -56,17 +58,9 @@ const KhAdd = () => {
           }
         );
 
-        if (!response.ok) {
-          // Handle error if the request fails
-          setOpen(true);
-          setSeverity("error");
-          setMessage("Lỗi khi kiểm tra Mã thẻ bảo hành!");
-          return;
-        }
+        // Axios automatically parses the JSON response
+        const data = response.data;
 
-        const data = await response.json();
-
-        // Handle the response from the server
         if (data[0].message === "NOT FOUND") {
           setOpen(true);
           setSeverity("error");
@@ -79,10 +73,8 @@ const KhAdd = () => {
           setOpen(true);
           setSeverity("success");
           setMessage("Mã thẻ bảo hành có thể sử dụng!");
-          // Proceed to step 2
-          handleNextStep();
+          handleNextStep(); // Proceed to step 2
         } else {
-          // Handle unexpected response
           setOpen(true);
           setSeverity("error");
           setMessage("Lỗi không xác định!");
@@ -104,14 +96,14 @@ const KhAdd = () => {
         setMessage("Vui lòng nhập Tên Khách Hàng!");
         return;
       }
-      // get maTheBaoHanhId from maTheBaoHanh
-      try {
-        console.log(maTheBaoHanh);
 
-        const response = await fetch(
-          `http://localhost:3000/api/admin/The_Bao_Hanh/code/${maTheBaoHanh}`,
+      try {
+        // Get maTheBaoHanhId from maTheBaoHanh
+        const response = await axios.get(
+          `${
+            import.meta.env.VITE_API_BASE_URL
+          }/The_Bao_Hanh/code/${maTheBaoHanh}`,
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -120,52 +112,59 @@ const KhAdd = () => {
           }
         );
 
-        if (response.status === 403) {
-          setOpen(true);
-          setSeverity("error");
-          setMessage("Bạn không có quyền truy cập chức năng này!");
-          return;
-        }
+        const theBaoHanhData = response.data; // Axios automatically parses JSON
 
-        const theBaoHanhData = await response.json();
         if (theBaoHanhData.length > 0) {
           const theBaoHanhId = theBaoHanhData[0].AUTO_ID;
 
-          console.log(theBaoHanhId, maTheBaoHanh, tenKhach, phone);
-
           // Send POST request with THE_BAO_HANH_ID
-          const khResponse = await fetch(
-            `http://localhost:3000/api/admin/Khach_Hang`,
+          const khResponse = await axios.post(
+            `${import.meta.env.VITE_API_BASE_URL}/Khach_Hang`,
             {
-              method: "POST",
+              TEN_KHACH: tenKhach,
+              THE_BAO_HANH_ID: theBaoHanhId,
+              SDT: phone,
+            },
+            {
               headers: {
                 "Content-Type": "application/json",
                 Accept: "application/json",
                 Authorization: "Bearer " + localStorage.getItem("token"),
               },
-              body: JSON.stringify({
-                TEN_KHACH: tenKhach,
-                THE_BAO_HANH_ID: theBaoHanhId,
-                SDT: phone,
-              }),
             }
           );
 
-          if (khResponse.ok) {
+          if (khResponse.status === 200) {
             // Add customer successfully, show confirmation dialog
             setShowConfirmationDialog(true);
           } else {
-            const errorData = await khResponse.json();
             setOpen(true);
             setSeverity("error");
-            setMessage("Error adding customer:", errorData.message);
+            setMessage("Lỗi khi thêm khách hàng!");
           }
         }
       } catch (error) {
         setOpen(true);
         setSeverity("error");
-        setMessage("Lỗi khi thêm khách hàng!");
-        console.error("Error adding customer:", error);
+
+        // Kiểm tra xem error.response có tồn tại không
+        if (error.response) {
+          // Lỗi từ server, hiển thị status và data
+          console.error(
+            "Server responded with:",
+            error.response.status,
+            error.response.data
+          );
+          setMessage("Lỗi server: " + error.response.data.message); // Giả sử server trả về lỗi trong error.response.data.message
+        } else if (error.request) {
+          // Request đã được gửi nhưng không nhận được phản hồi
+          console.error("No response received:", error.request);
+          setMessage("Không nhận được phản hồi từ server.");
+        } else {
+          // Lỗi xảy ra khi tạo request
+          console.error("Error setting up request:", error.message);
+          setMessage("Lỗi khi gửi yêu cầu đến server.");
+        }
       }
     }
   };

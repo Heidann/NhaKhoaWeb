@@ -20,7 +20,7 @@ import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import CenteredNotification from "../CenteredNotification";
-
+import axios from "axios";
 const LaboUpdate = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -41,10 +41,9 @@ const LaboUpdate = () => {
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/Labo/${id}`,
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Labo/${id}`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -52,11 +51,12 @@ const LaboUpdate = () => {
             },
           }
         );
-        if (!response.ok) {
+
+        if (response.status === 200) {
+          setTenLabo(response.data[0].TEN_LABO);
+        } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        setTenLabo(data[0].TEN_LABO); // Initialize tenLabo state
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
@@ -66,27 +66,28 @@ const LaboUpdate = () => {
     fetchDataDetail();
   }, [id]);
 
-  // Lấy danh sách labo
   useEffect(() => {
     const fetchLaboList = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/admin/Labo", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: "Bearer " + localStorage.getItem("token"),
-          },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setLaboList(data);
-          setFilteredLaboList(data); // Initialize filtered list
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Labo`, // Sử dụng VITE_API_BASE_URL
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          setLaboList(response.data);
+          setFilteredLaboList(response.data);
         } else {
-          // Xử lý lỗi
+          // Xử lý lỗi từ server
           setOpen(true);
           setSeverity("error");
-          setMessage("Lỗi khi lấy danh sách labo!");
+          setMessage(response.data.message || "Đã có lỗi xảy ra.");
         }
       } catch (error) {
         // Xử lý lỗi
@@ -95,6 +96,7 @@ const LaboUpdate = () => {
         setMessage("Lỗi kết nối đến server!");
       }
     };
+
     fetchLaboList();
   }, []);
 

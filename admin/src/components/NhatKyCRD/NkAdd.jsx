@@ -21,7 +21,7 @@ import {
 import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
-
+import axios from "axios";
 const NkAdd = () => {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
@@ -48,22 +48,22 @@ const NkAdd = () => {
   useEffect(() => {
     const fetchNhaSi = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/Tai_Khoan/nha_si`,
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Tai_Khoan/nha_si`,
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
-              Authorization: "Bearer " + localStorage.getItem("token"),
               Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
             },
           }
         );
-        if (!response.ok) {
+
+        if (response.status === 200) {
+          setNhaSiList(response.data);
+        } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        setNhaSiList(data);
       } catch (error) {
         setError(error);
         console.error("Error fetching nha si data:", error);
@@ -72,19 +72,22 @@ const NkAdd = () => {
 
     const fetchLabo = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/admin/Labo`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: "Bearer " + localStorage.getItem("token"),
-          },
-        });
-        if (!response.ok) {
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Labo`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          setLaboList(response.data);
+        } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        setLaboList(data);
       } catch (error) {
         setError(error);
         console.error("Error fetching labo data:", error);
@@ -92,12 +95,10 @@ const NkAdd = () => {
     };
 
     const fetchXuatXu = async () => {
-      // Changed from fetchLoaiDia to fetchXuatXu
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/Xuat_Xu`,
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Xuat_Xu`,
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -105,22 +106,23 @@ const NkAdd = () => {
             },
           }
         );
-        if (!response.ok) {
+
+        if (response.status === 200) {
+          setXuatXuList(response.data);
+        } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        setXuatXuList(data); // Update xuatXuList
       } catch (error) {
         setError(error);
         console.error("Error fetching xuat xu data:", error);
       }
     };
+
     const fetchVatLieu = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/Vat_Lieu`,
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Vat_Lieu`,
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -128,16 +130,18 @@ const NkAdd = () => {
             },
           }
         );
-        if (!response.ok) {
+
+        if (response.status === 200) {
+          setVatLieuList(response.data);
+        } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        setVatLieuList(data);
       } catch (error) {
         setError(error);
         console.error("Error fetching vat lieu data:", error);
       }
     };
+
     fetchNhaSi();
     fetchLabo();
     fetchXuatXu();
@@ -157,10 +161,11 @@ const NkAdd = () => {
 
     if (step === 1) {
       try {
-        const resMaTheBaoHanh = await fetch(
-          `http://localhost:3000/api/admin/The_Bao_Hanh/code/${maTheBaoHanh}`,
+        const resMaTheBaoHanh = await axios.get(
+          `${
+            import.meta.env.VITE_API_BASE_URL
+          }/The_Bao_Hanh/code/${maTheBaoHanh}`,
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -169,23 +174,18 @@ const NkAdd = () => {
           }
         );
 
-        if (!resMaTheBaoHanh.ok) {
-          // Thẻ bảo hành không tồn tại
-          setOpen(true);
-          setSeverity("error");
-          setMessage("Mã thẻ bảo hành không tồn tại!");
-          return;
-        } else {
-          const theBaoHanhData = await resMaTheBaoHanh.json();
+        if (resMaTheBaoHanh.status === 200) {
+          const theBaoHanhData = resMaTheBaoHanh.data;
           if (theBaoHanhData.length > 0) {
-            setTheBaoHanhId(theBaoHanhData[0].AUTO_ID); // Set THE_BAO_HANH_ID
+            setTheBaoHanhId(theBaoHanhData[0].AUTO_ID);
             handleNextStep();
           } else {
-            // Thẻ bảo hành không tồn tại
             setOpen(true);
             setSeverity("error");
             setMessage("Mã thẻ bảo hành không tồn tại!");
           }
+        } else {
+          throw new Error(`HTTP error! status: ${resMaTheBaoHanh.status}`);
         }
       } catch (error) {
         setOpen(true);
@@ -210,36 +210,34 @@ const NkAdd = () => {
       }
 
       try {
-        const Nkresponse = await fetch(
-          `http://localhost:3000/api/admin/Hoa_Don`,
+        const Nkresponse = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/Hoa_Don`,
           {
-            method: "POST",
+            THE_BAO_HANH_ID: theBaoHanhId,
+            NHA_KHOA: nhaKhoa,
+            TEN_BAC_SI: tenBacSi,
+            SO_THANG: soThang,
+            VAT_LIEU_ID: vatLieuId,
+            LABO_ID: laboId,
+            XUAT_XU_ID: xuatXuId,
+            SO_LUONG_RANG: soLuongRang,
+            VI_TRI_RANG: viTriRang,
+          },
+          {
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
               Authorization: "Bearer " + localStorage.getItem("token"),
             },
-            body: JSON.stringify({
-              THE_BAO_HANH_ID: theBaoHanhId,
-              NHA_KHOA: nhaKhoa,
-              TEN_BAC_SI: tenBacSi,
-              SO_THANG: soThang,
-              VAT_LIEU_ID: vatLieuId,
-              LABO_ID: laboId,
-              XUAT_XU_ID: xuatXuId,
-              SO_LUONG_RANG: soLuongRang,
-              VI_TRI_RANG: viTriRang,
-            }),
           }
         );
 
-        if (Nkresponse.ok) {
+        if (Nkresponse.status === 200) {
           setShowConfirmationDialog(true);
         } else {
-          const errorData = await Nkresponse.json();
           setOpen(true);
           setSeverity("error");
-          setMessage(errorData.message);
+          setMessage(Nkresponse.data.message);
         }
       } catch (error) {
         setOpen(true);
@@ -255,18 +253,15 @@ const NkAdd = () => {
   };
 
   const handleConfirmationDialogConfirm = (action) => {
-    setShowConfirmationDialog(false); // Đóng dialog
+    setShowConfirmationDialog(false);
 
     if (action === "viewDetail") {
-      // Chuyển hướng đến trang xem chi tiết hóa đơn
-      // Thay thế '/hoa-don/chi-tiet/id' bằng đường dẫn thực tế
       window.open(
         `http://localhost:5174/tra-cuu?maTheBaoHanh=${maTheBaoHanh}`,
         "_blank"
       );
       navigate("/nhat-ky");
     } else {
-      // Chuyển hướng về danh sách nhật ký
       navigate("/nhat-ky");
     }
   };

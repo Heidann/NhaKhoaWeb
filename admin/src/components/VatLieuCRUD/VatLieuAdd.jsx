@@ -19,6 +19,7 @@ import {
 import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import axios from "axios";
 
 const VatLieuAdd = () => {
   const navigate = useNavigate();
@@ -33,10 +34,9 @@ const VatLieuAdd = () => {
   useEffect(() => {
     const fetchVatLieuList = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:3000/api/admin/Vat_Lieu",
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Vat_Lieu`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -44,12 +44,13 @@ const VatLieuAdd = () => {
             },
           }
         );
-        if (!response.ok) {
+
+        if (response.status === 200) {
+          setVatLieuList(response.data);
+          setFilteredVatLieuList(response.data); // Initialize filtered list
+        } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        setVatLieuList(data);
-        setFilteredVatLieuList(data); // Initialize filtered list
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
@@ -95,17 +96,19 @@ const VatLieuAdd = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/admin/Vat_Lieu", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-        body: JSON.stringify({ TEN_VAT_LIEU: tenVatLieu }),
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/Vat_Lieu`, // Sử dụng VITE_API_BASE_URL
+        { TEN_VAT_LIEU: tenVatLieu },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }
+      );
 
-      if (response.ok) {
+      if (response.status === 200) {
         setSnackbarSeverity("success");
         setSnackbarMessage("Thêm vật liệu thành công!");
         setOpenSnackbar(true);
@@ -116,9 +119,8 @@ const VatLieuAdd = () => {
           setSnackbarSeverity("error");
           setSnackbarMessage("Bạn không có quyền truy cập chức năng này!");
         } else {
-          const errorData = await response.json();
           setSnackbarSeverity("error");
-          setSnackbarMessage(errorData.message);
+          setSnackbarMessage(response.data.message || "Đã có lỗi xảy ra.");
         }
         setOpenSnackbar(true);
       }

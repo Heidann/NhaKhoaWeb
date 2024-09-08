@@ -15,7 +15,7 @@ import { useState, useEffect } from "react";
 import { useMemo, Fragment } from "react";
 import CenteredNotification from "../components/CenteredNotification";
 import DataTable from "../components/DataTable.jsx";
-
+import axios from "axios";
 export default function LaboPage() {
   const navigate = useNavigate(); // điều hướng trang
 
@@ -31,30 +31,22 @@ export default function LaboPage() {
     { key: "AUTO_ID", label: "ID" },
     { key: "TEN_LABO", label: "Tên Labo" },
   ];
-
   const fetchInfo = async () => {
-    const response = await fetch("http://localhost:3000/api/admin/Labo", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-    });
-
-    // Kiểm tra trạng thái phản hồi
-    if (!response.ok) {
-      // 403: đã xác thực nhưng lại không có quyền truy cập
-      if (response.status === 403) {
-        setNotificationOpen(true);
-        return;
-      } else {
-        throw new Error(`Lỗi khi tải dữ liệu: ${response.status}`);
-      }
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/Labo`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }
+      );
+      setData(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
     }
-    const data = await response.json();
-    setData(data);
-    console.log("Data fetched successfully:", data);
   };
 
   useEffect(() => {
@@ -82,44 +74,6 @@ export default function LaboPage() {
   return (
     <>
       <Grid container spacing={3}>
-        {/* Chart */}
-        <Grid item xs={12} md={8} lg={8}>
-          <Paper
-            sx={{
-              p: 2,
-              display: "flex",
-              flexDirection: "column",
-              height: 240,
-            }}
-          >
-            {/* <Chart /> */}
-          </Paper>
-        </Grid>
-        {/* Recent Deposits */}
-        <Grid item xs={12} md={4} lg={4}>
-          <Paper
-            sx={{
-              p: 2,
-              display: "flex",
-              flexDirection: "column",
-              height: 240,
-            }}
-          >
-            <Title>Đã kích hoạt</Title>
-            <Gauge
-              value={75}
-              startAngle={-110}
-              endAngle={110}
-              sx={{
-                [`& .${gaugeClasses.valueText}`]: {
-                  fontSize: 40,
-                  transform: "translate(0px, 0px)",
-                },
-              }}
-              text={({ value, valueMax }) => `${value} / ${valueMax}`}
-            />
-          </Paper>
-        </Grid>
         {/* Recent Orders */}
         <Grid item xs={12}>
           <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>

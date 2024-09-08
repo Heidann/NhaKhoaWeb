@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { Gauge, gaugeClasses } from "@mui/x-charts/Gauge";
 import { useState, useEffect } from "react";
 import { useMemo, Fragment } from "react";
-
+import axios from "axios";
 import DataTable from "../components/DataTable.jsx";
 import * as XLSX from "xlsx"; // Import the XLSX library
 
@@ -27,20 +27,22 @@ export default function TheBaoHanhPage() {
   ];
 
   const fetchInfo = async () => {
-    const response = await fetch(
-      "http://localhost:3000/api/admin/The_Bao_Hanh",
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-      }
-    );
-    const data = await response.json();
-    setData(data);
-    console.log("Data fetched successfully:", data);
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/The_Bao_Hanh`, // Sử dụng VITE_API_BASE_URL
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }
+      );
+      setData(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      // Xử lý lỗi (ví dụ: hiển thị thông báo lỗi cho người dùng)
+    }
   };
 
   useEffect(() => {
@@ -70,44 +72,6 @@ export default function TheBaoHanhPage() {
   return (
     <>
       <Grid container spacing={3}>
-        {/* Chart */}
-        <Grid item xs={12} md={8} lg={8}>
-          <Paper
-            sx={{
-              p: 2,
-              display: "flex",
-              flexDirection: "column",
-              height: 240,
-            }}
-          >
-            {/* <Chart /> */}
-          </Paper>
-        </Grid>
-        {/* Recent Deposits */}
-        <Grid item xs={12} md={4} lg={4}>
-          <Paper
-            sx={{
-              p: 2,
-              display: "flex",
-              flexDirection: "column",
-              height: 240,
-            }}
-          >
-            <Title>Số lượng thẻ</Title>
-            <Gauge
-              value={75}
-              startAngle={-110}
-              endAngle={110}
-              sx={{
-                [`& .${gaugeClasses.valueText}`]: {
-                  fontSize: 40,
-                  transform: "translate(0px, 0px)",
-                },
-              }}
-              text={({ value, valueMax }) => `${value} / ${valueMax}`}
-            />
-          </Paper>
-        </Grid>
         {/* Recent Orders */}
         <Grid item xs={12}>
           <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>

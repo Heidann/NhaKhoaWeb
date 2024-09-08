@@ -81,10 +81,8 @@ const postTaiKhoanByUserController = async (req, res) => {
     // Tạo JWT
     const token = generateAccessToken(user[0].AUTO_ID);
     const refreshToken = generateRefreshToken(user[0].AUTO_ID);
-    console.log("token:", token);
-    console.log("refreshToken:", refreshToken);
 
-    res.status(200).json({ token, refreshToken });
+    res.status(200).json({ user, token, refreshToken });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -105,7 +103,7 @@ const createTai_KhoanController = async (req, res) => {
     const { TEN_TAI_KHOAN, TEN_NHAN_VIEN, CCCD, SDT, CHUC_VU_ID } = req.body;
 
     // Kiểm tra xem tất cả các trường đều có giá trị hay không
-    if (!TEN_TAI_KHOAN || !TEN_NHAN_VIEN || !CCCD || !SDT || !CHUC_VU_ID) {
+    if (!TEN_TAI_KHOAN || !TEN_NHAN_VIEN || !SDT || !CHUC_VU_ID) {
       return res
         .status(400)
         .json({ message: "Vui lòng nhập đầy đủ thông tin" });
@@ -117,12 +115,12 @@ const createTai_KhoanController = async (req, res) => {
     const newTai_Khoan = await createTai_Khoan(
       TEN_TAI_KHOAN,
       TEN_NHAN_VIEN,
-      CCCD,
+      CCCD || null,
       SDT,
       hashedPassword, // Lưu mật khẩu đã mã hóa
       CHUC_VU_ID
     );
-    res.status(201).json({ message: "Tạo tài khoản thành công" });
+    res.status(200).json({ message: "Tạo tài khoản thành công" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

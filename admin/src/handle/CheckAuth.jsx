@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Navigate, Outlet, useNavigate } from "react-router-dom";
-
+import axios from "axios";
 const PrivateRoute = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const navigate = useNavigate();
@@ -32,29 +32,23 @@ const PrivateRoute = () => {
 
     const refreshToken = async () => {
       try {
-        const refreshToken = localStorage.getItem("refreshToken"); // Lấy refresh token từ localStorage
+        const refreshToken = localStorage.getItem("refreshToken");
 
-        const response = await fetch(
-          "http://localhost:3000/api/admin/Tai_Khoan/refresh_token",
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/Tai_Khoan/refresh_token`, // Sử dụng VITE_API_BASE_URL
+          null,
           {
-            method: "POST",
-            credentials: "include", // Có thể không cần thiết nữa
             headers: {
-              Authorization: `Bearer ${refreshToken}`, // Gửi refresh token trong header
+              Authorization: `Bearer ${refreshToken}`,
             },
           }
         );
 
-        if (response.ok) {
-          const data = await response.json();
-
-          // Cập nhật access token mới và thời gian hết hạn trong localStorage
-          localStorage.setItem("token", data.accessToken);
-
+        if (response.status === 200) {
+          localStorage.setItem("token", response.data.accessToken);
           setIsAuthenticated(true);
           console.log("Refresh token thành công");
         } else {
-          // Xử lý lỗi khi refresh token không hợp lệ
           console.error("Refresh token không hợp lệ");
           setIsAuthenticated(false);
           navigate("/login");

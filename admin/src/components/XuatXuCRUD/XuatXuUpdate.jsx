@@ -19,7 +19,7 @@ import {
 import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
-
+import axios from "axios";
 const XuatXuUpdate = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -34,10 +34,9 @@ const XuatXuUpdate = () => {
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/Xuat_Xu/${id}`,
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Xuat_Xu/${id}`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -45,11 +44,12 @@ const XuatXuUpdate = () => {
             },
           }
         );
-        if (!response.ok) {
+
+        if (response.status === 200) {
+          setTenXuatXu(response.data[0].TEN_XUAT_XU);
+        } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        setTenXuatXu(data[0].TEN_XUAT_XU); // Initialize tenXuatXu state
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
@@ -62,10 +62,9 @@ const XuatXuUpdate = () => {
   useEffect(() => {
     const fetchXuatXuList = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:3000/api/admin/Xuat_Xu",
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Xuat_Xu`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -73,23 +72,19 @@ const XuatXuUpdate = () => {
             },
           }
         );
-        if (response.ok) {
-          const data = await response.json();
-          setXuatXuList(data);
-          setFilteredXuatXuList(data); // Initialize filtered list
+
+        if (response.status === 200) {
+          setXuatXuList(response.data);
+          setFilteredXuatXuList(response.data);
         } else {
-          // Xử lý lỗi
-          setOpenSnackbar(true);
-          setSnackbarSeverity("error");
-          setSnackbarMessage("Lỗi khi lấy danh sách xuất xứ!");
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
       } catch (error) {
-        // Xử lý lỗi
-        setOpenSnackbar(true);
-        setSnackbarSeverity("error");
-        setSnackbarMessage("Lỗi kết nối đến server!");
+        setError(error);
+        console.error("Error fetching data detail:", error);
       }
     };
+
     fetchXuatXuList();
   }, []);
 
@@ -127,39 +122,30 @@ const XuatXuUpdate = () => {
     }
 
     try {
-      console.log(id, tenXuatXu);
-
-      const response = await fetch(
-        `http://localhost:3000/api/admin/Xuat_Xu/${id}`,
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_BASE_URL}/Xuat_Xu/${id}`, // Sử dụng VITE_API_BASE_URL
+        { TEN_XUAT_XU: tenXuatXu },
         {
-          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
             Authorization: "Bearer " + localStorage.getItem("token"),
           },
-          body: JSON.stringify({
-            TEN_XUAT_XU: tenXuatXu,
-          }),
         }
       );
 
-      if (response.ok) {
-        // Xử lý khi cập nhật xuất xứ thành công
+      if (response.status === 200) {
         setOpenSnackbar(true);
         setSnackbarSeverity("success");
         setSnackbarMessage("Cập nhật xuất xứ thành công!");
-        // Chuyển hướng về trang danh sách xuất xứ
         navigate("/xuat-xu");
       } else {
-        // Xử lý lỗi từ server
         if (response.status === 403) {
           setSnackbarSeverity("error");
           setSnackbarMessage("Bạn không có quyền truy cập chức năng này!");
         } else {
-          const errorData = await response.json();
           setSnackbarSeverity("error");
-          setSnackbarMessage(errorData.message); // Use errorData.message
+          setSnackbarMessage(response.data.message || "Đã có lỗi xảy ra.");
         }
         setOpenSnackbar(true);
       }

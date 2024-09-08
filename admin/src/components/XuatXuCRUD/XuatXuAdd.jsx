@@ -20,6 +20,8 @@ import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 
+import axios from "axios";
+
 const XuatXuAdd = () => {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
@@ -33,10 +35,9 @@ const XuatXuAdd = () => {
   useEffect(() => {
     const fetchXuatXuList = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:3000/api/admin/Xuat_Xu",
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Xuat_Xu`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -44,17 +45,9 @@ const XuatXuAdd = () => {
             },
           }
         );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log(data);
 
-        setXuatXuList(data);
-        setFilteredXuatXuList(data); // Initialize filtered list
-
-        console.log(xuatXuList);
-        console.log(filteredXuatXuList);
+        setXuatXuList(response.data);
+        setFilteredXuatXuList(response.data);
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
@@ -63,7 +56,6 @@ const XuatXuAdd = () => {
 
     fetchXuatXuList();
   }, []);
-
   // search xuat xu list
   const handleTenXuatXuChange = (event) => {
     setTenXuatXu(event.target.value);
@@ -99,30 +91,32 @@ const XuatXuAdd = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/admin/Xuat_Xu", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-        body: JSON.stringify({ TEN_XUAT_XU: tenXuatXu }),
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/Xuat_Xu`, // Sử dụng VITE_API_BASE_URL
+        { TEN_XUAT_XU: tenXuatXu }, // Dữ liệu gửi đi
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }
+      );
 
-      if (response.ok) {
+      if (response.status === 200) {
+        // Xử lý thành công
         setSnackbarSeverity("success");
         setSnackbarMessage("Thêm xuất xứ thành công!");
         setOpenSnackbar(true);
-        navigate("/xuat-xu"); // Điều hướng đến trang danh sách xuất xứ
+        navigate("/xuat-xu");
       } else {
         // Xử lý lỗi từ server
         if (response.status === 403) {
           setSnackbarSeverity("error");
           setSnackbarMessage("Bạn không có quyền truy cập chức năng này!");
         } else {
-          const errorData = await response.json();
           setSnackbarSeverity("error");
-          setSnackbarMessage(errorData.message);
+          setSnackbarMessage(response.data.message || "Đã có lỗi xảy ra.");
         }
         setOpenSnackbar(true);
       }

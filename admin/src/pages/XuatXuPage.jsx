@@ -7,7 +7,7 @@ import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import Button from "@mui/material/Button";
 import * as XLSX from "xlsx";
-
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 import { useState, useEffect } from "react";
@@ -25,19 +25,23 @@ export default function XuatXuPage() {
     { key: "AUTO_ID", label: "ID" },
     { key: "TEN_XUAT_XU", label: "Xuất Xứ" },
   ];
-
   const fetchInfo = async () => {
-    const response = await fetch("http://localhost:3000/api/admin/Xuat_Xu", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-    });
-    const data = await response.json();
-    setData(data);
-    console.log("Data fetched successfully:", data);
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/Xuat_xu`, // Sử dụng VITE_API_BASE_URL
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }
+      );
+      setData(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      // Xử lý lỗi (ví dụ: hiển thị thông báo lỗi cho người dùng)
+    }
   };
 
   useEffect(() => {

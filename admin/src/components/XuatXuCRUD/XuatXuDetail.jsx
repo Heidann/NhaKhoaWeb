@@ -19,7 +19,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import EditIcon from "@mui/icons-material/Edit";
 import Title from "../Title";
-
+import axios from "axios";
 const XuatXuDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -33,8 +33,8 @@ const XuatXuDetail = () => {
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/Xuat_Xu/${id}`,
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Xuat_Xu/${id}`, // Sử dụng VITE_API_BASE_URL
           {
             headers: {
               "Content-Type": "application/json",
@@ -43,11 +43,12 @@ const XuatXuDetail = () => {
             },
           }
         );
-        if (!response.ok) {
+
+        if (response.status === 200) {
+          setXuatXuDetail(response.data[0]); // Assuming API returns an array with one object
+        } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        setXuatXuDetail(data[0]); // Assuming API returns an array with one object
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
@@ -56,13 +57,11 @@ const XuatXuDetail = () => {
 
     fetchDataDetail();
   }, [id]);
-
   const handleDelete = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/admin/Xuat_Xu/${id}`,
+      const response = await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/Xuat_Xu/${id}`, // Sử dụng VITE_API_BASE_URL
         {
-          method: "DELETE",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
@@ -70,7 +69,8 @@ const XuatXuDetail = () => {
           },
         }
       );
-      if (response.ok) {
+
+      if (response.status === 200) {
         setSnackbarSeverity("success");
         setSnackbarMessage("Xóa xuất xứ thành công!");
         setOpenSnackbar(true);
@@ -81,9 +81,8 @@ const XuatXuDetail = () => {
           setSnackbarSeverity("error");
           setSnackbarMessage("Bạn không có quyền truy cập chức năng này!");
         } else {
-          const errorData = await response.json();
           setSnackbarSeverity("error");
-          setSnackbarMessage(errorData.message);
+          setSnackbarMessage(response.data.message || "Đã có lỗi xảy ra."); // Lấy message lỗi (nếu có)
         }
         setOpenSnackbar(true);
       }

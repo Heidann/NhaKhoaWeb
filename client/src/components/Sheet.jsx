@@ -1,18 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import * as React from "react";
 import PropTypes from "prop-types";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Grid, styled } from "@mui/material";
 import Button from "@mui/material/Button";
+import Paper from "@mui/material/Paper";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -28,6 +23,7 @@ const Item = styled(Paper)(({ theme }) => ({
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
+
   return (
     <div
       role="tabpanel"
@@ -63,19 +59,17 @@ export default function SheetPage() {
   const maTheBaoHanh = searchParams.get("maTheBaoHanh");
   const navigate = useNavigate();
 
-  const [orientation, setOrientation] = useState("vertical");
-  const [selectedCard, setSelectedCard] = useState(null);
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [data, setData] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
   const [value, setValue] = React.useState(0);
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
-    setSelectedCard(data[newValue]);
   };
 
   // fetch the data
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch(
@@ -111,22 +105,6 @@ export default function SheetPage() {
 
     fetchData();
   }, [maTheBaoHanh]);
-
-  // Handle orientation change events
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 600) {
-        setOrientation("horizontal");
-      } else {
-        setOrientation("vertical");
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    handleResize(); // Initial check on load
-
-    return () => window.removeEventListener("resize", handleResize);
-  }, []); // Empty dependency array to run only once on mount
 
   // Handle loading
   if (isLoading) {
@@ -283,235 +261,173 @@ export default function SheetPage() {
       </>
     );
   }
-
   // css table cell
   const tableCellStyles = {
     padding: {
       xs: 0,
       sm: 0,
       md: 1,
-      lg: 2,
+      lg: 1,
       xl: 2,
     },
     margin: 1,
     color: "white",
+    fontSize: {
+      xs: "1rem",
+      sm: "1rem",
+      md: "1.1rem",
+      lg: "1.2rem",
+      xl: "1.8rem",
+    },
+    textAlign: "left",
+    display: "flex", // Thêm display: 'flex' để sử dụng alignItems
+    alignItems: "center", // Căn giữa theo chiều dọc
   };
-
   return (
-    <div>
-      <Box sx={{ flexGrow: 1, mt: 8 }}>
-        <Grid container spacing={2}>
-          <Grid item xs={0} sm={2} md={4} lg={4} xl={6}></Grid>
-          <Grid item xs={12} sm={10} md={8} lg={8} xl={6}>
-            <Item
-              sx={{
-                minWidth: "100%",
-                border: "1px solid white",
-                backgroundColor: "#2973ED",
-                margin: 0,
-                padding: 0,
-              }}
-            >
-              <Box noValidate sx={{ mt: 1 }}>
-                <Typography
-                  variant="h3"
-                  sx={{
-                    color: "white",
-                    textOverflow: "ellipsis",
-                    fontWeight: 800,
-                    fontSize: {
-                      xs: "1rem",
-                      sm: "1rem",
-                      md: "1rem",
-                      lg: "1.4rem",
-                      xl: "2.3rem",
-                    },
-                    margin: 2,
-                    padding: {
-                      xs: 0,
-                      sx: 1,
-                      sm: 2,
-                      md: 2,
-                    },
-                    textAlign: "center",
-                    textTransform: "uppercase",
-                    width: "80%",
-                    flexGrow: 1,
-                    justifyContent: "center",
-                  }}
-                >
-                  thông tin bảo hành
+    <Item
+      sx={{
+        minWidth: "100%",
+        border: "1px solid white",
+        backgroundColor: "#2973ED",
+        margin: 0,
+        padding: 0,
+      }}
+    >
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: "flex", // Sử dụng flexbox cho Box cha
+          flexDirection: "column", // Sắp xếp các phần tử con theo chiều dọc
+          margin: 0,
+          padding: 0,
+        }}
+      >
+        <Typography
+          variant="h3"
+          sx={{
+            color: "white",
+            textOverflow: "ellipsis",
+            fontWeight: 800,
+            fontSize: {
+              xs: "1rem",
+              sm: "1rem",
+              md: "1rem",
+              lg: "1.4rem",
+              xl: "2.3rem",
+            },
+            margin: 2,
+            padding: {
+              xs: 0,
+              sx: 1,
+              sm: 2,
+              md: 2,
+            },
+            textAlign: "center",
+            textTransform: "uppercase",
+            width: "80%",
+            flexGrow: 1,
+            justifyContent: "center",
+          }}
+        >
+          thông tin bảo hành
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            width: "100%",
+            flexGrow: 1, // Cho phép Box chứa Tabs và TabPanel mở rộng tối đa
+          }}
+        >
+          <Tabs
+            orientation="vertical"
+            variant="scrollable"
+            value={value}
+            onChange={handleChange}
+            aria-label="Vertical tabs example"
+            sx={{
+              width: {
+                xs: 120,
+                sm: 120,
+                md: 150,
+                lg: 250,
+                xl: 250,
+              }, // Điều chỉnh độ rộng của Tabs
+            }}
+          >
+            {data.map((item, index) => (
+              <Tab
+                label={`${item.NGAY_KICH_HOAT}`}
+                {...a11yProps(index)}
+                key={item.AUTO_ID}
+                sx={{
+                  fontWeight: "bold",
+                  color: "white",
+                  padding: 0, // Thêm padding cho nội dung
+                  margin: 0, // Thêm margin cho nội dung
+                }}
+              />
+            ))}
+          </Tabs>
+          <Box
+            sx={{
+              flexGrow: 1,
+              overflowY: "auto", // Thêm overflowY: 'auto' để cuộn nội dung khi cần thiết
+              margin: 0,
+              padding: 0,
+            }}
+          >
+            {data.map((item, index) => (
+              <TabPanel value={value} index={index} key={index}>
+                <Typography variant="h6" gutterBottom sx={tableCellStyles}>
+                  {`Mã thẻ: ${item.MA_THE_BAO_HANH}`}
                 </Typography>
-                <Box
-                  sx={{
-                    flexGrow: 1,
-                    display: "flex",
-                    flexDirection: {
-                      xs: "column",
-                      sm: "row",
-                    },
-                  }}
-                >
-                  {/* Add scrollbar to Tabs when there are more than 3 items */}
-                  <Tabs
-                    orientation={orientation} // Use the state variable
-                    value={value}
-                    variant="scrollable"
-                    // Add scroll buttons for mobile
-                    allowScrollButtonsMobile
-                    onChange={handleChange} // aria-label="Vertical tabs example"
-                    sx={{
-                      borderRight: 1,
-                      borderColor: "divider",
-                      width: {
-                        xs: "100%",
-                        sm: "150px",
-                        md: "200px",
-                        lg: "250px",
-                        xl: "250px",
-                      },
-                    }}
-                  >
-                    {data.map((item, index) => (
-                      <Tab
-                        label={`${item.NGAY_KICH_HOAT}`}
-                        {...a11yProps(index)}
-                        key={item.AUTO_ID}
-                        sx={tableCellStyles}
-                      />
-                    ))}
-                  </Tabs>
-                  {/* Hiển thị data trong TabPanel */}
-                  <Box
-                    sx={{
-                      flexGrow: 1,
-                      padding: 0,
-                      width: {
-                        xs: "100%",
-                        sm: "calc(100% - 150px)",
-                        md: "calc(100% - 150px)",
-                        lg: "calc(100% - 150px)",
-                        xl: "calc(100% - 150px)",
-                      },
-                    }}
-                  >
-                    {data.map((item, index) => (
-                      <TabPanel value={value} index={index} key={index}>
-                        <TableContainer>
-                          <Table
-                            sx={{
-                              width: "100%",
-                              borderCollapse: "collapse",
-                              color: "white",
-                              tableLayout: "fixed", // Keep this
-                            }}
-                          >
-                            <TableBody>
-                              <TableRow key={item.MA_THE_BAO_HANH}>
-                                <TableCell sx={tableCellStyles}>
-                                  Mã thẻ
-                                </TableCell>
-                                <TableCell sx={tableCellStyles}>
-                                  {item.MA_THE_BAO_HANH}
-                                </TableCell>
-                              </TableRow>
-                              <TableRow>
-                                <TableCell sx={tableCellStyles}>
-                                  Ngày kích hoạt
-                                </TableCell>
-                                <TableCell sx={tableCellStyles}>
-                                  {item.NGAY_KICH_HOAT}
-                                </TableCell>
-                              </TableRow>
-                              <TableRow>
-                                <TableCell sx={tableCellStyles}>
-                                  Thời hạn tới
-                                </TableCell>
-                                <TableCell sx={tableCellStyles}>
-                                  {item.NGAY_HET_HAN}
-                                </TableCell>
-                              </TableRow>
-                              <TableRow>
-                                <TableCell sx={tableCellStyles}>
-                                  Bệnh nhân
-                                </TableCell>
-                                <TableCell sx={tableCellStyles}>
-                                  {item.TEN_KHACH}
-                                </TableCell>
-                              </TableRow>
-                              <TableRow>
-                                <TableCell sx={tableCellStyles}>
-                                  Nha sĩ
-                                </TableCell>
-                                <TableCell sx={tableCellStyles}>
-                                  {item.NHA_SI}
-                                </TableCell>
-                              </TableRow>
-                              <TableRow>
-                                <TableCell sx={tableCellStyles}>
-                                  Nha khoa
-                                </TableCell>
-                                <TableCell sx={tableCellStyles}>
-                                  {item.NHA_KHOA}
-                                </TableCell>
-                              </TableRow>
-                              <TableRow>
-                                <TableCell sx={tableCellStyles}>Labo</TableCell>
-                                <TableCell sx={tableCellStyles}>
-                                  {item.TEN_LABO}
-                                </TableCell>
-                              </TableRow>
-                              <TableRow>
-                                <TableCell sx={tableCellStyles}>
-                                  Xuất Xứ
-                                </TableCell>
-                                <TableCell sx={tableCellStyles}>
-                                  {item.TEN_XUAT_XU}
-                                </TableCell>
-                              </TableRow>
-                              <TableRow>
-                                <TableCell sx={tableCellStyles}>
-                                  Số lượng răng
-                                </TableCell>
-                                <TableCell sx={tableCellStyles}>
-                                  {item.SO_LUONG_RANG}
-                                </TableCell>
-                              </TableRow>
-                              <TableRow>
-                                <TableCell sx={tableCellStyles}>
-                                  Vị trí răng
-                                </TableCell>
-                                <TableCell sx={tableCellStyles}>
-                                  {item.VI_TRI_RANG}
-                                </TableCell>
-                              </TableRow>
-                            </TableBody>
-                          </Table>
-                        </TableContainer>
-                      </TabPanel>
-                    ))}
-                  </Box>
-                </Box>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => navigate("/")}
-                  sx={{
-                    m: {
-                      xs: 1,
-                      sx: 1,
-                      sm: 2,
-                      md: 2,
-                    },
-                  }}
-                >
-                  Quay lại trang chủ
-                </Button>
-              </Box>
-            </Item>
-          </Grid>
-        </Grid>
+                <Typography variant="body1" gutterBottom sx={tableCellStyles}>
+                  {`Ngày kích hoạt: ${item.NGAY_KICH_HOAT}`}
+                </Typography>
+                <Typography variant="body1" gutterBottom sx={tableCellStyles}>
+                  {`Thời hạn tới: ${item.NGAY_HET_HAN}`}
+                </Typography>
+                <Typography variant="body1" gutterBottom sx={tableCellStyles}>
+                  {`Bệnh nhân: ${item.TEN_KHACH}`}
+                </Typography>
+                <Typography variant="body1" gutterBottom sx={tableCellStyles}>
+                  {`Nha sĩ: ${item.NHA_SI}`}
+                </Typography>
+                <Typography variant="body1" gutterBottom sx={tableCellStyles}>
+                  {`Nha khoa: ${item.NHA_KHOA}`}
+                </Typography>
+                <Typography variant="body1" gutterBottom sx={tableCellStyles}>
+                  {`Labo: ${item.TEN_LABO}`}
+                </Typography>
+                <Typography variant="body1" gutterBottom sx={tableCellStyles}>
+                  {`Xuất Xứ: ${item.TEN_XUAT_XU}`}
+                </Typography>
+                <Typography variant="body1" gutterBottom sx={tableCellStyles}>
+                  {`Số lượng răng: ${item.SO_LUONG_RANG}`}
+                </Typography>
+                <Typography variant="body1" gutterBottom sx={tableCellStyles}>
+                  {`Vị trí răng: ${item.VI_TRI_RANG}`}
+                </Typography>
+              </TabPanel>
+            ))}
+          </Box>
+        </Box>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate("/")}
+          sx={{
+            m: {
+              xs: 1,
+              sx: 1,
+              sm: 2,
+              md: 2,
+            },
+          }}
+        >
+          Quay lại trang chủ
+        </Button>
       </Box>
-    </div>
+    </Item>
   );
 }

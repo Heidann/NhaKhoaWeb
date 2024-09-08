@@ -10,7 +10,7 @@ import Skeleton from "@mui/material/Skeleton";
 import CenteredNotification from "../components/CenteredNotification";
 import DataTable from "../components/DataTable";
 import Title from "../components/Title";
-
+import axios from "axios";
 export default function NhatKyPage() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
@@ -30,39 +30,33 @@ export default function NhatKyPage() {
 
   const fetchInfo = async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/admin/Hoa_Don", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-      });
-
-      // Kiểm tra trạng thái phản hồi
-      if (!response.ok) {
-        if (response.status === 403) {
-          setNotificationOpen(true);
-          return;
-        } else {
-          throw new Error(`Lỗi khi tải dữ liệu: ${response.status}`);
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/Hoa_Don`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
         }
-      }
+      );
 
-      const data = await response.json();
-      data.forEach((item) => {
-        item.NGAY_KICH_HOAT = item.NGAY_KICH_HOAT
+      const formattedData = response.data.map((item) => ({
+        ...item,
+        NGAY_KICH_HOAT: item.NGAY_KICH_HOAT
           ? item.NGAY_KICH_HOAT.slice(0, 10)
-          : null;
-        item.NGAY_HET_HAN = item.NGAY_HET_HAN
-          ? item.NGAY_HET_HAN.slice(0, 10)
-          : null;
-      });
+          : null,
+        NGAY_HET_HAN: item.NGAY_HET_HAN ? item.NGAY_HET_HAN.slice(0, 10) : null,
+      }));
 
-      setData(data);
+      setData(formattedData);
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu:", error);
-      alert("Đã có lỗi xảy ra. Vui lòng thử lại sau.");
+      if (error.response && error.response.status === 403) {
+        setNotificationOpen(true);
+      } else {
+        alert("Đã có lỗi xảy ra. Vui lòng thử lại sau.");
+      }
     }
   };
 

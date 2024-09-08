@@ -9,7 +9,7 @@ import Box from "@mui/material/Box";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useMemo, Fragment } from "react";
-
+import axios from "axios";
 import Title from "../components/Title.jsx";
 import DataTable from "../components/DataTable.jsx";
 import CenteredNotification from "../components/CenteredNotification.jsx";
@@ -35,23 +35,27 @@ export default function NhanVienPage() {
   ];
 
   const fetchInfo = async () => {
-    const response = await fetch("http://localhost:3000/api/admin/Tai_Khoan", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-    });
-    if (response.status === 403) {
-      setNotificationOpen(true);
-      return;
-    } else if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/Tai_Khoan`, // Sử dụng VITE_API_BASE_URL
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }
+      );
+
+      setData(response.data);
+    } catch (error) {
+      if (error.response && error.response.status === 403) {
+        setNotificationOpen(true);
+      } else {
+        console.error("Error fetching data:", error);
+        // Xử lý lỗi khác nếu cần
+      }
     }
-    const data = await response.json();
-    setData(data);
-    console.log("Data fetched successfully:", data);
   };
 
   useEffect(() => {

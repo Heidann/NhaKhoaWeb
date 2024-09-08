@@ -18,7 +18,7 @@ import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import CenteredNotification from "../CenteredNotification";
-
+import axios from "axios";
 const KhUpdate = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -38,14 +38,12 @@ const KhUpdate = () => {
   const handleCloseNotification = () => {
     setNotificationOpen(false);
   };
-
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
-        const dataKh = await fetch(
-          `http://localhost:3000/api/admin/Khach_Hang/${id}`,
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Khach_Hang/${id}`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -53,10 +51,13 @@ const KhUpdate = () => {
             },
           }
         );
-        if (!dataKh.ok) {
-          throw new Error(`HTTP error! status: ${dataKh.status}`);
+
+        if (response.status === 403) {
+          setNotificationOpen(true);
+          return;
         }
-        const data = await dataKh.json();
+
+        const data = response.data;
         console.log(data);
 
         setKhachHangDetail(data);
@@ -67,21 +68,23 @@ const KhUpdate = () => {
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
+        if (error.response && error.response.status === 403) {
+          setNotificationOpen(true);
+        }
       }
     };
-
     fetchDataDetail();
   }, [id]);
 
   useEffect(() => {
     const fetchTheBaoHAnhData = async () => {
       if (maTheBaoHanh) {
-        // Kiểm tra maTheBaoHanh đã được cập nhật
         try {
-          const resMaTheBaoHanh = await fetch(
-            `http://localhost:3000/api/admin/The_Bao_Hanh/code/${maTheBaoHanh}`,
+          const resMaTheBaoHanh = await axios.get(
+            `${
+              import.meta.env.VITE_API_BASE_URL
+            }/The_Bao_Hanh/code/${maTheBaoHanh}`, // Sử dụng VITE_API_BASE_URL
             {
-              method: "GET",
               headers: {
                 "Content-Type": "application/json",
                 Accept: "application/json",
@@ -89,31 +92,32 @@ const KhUpdate = () => {
               },
             }
           );
-          if (!resMaTheBaoHanh.ok) {
-            // Thẻ bảo hành không tồn tại
-            handleSnackbarOpen("error", "Mã thẻ bảo hành không tồn tại!");
+
+          if (resMaTheBaoHanh.status === 403) {
+            setNotificationOpen(true);
             return;
           }
 
-          const theBaoHanhData = await resMaTheBaoHanh.json();
+          const theBaoHanhData = resMaTheBaoHanh.data;
           console.log("theBaoHanhData:", theBaoHanhData);
 
           if (theBaoHanhData.length > 0) {
             setTheBaoHanhId(theBaoHanhData[0].AUTO_ID);
-
             console.log("theBaoHanhId:", theBaoHanhId);
           } else {
-            // Thẻ bảo hành không tồn tại
             handleSnackbarOpen("error", "Mã thẻ bảo hành không tồn tại!");
           }
         } catch (error) {
           console.error("Error fetching The Bao Hanh:", error);
           handleSnackbarOpen("error", "Lỗi khi lấy thông tin thẻ bảo hành!");
+          if (error.response && error.response.status === 403) {
+            setNotificationOpen(true);
+          }
         }
       }
     };
     fetchTheBaoHAnhData();
-  }, [maTheBaoHanh]); // useEffect sẽ chạy lại mỗi khi maTheBaoHanh thay đổi
+  }, [maTheBaoHanh]);
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
@@ -126,30 +130,27 @@ const KhUpdate = () => {
       console.log("maTheBaoHanh before fetch:", maTheBaoHanh);
       console.log("theBaoHanhId before fetch:", theBaoHanhId);
 
-      // Gửi yêu cầu PUT sau khi đã có theBaoHanhId
       try {
         console.log("maTheBaoHanh after fetch:", maTheBaoHanh);
         console.log("theBaoHanhId after fetch:", theBaoHanhId);
 
-        // Send PUT request with THE_BAO_HANH_ID
-        const khResponse = await fetch(
-          `http://localhost:3000/api/admin/Khach_Hang/${id}`,
+        const khResponse = await axios.put(
+          `${import.meta.env.VITE_API_BASE_URL}/Khach_Hang/${id}`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "PUT",
+            TEN_KHACH: tenKhach,
+            THE_BAO_HANH_ID: theBaoHanhId,
+            SDT: phone,
+          },
+          {
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
               Authorization: "Bearer " + localStorage.getItem("token"),
             },
-            body: JSON.stringify({
-              TEN_KHACH: tenKhach,
-              THE_BAO_HANH_ID: theBaoHanhId,
-              SDT: phone,
-            }),
           }
         );
 
-        if (khResponse.ok) {
+        if (khResponse.status === 200) {
           handleSnackbarOpen("success", "Cập nhật khách hàng thành công!");
           navigate("/khach-hang");
         } else {
@@ -158,6 +159,9 @@ const KhUpdate = () => {
       } catch (error) {
         console.error("Error submitting form:", error);
         handleSnackbarOpen("error", "Lỗi khi cập nhật khách hàng!");
+        if (error.response && error.response.status === 403) {
+          setNotificationOpen(true);
+        }
       }
     } catch (error) {
       console.error("Error submitting form:", error);

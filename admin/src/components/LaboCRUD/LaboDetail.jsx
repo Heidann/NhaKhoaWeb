@@ -17,7 +17,7 @@ import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import CenteredNotification from "../CenteredNotification";
 import EditIcon from "@mui/icons-material/Edit";
 import Title from "../Title";
-
+import axios from "axios";
 const LaboDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -35,10 +35,9 @@ const LaboDetail = () => {
   useEffect(() => {
     const fetchDataDetail = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/Labo/${id}`,
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Labo/${id}`, // Sử dụng VITE_API_BASE_URL
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
@@ -46,11 +45,12 @@ const LaboDetail = () => {
             },
           }
         );
-        if (!response.ok) {
+
+        if (response.status === 200) {
+          setLaboDetail(response.data);
+        } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        setLaboDetail(data);
       } catch (error) {
         setError(error);
         console.error("Error fetching data detail:", error);
@@ -63,10 +63,9 @@ const LaboDetail = () => {
   // Handle delete
   const handleDelete = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/admin/Labo/${id}`,
+      const response = await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/Labo/${id}`, // Sử dụng VITE_API_BASE_URL
         {
-          method: "DELETE",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
@@ -74,14 +73,15 @@ const LaboDetail = () => {
           },
         }
       );
-      if (response.status === 403) {
+
+      if (response.status === 200) {
+        navigate("/labo");
+      } else if (response.status === 403) {
         setNotificationOpen(true);
         return;
-      } else if (!response.ok) {
+      } else {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
-      navigate("/labo");
     } catch (error) {
       setError(error);
       console.error("Error deleting data:", error);

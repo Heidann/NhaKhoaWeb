@@ -7,7 +7,7 @@ import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import Button from "@mui/material/Button"; // Import Button component
 import * as XLSX from "xlsx"; // Import XLSX library
-
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 import { useState, useEffect } from "react";
@@ -27,17 +27,22 @@ export default function VatLieuPage() {
   ];
 
   const fetchInfo = async () => {
-    const response = await fetch("http://localhost:3000/api/admin/Vat_Lieu", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-    });
-    const data = await response.json();
-    setData(data);
-    console.log("Data fetched successfully:", data);
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/Vat_Lieu`, // Sử dụng VITE_API_BASE_URL
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }
+      );
+      setData(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      // Xử lý lỗi (ví dụ: hiển thị thông báo lỗi cho người dùng)
+    }
   };
 
   useEffect(() => {
