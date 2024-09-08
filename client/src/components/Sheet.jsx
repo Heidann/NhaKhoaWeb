@@ -8,7 +8,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { Grid, styled } from "@mui/material";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
-
+import axios from "axios";
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
   ...theme.typography.body2,
@@ -68,26 +68,15 @@ export default function SheetPage() {
     setValue(newValue);
   };
 
-  // fetch the data
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/admin/Hoa_Don/result/${maTheBaoHanh}`
+        setIsLoading(true); // Bắt đầu loading
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/Hoa_Don/result/${maTheBaoHanh}`
         );
 
-        if (!response.ok) {
-          // Handle specific error based on status code
-          if (response.status === 404) {
-            throw new Error("Mã thẻ bảo hành không tồn tại.");
-          } else {
-            throw new Error(
-              `Lỗi API: Yêu cầu thất bại với trạng thái ${response.status}`
-            );
-          }
-        }
-
-        const data = await response.json();
+        const data = response.data;
 
         data.forEach((item) => {
           // Chuyển đổi chuỗi ngày thành đối tượng Date
@@ -104,9 +93,22 @@ export default function SheetPage() {
         });
         setData(data);
       } catch (error) {
-        setError(error);
+        // Kiểm tra xem lỗi có phải là AxiosError hay không
+        if (axios.isAxiosError(error)) {
+          // Lỗi từ phía server
+          if (error.response) {
+            setError(new Error(`Lỗi API: ${error.response.status}`));
+          } else if (error.request) {
+            setError(new Error("Không thể kết nối đến server"));
+          } else {
+            setError(new Error("Lỗi khi tạo yêu cầu"));
+          }
+        } else {
+          // Lỗi khác
+          setError(error);
+        }
       } finally {
-        setIsLoading(false);
+        setIsLoading(false); // Kết thúc loading
       }
     };
 

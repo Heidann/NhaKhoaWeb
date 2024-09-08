@@ -4,12 +4,12 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
-import LogoLaboratory from "../assets/logoNhaKhoa.jpg";
+import LogoLaboratory from "../assets/logoNhaKhoaSVG.svg";
 // import { Link } from "react-router-dom";
 export default function ButtonAppBar() {
-  const handleOpenAdmin = () => {
-    window.open("http://localhost:5174/dang-nhap", "_blank");
-  };
+  // const handleOpenAdmin = () => {
+  //   window.open("http://localhost:5174/dang-nhap", "_blank");
+  // };
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar
@@ -41,7 +41,7 @@ export default function ButtonAppBar() {
             <img
               src={LogoLaboratory}
               alt="Laboratory"
-              style={{ width: "50px", height: "50px" }}
+              style={{ width: "80px", height: "50px", objectFit: "cover" }}
             />
           </IconButton>
           <Typography
@@ -50,7 +50,7 @@ export default function ButtonAppBar() {
             sx={{ flexGrow: 1 }}
           ></Typography>
           {/* <Link to="/admin"> */}
-          <Button
+          {/* <Button
             onClick={handleOpenAdmin}
             sx={{
               backgroundColor: "#202A44",
@@ -70,7 +70,7 @@ export default function ButtonAppBar() {
             }}
           >
             Sign In
-          </Button>
+          </Button> */}
           {/* </Link> */}
         </Toolbar>
       </AppBar>
