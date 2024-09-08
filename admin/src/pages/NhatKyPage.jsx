@@ -7,10 +7,13 @@ import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
+import Button from "@mui/material/Button"; // Import Button component
+import * as XLSX from "xlsx"; // Import XLSX library
 import CenteredNotification from "../components/CenteredNotification";
 import DataTable from "../components/DataTable";
 import Title from "../components/Title";
 import axios from "axios";
+
 export default function NhatKyPage() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
@@ -41,15 +44,20 @@ export default function NhatKyPage() {
         }
       );
 
-      const formattedData = response.data.map((item) => ({
-        ...item,
-        NGAY_KICH_HOAT: item.NGAY_KICH_HOAT
-          ? item.NGAY_KICH_HOAT.slice(0, 10)
-          : null,
-        NGAY_HET_HAN: item.NGAY_HET_HAN ? item.NGAY_HET_HAN.slice(0, 10) : null,
-      }));
+      response.data.forEach((item) => {
+        // Chuyển đổi chuỗi ngày thành đối tượng Date
+        const kichHoat = new Date(item.NGAY_KICH_HOAT);
+        const hetHan = new Date(item.NGAY_HET_HAN);
+        // Định dạng ngày tháng năm
+        item.NGAY_KICH_HOAT = `${kichHoat.getDate()}/${
+          kichHoat.getMonth() + 1
+        }/${kichHoat.getFullYear()}`;
+        item.NGAY_HET_HAN = `${hetHan.getDate()}/${
+          hetHan.getMonth() + 1
+        }/${hetHan.getFullYear()}`;
+      });
 
-      setData(formattedData);
+      setData(response.data);
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu:", error);
       if (error.response && error.response.status === 403) {
@@ -75,12 +83,20 @@ export default function NhatKyPage() {
     });
   }, [memoizedData, searchTerm]);
 
+  // Hàm xuất dữ liệu ra file Excel
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Nhật Ký");
+    XLSX.writeFile(workbook, "NhatKy.xlsx");
+  };
+
   return (
     <>
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
-            <Title>Thông Tin Khách Hàng</Title>
+            <Title>Thông Tin Nhật Ký</Title>
             <Grid container spacing={3}>
               <Grid item xs={1} md={1} lg={1}>
                 <Box sx={{ "& > :not(style)": { m: 1 } }}>
@@ -114,6 +130,10 @@ export default function NhatKyPage() {
                   rows={filteredData}
                   tableType="nhat-ky"
                 />
+                {/* Nút "Xuất Excel" */}
+                <Button variant="contained" onClick={exportToExcel}>
+                  Xuất Excel
+                </Button>
               </Fragment>
             ) : (
               <Box sx={{ display: "flex" }}>

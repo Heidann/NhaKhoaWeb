@@ -27,12 +27,24 @@ const NkDetail = () => {
         );
 
         if (response.status === 200) {
-          const data = response.data;
-          data.forEach((item) => {
-            item.NGAY_KICH_HOAT = item.NGAY_KICH_HOAT.slice(0, 10);
-            item.NGAY_HET_HAN = item.NGAY_HET_HAN.slice(0, 10);
+          response.data.forEach((item) => {
+            // Chuyển đổi chuỗi ngày thành đối tượng Date
+            const createAt = new Date(item.CREATE_AT);
+            const kichHoat = new Date(item.NGAY_KICH_HOAT);
+            const hetHan = new Date(item.NGAY_HET_HAN);
+
+            // Định dạng ngày tháng năm
+            item.CREATE_AT = `${createAt.getDate()}/${
+              createAt.getMonth() + 1
+            }/${createAt.getFullYear()}`;
+            item.NGAY_KICH_HOAT = `${kichHoat.getDate()}/${
+              kichHoat.getMonth() + 1
+            }/${kichHoat.getFullYear()}`;
+            item.NGAY_HET_HAN = `${hetHan.getDate()}/${
+              hetHan.getMonth() + 1
+            }/${hetHan.getFullYear()}`;
           });
-          setNkDetail(data);
+          setNkDetail(response.data);
         } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

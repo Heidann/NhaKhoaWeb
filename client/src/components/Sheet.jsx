@@ -90,11 +90,18 @@ export default function SheetPage() {
         const data = await response.json();
 
         data.forEach((item) => {
-          item.NGAY_KICH_HOAT = item.NGAY_KICH_HOAT.slice(0, 10);
+          // Chuyển đổi chuỗi ngày thành đối tượng Date
+          const ngayKichHoat = new Date(item.NGAY_KICH_HOAT);
+          const ngayHetHan = new Date(item.NGAY_HET_HAN);
 
-          item.NGAY_HET_HAN = item.NGAY_HET_HAN.slice(0, 10);
+          // Định dạng ngày tháng năm
+          item.NGAY_KICH_HOAT = `${ngayKichHoat.getDate()}/${
+            ngayKichHoat.getMonth() + 1
+          }/${ngayKichHoat.getFullYear()}`;
+          item.NGAY_HET_HAN = `${ngayHetHan.getDate()}/${
+            ngayHetHan.getMonth() + 1
+          }/${ngayHetHan.getFullYear()}`;
         });
-
         setData(data);
       } catch (error) {
         setError(error);
@@ -268,16 +275,16 @@ export default function SheetPage() {
       sm: 0,
       md: 1,
       lg: 1,
-      xl: 2,
+      xl: 1,
     },
     margin: 1,
     color: "white",
     fontSize: {
       xs: "1rem",
       sm: "1rem",
-      md: "1.1rem",
-      lg: "1.2rem",
-      xl: "1.8rem",
+      md: "1rem",
+      lg: "1rem",
+      xl: "1rem",
     },
     textAlign: "left",
     display: "flex", // Thêm display: 'flex' để sử dụng alignItems
@@ -313,7 +320,7 @@ export default function SheetPage() {
               sm: "1rem",
               md: "1rem",
               lg: "1.4rem",
-              xl: "2.3rem",
+              xl: "2rem",
             },
             margin: 2,
             padding: {
@@ -349,8 +356,8 @@ export default function SheetPage() {
                 xs: 120,
                 sm: 120,
                 md: 150,
-                lg: 250,
-                xl: 250,
+                lg: 200,
+                xl: 200,
               }, // Điều chỉnh độ rộng của Tabs
             }}
           >

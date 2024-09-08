@@ -13,7 +13,6 @@ function App() {
           <Route path="*" element={<NotFoundPage />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/tra-cuu" element={<SheetPage />} />
-          <Route path="/dang-nhap" element={<SignInPage />} />
         </Routes>
       </BrowserRouter>
     </>

@@ -5,6 +5,8 @@ import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button"; // Import Button component
+import * as XLSX from "xlsx"; // Import XLSX library
 
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -77,6 +79,14 @@ export default function NhanVienPage() {
     });
   }, [memoizedData, searchTerm]); // Phụ thuộc vào memoizedData và searchTerm
 
+  // Hàm xuất dữ liệu ra file Excel
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Nhân Viên");
+    XLSX.writeFile(workbook, "NhanVien.xlsx");
+  };
+
   return (
     <>
       <Grid container spacing={3}>
@@ -119,6 +129,10 @@ export default function NhanVienPage() {
                   rows={filteredData}
                   tableType="nhan-vien"
                 />
+                {/* Nút "Xuất Excel" */}
+                <Button variant="contained" onClick={exportToExcel}>
+                  Xuất Excel
+                </Button>
               </Fragment>
             ) : (
               <Box sx={{ display: "flex" }}>

@@ -51,6 +51,14 @@ const TbhDetail = () => {
             console.log("Data is empty");
             setOpenDialog(true);
           } else {
+            response.data.forEach((item) => {
+              // Chuyển đổi chuỗi ngày thành đối tượng Date
+              const createAt = new Date(item.CREATE_AT);
+              // Định dạng ngày tháng năm
+              item.CREATE_AT = `${createAt.getDate()}/${
+                createAt.getMonth() + 1
+              }/${createAt.getFullYear()}`;
+            });
             setTheBaoHanhDetail(response.data);
           }
         } else {

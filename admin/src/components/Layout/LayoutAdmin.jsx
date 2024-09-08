@@ -10,7 +10,7 @@ import List from "@mui/material/List";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import LogoutIcon from "@mui/icons-material/Logout"; // Import icon Logout
 import { MainListItems, SecondaryListItems } from "../listItems";
@@ -127,7 +127,7 @@ function LayoutAdmin() {
                   ...(open && { display: "none" }),
                 }}
               >
-                <MenuIcon />
+                <AccountCircleIcon />
               </IconButton>
               <Typography
                 component="h1"
@@ -141,7 +141,7 @@ function LayoutAdmin() {
 
               {/* Nút Menu */}
               <IconButton color="inherit" onClick={handleMenuOpen}>
-                <MenuIcon />
+                <AccountCircleIcon />
               </IconButton>
               <Menu
                 anchorEl={anchorEl}
