@@ -11,7 +11,7 @@ import Xuat_Xu_Route from "./Routes//Xuat_Xu_Route.js";
 import Labo_Route from "./Routes/Labo_Route.js";
 import Thong_Ke_Route from "./Routes/Thong_Ke_Route.js";
 import { protect } from "./middlewares/Auth.js";
-
+import cookieParser from "cookie-parser";
 import cors from "cors";
 
 import errorHandler from "./middlewares/errorMiddleWare.js";
@@ -19,9 +19,11 @@ import errorHandler from "./middlewares/errorMiddleWare.js";
 dotenv.config();
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 app.use(
   cors({
     origin: ["http://localhost:5173", "http://localhost:5174"],
+    credentials: true, // Add this line to allow credentials
   })
 );
 
@@ -46,10 +48,6 @@ app.use("/api/admin/Vat_Lieu", Vat_Lieu_Route);
 app.use("/api/admin/Xuat_Xu", Xuat_Xu_Route);
 app.use("/api/admin/Labo", Labo_Route);
 app.use("/api/admin/Thong_Ke", Thong_Ke_Route);
-app.use("/api/check_token", protect, (req, res) => {
-  // Trả về response 200 OK cho biết token hợp lệ
-  res.status(200).json({ message: "Token hợp lệ" });
-});
 
 // to handle errors in async routes
 app.use(errorHandler);

@@ -1,9 +1,7 @@
-import React from "react";
 import Grid from "@mui/material/Grid";
-import Paper from "@mui/material/Paper";
+
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
-import ThongKePage from "./ThongKePage";
 
 export default function DashboardPage() {
   const navigate = useNavigate();

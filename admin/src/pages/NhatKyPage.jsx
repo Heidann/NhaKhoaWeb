@@ -71,17 +71,14 @@ export default function NhatKyPage() {
   }, []);
 
   const memoizedData = useMemo(() => data, [data]);
-
   const filteredData = useMemo(() => {
     if (!searchTerm) {
       return memoizedData;
     }
-    return memoizedData.filter(
-      (item) =>
-        item.MA_THE_BAO_HANH.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.TEN_KHACH.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.SDT.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    return memoizedData.filter((item) => {
+      return item.MA_THE_BAO_HANH.toLowerCase().includes(lowerCaseSearchTerm);
+    });
   }, [memoizedData, searchTerm]);
 
   return (

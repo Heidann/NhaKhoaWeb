@@ -14,7 +14,8 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SignInPage.css";
-import Alert from "@mui/material/Alert"; // Thêm import Alert
+import Alert from "@mui/material/Alert";
+
 const defaultTheme = createTheme();
 
 const SignInPage = () => {
@@ -44,9 +45,16 @@ const SignInPage = () => {
 
       if (login.ok) {
         const data = await login.json();
-        console.log(data);
+
+        // Lưu trữ access token trong localStorage
         localStorage.setItem("token", data.token);
-        localStorage.setItem("TEN_TAI_KHOAN", username);
+
+        // Lưu trữ username trong localStorage
+        localStorage.setItem("TEN_TAI_KHOAN", data.TEN_TAI_KHOAN);
+
+        // Lưu trữ refresh token trong localStorage
+        localStorage.setItem("refreshToken", data.refreshToken);
+
         navigate("/");
       } else {
         const errorData = await login.json();

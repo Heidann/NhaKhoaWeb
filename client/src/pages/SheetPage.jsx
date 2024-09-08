@@ -2,6 +2,7 @@
 import "./Home.css";
 import Navbar from "../components/Navbar.jsx";
 import Sheet from "../components/Sheet.jsx";
+import Sheet_copy from "../components/Sheet_copy.jsx";
 import { Box } from "@mui/material";
 
 export default function HomePage() {
@@ -19,6 +20,7 @@ export default function HomePage() {
       >
         <Navbar />
         <Sheet />
+        {/* <Sheet_copy /> */}
       </Box>
     </>
   );

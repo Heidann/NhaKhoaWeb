@@ -10,7 +10,10 @@ import {
   updateMatKhau,
 } from "../Models/Tai_Khoan_Model.js";
 import bcrypt from "bcrypt"; // Thêm bcrypt để mã hóa mật khẩu
-import { generateToken } from "../middlewares/Auth.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../middlewares/Auth.js";
 import asyncHandler from "express-async-handler";
 
 const getAllTai_KhoanController = async (req, res) => {
@@ -76,9 +79,12 @@ const postTaiKhoanByUserController = async (req, res) => {
     }
 
     // Tạo JWT
-    const token = generateToken(user[0].AUTO_ID);
+    const token = generateAccessToken(user[0].AUTO_ID);
+    const refreshToken = generateRefreshToken(user[0].AUTO_ID);
+    console.log("token:", token);
+    console.log("refreshToken:", refreshToken);
 
-    res.status(200).json({ token });
+    res.status(200).json({ token, refreshToken });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

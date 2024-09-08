@@ -17,17 +17,10 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
-  Autocomplete,
-  IconButton,
-  Tooltip,
-  CircularProgress,
 } from "@mui/material";
 import Title from "../Title";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import AddIcon from "@mui/icons-material/Add";
 
 const NkAdd = () => {
   const navigate = useNavigate();
@@ -51,11 +44,6 @@ const NkAdd = () => {
   const [vatLieuList, setVatLieuList] = useState([]);
   const [theBaoHanhId, setTheBaoHanhId] = useState(null);
   const [vatLieuId, setVatLieuId] = useState("");
-  const [vatLieuInput, setVatLieuInput] = useState(""); // State cho TextField TEN_VAT_LIEU
-  const [selectedValue, setSelectedValue] = useState(null);
-  const [showAddButton, setShowAddButton] = useState(false); // Hiển thị button "Thêm nhanh"
-  const [addingVatLieu, setAddingVatLieu] = useState(false); // Đang thêm vật liệu
-  const [addVatLieuSuccess, setAddVatLieuSuccess] = useState(null); // Trạng thái thêm vật liệu
 
   useEffect(() => {
     const fetchNhaSi = async () => {
@@ -276,6 +264,7 @@ const NkAdd = () => {
         `http://localhost:5174/tra-cuu?maTheBaoHanh=${maTheBaoHanh}`,
         "_blank"
       );
+      navigate("/nhat-ky");
     } else {
       // Chuyển hướng về danh sách nhật ký
       navigate("/nhat-ky");

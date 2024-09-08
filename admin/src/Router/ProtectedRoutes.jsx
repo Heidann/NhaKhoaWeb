@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { PrivateRoute } from "../handle/CheckAuth";
+import PrivateRoute from "../handle/CheckAuth.jsx";
 
 const ProtectedRoutes = () => {
   return (
